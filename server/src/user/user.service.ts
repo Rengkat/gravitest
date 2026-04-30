@@ -497,4 +497,47 @@ export class UserService {
     }
     return cleaned;
   }
+  private async assertUniqueEmail(
+    email: string,
+    excludeId?: string,
+  ): Promise<void> {
+    const qb = this.userRepository
+      .createQueryBuilder('u')
+      .where('LOWER(u.email) = LOWER(:email)', { email });
+
+    if (excludeId) qb.andWhere('u.id != :id', { id: excludeId });
+
+    const existing = await qb.getOne();
+
+    if (existing) {
+      throw new ConflictException(`Email ${email} is already in use`);
+    }
+  }
+
+  private async assertUniquePhone(
+    phone: string,
+    excludeId?: string,
+  ): Promise<void> {
+    const qb = this.userRepository
+      .createQueryBuilder('u')
+      .where('u.phoneNumber = :phone', { phone });
+
+    if (excludeId) qb.andWhere('u.id != :id', { id: excludeId });
+
+    const existing = await qb.getOne();
+
+    if (existing) {
+      throw new ConflictException(`Phone number ${phone} is already in use`);
+    }
+  }
+
+  private toUserDto(user: User): UserResponseDto {
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  private normalizeEmail(email: string): string {
+    return email.toLowerCase().trim();
+  }
 }
