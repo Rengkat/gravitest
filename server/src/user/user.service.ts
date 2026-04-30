@@ -242,82 +242,48 @@ export class UserService {
   // ADMIN — super admin operations
   // ══════════════════════════════════════════
   async adminCreateUser(dto: CreateUserDto): Promise<CreateUserResponseDto> {
-    const normalizedEmail = dto.email.toLowerCase().trim();
+    const normalizedEmail = this.normalizeEmail(dto.email);
     const normalizedPhone = dto.phoneNumber
       ? this.normalizePhone(dto.phoneNumber)
       : null;
 
-    // ── 1. Pre-check email uniqueness ──────────────────────────────────────
-    const existingEmail = await this.userRepository
-      .createQueryBuilder('u')
-      .where('LOWER(u.email) = LOWER(:email)', { email: normalizedEmail })
-      .getOne();
+    await this.assertUniqueEmail(normalizedEmail);
 
-    if (existingEmail) {
-      throw new ConflictException(
-        `An account with email ${normalizedEmail} already exists`,
-      );
-    }
-
-    // ── 2. Pre-check phone uniqueness ──────────────────────────────────────
     if (normalizedPhone) {
-      const existingPhone = await this.userRepository
-        .createQueryBuilder('u')
-        .where('u.phoneNumber = :phone', { phone: normalizedPhone })
-        .getOne();
-
-      if (existingPhone) {
-        throw new ConflictException(
-          `An account with phone number ${normalizedPhone} already exists`,
-        );
-      }
+      await this.assertUniquePhone(normalizedPhone);
     }
 
-    // ── 3. Password preparation ────────────────────────────────────────────
     const wasGenerated = !dto.password;
     const rawPassword = dto.password ?? this.generateTempPassword();
     const passwordHash = await this.hashProvider.hashPassword(rawPassword);
 
-    // ── 4. Build user entity ───────────────────────────────────────────────
     const user = this.userRepository.create({
       firstName: dto.firstName.trim(),
       lastName: dto.lastName.trim(),
       middleName: dto.middleName?.trim() ?? null,
-
       email: normalizedEmail,
       phoneNumber: normalizedPhone,
-
       avatarUrl: dto.avatar ?? null,
       dateOfBirth: dto.dateOfBirth ?? null,
       gender: dto.gender ?? null,
       stateOfResidence: dto.stateOfResidence ?? null,
       lga: dto.lga?.trim() ?? null,
-
       passwordHash,
       role: dto.role ?? UserRole.STUDENT,
       authProvider: AuthProvider.EMAIL,
-
       isEmailVerified: dto.skipEmailVerification === true,
       isActive: true,
-
-      // optional future field:
-      // mustChangePassword: wasGenerated,
     });
 
     try {
       const saved = await this.userRepository.save(user);
 
       this.logger.warn(
-        `ADMIN ACTION: User ${saved.id} created (${saved.email}) role=${saved.role}` +
-          (wasGenerated ? ' temp_password_generated=true' : ''),
+        `ADMIN ACTION: User created ${saved.id} (${saved.email})`,
       );
 
-      const userDto = plainToInstance(UserResponseDto, saved, {
-        excludeExtraneousValues: true,
-      });
-
       return {
-        user: userDto,
+        user: this.toUserDto(saved),
         ...(wasGenerated && { temporaryPassword: rawPassword }),
       };
     } catch (error: any) {
