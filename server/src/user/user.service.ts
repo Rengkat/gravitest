@@ -540,4 +540,23 @@ export class UserService {
   private normalizeEmail(email: string): string {
     return email.toLowerCase().trim();
   }
+  private securityUserQuery() {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .addSelect([
+        'user.passwordHash',
+        'user.otpCode',
+        'user.otpExpiresAt',
+        'user.otpAttempts',
+        'user.passwordResetToken',
+        'user.passwordResetExpiresAt',
+        'user.verificationToken',
+        'user.verificationTokenExpiresAt',
+        'user.twoFactorSecret',
+        'user.twoFactorEnabled',
+        'user.failedLoginAttempts',
+        'user.lockedUntil',
+        'user.newEmailPending',
+      ]);
+  }
 }
