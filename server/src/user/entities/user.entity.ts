@@ -15,6 +15,7 @@ import {
   Index,
   BeforeInsert,
   BeforeUpdate,
+  DeleteDateColumn,
 } from 'typeorm';
 import { StudentProfile } from './student-profile.entity';
 import { TutorProfile } from './tutor-profile.entity';
@@ -165,7 +166,7 @@ export class User {
   updatedAt!: Date;
 
   // ── Soft Delete ────────────────────────────────────────────────────────
-  @Column({ type: 'timestamptz', nullable: true })
+  @DeleteDateColumn({ type: 'timestamptz', nullable: true })
   deletedAt: Date | null;
 
   @Column({ type: 'varchar', nullable: true })
@@ -202,20 +203,22 @@ export class User {
   // ── Computed ───────────────────────────────────────────────────────────
   @Expose()
   get fullName(): string {
-    return [this.firstName, this.lastName].filter(Boolean).join(' ');
+    return [this.firstName, this?.middleName, this.lastName]
+      .filter(Boolean)
+      .join(' ');
   }
 
-  // ── Methods ────────────────────────────────────────────────────────────
+  // ── Domain Methods ─────────────────────────────────────────────────────
+
   isAccountLocked(): boolean {
     return !!this.lockedUntil && new Date() < this.lockedUntil;
   }
 
-  incrementFailedLoginAttempts(): void {
+  incrementFailedLoginAttempts(maxAttempts = 5, lockMinutes = 15): void {
     this.failedLoginAttempts += 1;
 
-    if (this.failedLoginAttempts >= 5) {
-      const lockDuration = 15 * 60 * 1000; // 15 minutes
-      this.lockedUntil = new Date(Date.now() + lockDuration);
+    if (this.failedLoginAttempts >= maxAttempts) {
+      this.lockedUntil = new Date(Date.now() + lockMinutes * 60 * 1000);
     }
   }
 
@@ -224,6 +227,69 @@ export class User {
     this.lockedUntil = null;
   }
 
+  scheduleOtp(code: string, expiresAt: Date): void {
+    this.otpCode = code;
+    this.otpExpiresAt = expiresAt;
+    this.otpAttempts = 0;
+  }
+
+  clearOtp(): void {
+    this.otpCode = null;
+    this.otpExpiresAt = null;
+    this.otpAttempts = 0;
+  }
+
+  markEmailVerified(): void {
+    this.isEmailVerified = true;
+    this.clearOtp();
+    this.verificationToken = null;
+    this.verificationTokenExpiresAt = null;
+  }
+
+  markPhoneVerified(): void {
+    this.isPhoneVerified = true;
+    this.clearOtp();
+  }
+
+  schedulePasswordReset(token: string, expiresAt: Date): void {
+    this.passwordResetToken = token;
+    this.passwordResetExpiresAt = expiresAt;
+  }
+
+  clearPasswordReset(): void {
+    this.passwordResetToken = null;
+    this.passwordResetExpiresAt = null;
+  }
+
+  changePassword(newPasswordHash: string): void {
+    this.passwordHash = newPasswordHash;
+    this.clearPasswordReset();
+    this.clearOtp();
+    this.resetFailedLoginAttempts();
+  }
+
+  deactivate(): void {
+    this.isActive = false;
+    this.clearOtp();
+    this.resetFailedLoginAttempts();
+  }
+
+  softDelete(by: string, reason?: string): void {
+    this.deletedAt = new Date();
+    this.deletedBy = by;
+    this.deletionReason = reason ?? null;
+    this.isActive = false;
+    this.clearOtp();
+    this.clearPasswordReset();
+    this.resetFailedLoginAttempts();
+  }
+
+  restore(): void {
+    this.deletedAt = null;
+    this.deletedBy = null;
+    this.deletionReason = null;
+    this.isActive = true;
+  }
   @BeforeInsert()
   @BeforeUpdate()
   emailToLowerCase(): void {

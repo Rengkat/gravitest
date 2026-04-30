@@ -222,66 +222,108 @@ export class UserService {
   async deactivate(id: string): Promise<{ message: string }> {
     await this.findById(id);
     await this.userRepository.update(id, { isActive: false });
+    /*
+    TODO:
+    Deactivation should probably also:
+    - revoke refresh tokens
+    - clear OTPs
+    - disable active sessions
+    - maybe mark deactivatedAt
+    */
     this.logger.log(`User deactivated: ${id}`);
     return { message: 'Account deactivated successfully' };
   }
 
   // ADMIN — super admin operations
   // ══════════════════════════════════════════
-  async createUser(dto: CreateUserDto): Promise<CreateUserResponseDto> {
-    // ── 1. Check email uniqueness ──────────────────────────────────────────
-    const existing = await this.userRepository
+  async adminCreateUser(dto: CreateUserDto): Promise<CreateUserResponseDto> {
+    const normalizedEmail = dto.email.toLowerCase().trim();
+    const normalizedPhone = dto.phoneNumber
+      ? this.normalizePhone(dto.phoneNumber)
+      : null;
+
+    // ── 1. Pre-check email uniqueness ──────────────────────────────────────
+    const existingEmail = await this.userRepository
       .createQueryBuilder('u')
-      .where('LOWER(u.email) = LOWER(:email)', { email: dto.email })
+      .where('LOWER(u.email) = LOWER(:email)', { email: normalizedEmail })
       .getOne();
 
-    if (existing) {
+    if (existingEmail) {
       throw new ConflictException(
-        `An account with email ${dto.email} already exists`,
+        `An account with email ${normalizedEmail} already exists`,
       );
     }
 
-    // ── 2. Password — generate if not supplied ─────────────────────────────
+    // ── 2. Pre-check phone uniqueness ──────────────────────────────────────
+    if (normalizedPhone) {
+      const existingPhone = await this.userRepository
+        .createQueryBuilder('u')
+        .where('u.phoneNumber = :phone', { phone: normalizedPhone })
+        .getOne();
+
+      if (existingPhone) {
+        throw new ConflictException(
+          `An account with phone number ${normalizedPhone} already exists`,
+        );
+      }
+    }
+
+    // ── 3. Password preparation ────────────────────────────────────────────
     const wasGenerated = !dto.password;
     const rawPassword = dto.password ?? this.generateTempPassword();
     const passwordHash = await this.hashProvider.hashPassword(rawPassword);
 
-    // ── 3. Build and save the user ─────────────────────────────────────────
+    // ── 4. Build user entity ───────────────────────────────────────────────
     const user = this.userRepository.create({
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      middleName: dto.middleName ?? null,
-      email: dto.email.toLowerCase().trim(),
-      phoneNumber: dto.phoneNumber ?? null,
+      firstName: dto.firstName.trim(),
+      lastName: dto.lastName.trim(),
+      middleName: dto.middleName?.trim() ?? null,
+
+      email: normalizedEmail,
+      phoneNumber: normalizedPhone,
+
       avatarUrl: dto.avatar ?? null,
       dateOfBirth: dto.dateOfBirth ?? null,
       gender: dto.gender ?? null,
       stateOfResidence: dto.stateOfResidence ?? null,
-      lga: dto.lga ?? null,
+      lga: dto.lga?.trim() ?? null,
+
       passwordHash,
       role: dto.role ?? UserRole.STUDENT,
-      isEmailVerified: dto.skipEmailVerification ?? false,
-      isActive: true,
       authProvider: AuthProvider.EMAIL,
+
+      isEmailVerified: dto.skipEmailVerification === true,
+      isActive: true,
+
+      // optional future field:
+      // mustChangePassword: wasGenerated,
     });
 
-    const saved = await this.userRepository.save(user);
+    try {
+      const saved = await this.userRepository.save(user);
 
-    this.logger.log(
-      `Admin created user ${saved.id} (${saved.email}) with role ${saved.role}` +
-        (wasGenerated ? ' — password was auto-generated' : ''),
-    );
+      this.logger.warn(
+        `ADMIN ACTION: User ${saved.id} created (${saved.email}) role=${saved.role}` +
+          (wasGenerated ? ' temp_password_generated=true' : ''),
+      );
 
-    const userDto = plainToInstance(UserResponseDto, saved, {
-      excludeExtraneousValues: true,
-    });
+      const userDto = plainToInstance(UserResponseDto, saved, {
+        excludeExtraneousValues: true,
+      });
 
-    return {
-      user: userDto,
-      ...(wasGenerated && { temporaryPassword: rawPassword }),
-    };
+      return {
+        user: userDto,
+        ...(wasGenerated && { temporaryPassword: rawPassword }),
+      };
+    } catch (error: any) {
+      if (error.code === '23505') {
+        throw new ConflictException(
+          'User could not be created because email or phone already exists',
+        );
+      }
+      throw error;
+    }
   }
-
   // create bulk by admin
   async bulkCreateUsers(
     dto: BulkCreateUsersDto,
@@ -291,13 +333,15 @@ export class UserService {
 
   async adminUpdateUser(id: string, dto: AdminUpdateUserDto): Promise<User> {
     const user = await this.findById(id);
+    const normalizedPhone = dto.phoneNumber
+      ? this.normalizePhone(dto.phoneNumber)
+      : null;
 
     // Profile fields
     if (dto.firstName !== undefined) user.firstName = dto.firstName;
     if (dto.lastName !== undefined) user.lastName = dto.lastName;
     if (dto.middleName !== undefined) user.middleName = dto.middleName ?? null;
-    if (dto.phoneNumber !== undefined)
-      user.phoneNumber = dto.phoneNumber ?? null;
+    if (dto.phoneNumber !== undefined) user.phoneNumber = normalizedPhone;
     if (dto.avatar !== undefined) user.avatarUrl = dto.avatar ?? null;
     if (dto.dateOfBirth !== undefined)
       user.dateOfBirth = dto.dateOfBirth ?? null;
@@ -431,7 +475,7 @@ export class UserService {
       { length: 6 },
       () => chars[Math.floor(Math.random() * chars.length)],
     ).join('');
-    return `Gravitas@${year}${random}`;
+    return `Gravitest@${year}${random}`;
   }
   private normalizePhone(phone: string): string {
     if (!phone) return '';

@@ -105,7 +105,7 @@ export class UserController {
   @ApiCreatedResponse({ type: CreateUserResponseDto })
   @ApiConflictResponse({ description: 'Email already exists' })
   create(@Body() dto: CreateUserDto) {
-    return this.usersService.createUser(dto);
+    return this.usersService.adminCreateUser(dto);
   }
 
   @Post('bulk')
