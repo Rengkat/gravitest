@@ -21,7 +21,11 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HashProvider } from 'src/auth/providers/Hash.provider';
 import { BulkCreateUsersProvider } from './providers/BulkCreateUsersProvider';
-import { AuthProvider, UserRole } from 'src/common/enums/enums';
+import {
+  AuthProvider,
+  DeactivationType,
+  UserRole,
+} from 'src/common/enums/enums';
 import {
   CreateUserResponseDto,
   UserResponseDto,
@@ -208,21 +212,30 @@ export class UserService {
         'Password changed successfully. Please log in again on all devices.',
     };
   }
-  async deactivate(id: string): Promise<{ message: string }> {
-    await this.findById(id);
-    await this.userRepository.update(id, { isActive: false });
-    /*
-    TODO:
-    Deactivation should probably also:
-    - revoke refresh tokens
-    - clear OTPs
-    - disable active sessions
-    - maybe mark deactivatedAt
-    */
-    this.logger.log(`User deactivated: ${id}`);
+
+  //DEACTIVATE
+  async deactivate(
+    id: string,
+    type: DeactivationType,
+    by?: string,
+    reason?: string,
+  ): Promise<{ message: string }> {
+    const user = await this.findById(id);
+
+    if (!user.isActive) {
+      throw new ConflictException('Account is already deactivated');
+    }
+
+    user.deactivate(type, by, reason);
+
+    await this.userRepository.save(user);
+
+    this.logger.log(
+      `User deactivated: ${id} | type: ${type} | by: ${by ?? 'system'} | reason: ${reason ?? 'N/A'}`,
+    );
+
     return { message: 'Account deactivated successfully' };
   }
-
   // ADMIN — super admin operations
   // ══════════════════════════════════════════
   async adminCreateUser(dto: CreateUserDto): Promise<CreateUserResponseDto> {

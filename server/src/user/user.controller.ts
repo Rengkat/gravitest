@@ -37,6 +37,8 @@ import {
   BulkCreateUsersResponseDto,
 } from './dto/create-user.dto';
 import { UserService } from './user.service';
+import { DeactivateUserDto } from './dto/admin.dto';
+import { DeactivationType } from 'src/common/enums/enums';
 
 @ApiTags('Users')
 @Controller('users')
@@ -77,7 +79,6 @@ export class UserController {
     // TODO: replace 'temp-user-id' with @CurrentUser('id') when JWT is implemented
     return this.usersService.changePassword('temp-user-id', dto);
   }
-
   @Delete('me')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -88,7 +89,12 @@ export class UserController {
   })
   deactivateMe() {
     // TODO: replace 'temp-user-id' with @CurrentUser('id') when JWT is implemented
-    return this.usersService.deactivate('temp-user-id');
+    return this.usersService.deactivate(
+      'temp-user-id',
+      DeactivationType.USER_REQUEST,
+      'temp-user-id',
+      'User requested account deactivation',
+    );
   }
 
   // ══════════════════════════════════════════
@@ -169,10 +175,18 @@ export class UserController {
   @Patch(':id/deactivate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '[Admin] Deactivate a user account' })
-  adminDeactivate(@Param('id', ParseUUIDPipe) id: string) {
-    return this.usersService.deactivate(id);
+  adminDeactivate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: DeactivateUserDto,
+  ) {
+    // TODO: replace 'admin-id' with @CurrentUser('id') when JWT is implemented
+    return this.usersService.deactivate(
+      id,
+      dto.type ?? DeactivationType.ADMIN_SUSPENSION,
+      'admin-id',
+      dto.reason,
+    );
   }
-
   @Patch(':id/reactivate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '[Admin] Reactivate a previously deactivated user' })

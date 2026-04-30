@@ -415,3 +415,10 @@ export enum TutorStatus {
   ACTIVE = 'active',
   SUSPENDED = 'suspended',
 }
+
+export enum DeactivationType {
+  ADMIN_SUSPENSION = 'ADMIN_SUSPENSION',
+  SECURITY_LOCK = 'SECURITY_LOCK',
+  USER_REQUEST = 'USER_REQUEST',
+  UNVERIFIED_EMAIL = 'UNVERIFIED_EMAIL',
+}

@@ -1,5 +1,6 @@
 import {
   AuthProvider,
+  DeactivationType,
   Gender,
   NigerianState,
   UserRole,
@@ -165,6 +166,22 @@ export class User {
   @UpdateDateColumn()
   updatedAt!: Date;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  deactivatedAt: Date | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  deactivatedBy: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  deactivationReason: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: DeactivationType,
+    nullable: true,
+  })
+  deactivationType: DeactivationType | null;
+
   // ── Soft Delete ────────────────────────────────────────────────────────
   @DeleteDateColumn({ type: 'timestamptz', nullable: true })
   deletedAt: Date | null;
@@ -269,8 +286,13 @@ export class User {
     this.lockedUntil = null;
   }
 
-  deactivate(): void {
+  deactivate(type: DeactivationType, by?: string, reason?: string): void {
     this.isActive = false;
+    this.deactivatedAt = new Date();
+    this.deactivatedBy = by ?? null;
+    this.deactivationReason = reason ?? null;
+    this.deactivationType = type;
+
     this.clearOtp();
     this.resetFailedLoginAttempts();
   }
