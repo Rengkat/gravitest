@@ -372,11 +372,10 @@ export class UserService {
     const user = await this.findById(id);
 
     const rawPassword = dto.newPassword ?? this.generateTempPassword();
-    user.passwordHash = await this.hashProvider.hashPassword(rawPassword);
+    const newPasswordHash = await this.hashProvider.hashPassword(rawPassword);
 
     // Force user to change on next login
-    user.passwordResetToken = null;
-    user.passwordResetExpiresAt = null;
+    user.changePassword(newPasswordHash);
 
     await this.userRepository.save(user);
     this.logger.log(`Admin reset password for user ${id}`);
