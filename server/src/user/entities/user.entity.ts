@@ -266,6 +266,7 @@ export class User {
     this.clearPasswordReset();
     this.clearOtp();
     this.resetFailedLoginAttempts();
+    this.lockedUntil = null;
   }
 
   deactivate(): void {

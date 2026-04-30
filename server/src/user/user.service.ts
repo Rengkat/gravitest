@@ -190,20 +190,9 @@ export class UserService {
     const newPasswordHash = await this.hashProvider.hashPassword(
       dto.newPassword,
     );
-
-    await this.userRepository.update(user.id, {
-      passwordHash: newPasswordHash,
-
-      passwordResetToken: null,
-      passwordResetExpiresAt: null,
-
-      otpCode: null,
-      otpExpiresAt: null,
-      otpAttempts: 0,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-    });
-
+    //call the change password method
+    user.changePassword(newPasswordHash);
+    await this.userRepository.save(user);
     this.logger.warn(
       `SECURITY: Password changed for user ${user.id}. Sessions revoked.`,
     );
