@@ -34,6 +34,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserFilterDto } from './dto';
 import { PaginatedResult } from 'src/common/pagination/pagination.interface';
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
+import { RegisterUserDto } from './dto/register-user.dto';
 
 @Injectable()
 export class UserService {
@@ -112,6 +113,56 @@ export class UserService {
 
   // PROFILE — any authenticated user
   // ══════════════════════════════════════════
+  async registerUser(dto: RegisterUserDto): Promise<User> {
+    const normalizedEmail = this.normalizeEmail(dto.email);
+    const normalizedPhone = dto.phoneNumber
+      ? this.normalizePhone(dto.phoneNumber)
+      : null;
+
+    await this.assertUniqueEmail(normalizedEmail);
+
+    if (normalizedPhone) {
+      await this.assertUniquePhone(normalizedPhone);
+    }
+
+    const passwordHash = await this.hashProvider.hashPassword(dto.password);
+
+    const user = this.userRepository.create({
+      firstName: dto.firstName.trim(),
+      lastName: dto.lastName.trim(),
+      middleName: dto.middleName?.trim() ?? null,
+
+      email: normalizedEmail,
+      phoneNumber: normalizedPhone,
+
+      passwordHash,
+      role: UserRole.STUDENT,
+      authProvider: AuthProvider.EMAIL,
+
+      isActive: true,
+      isEmailVerified: false,
+      isPhoneVerified: false,
+    });
+
+    try {
+      const saved = await this.userRepository.save(user);
+
+      this.logger.log(
+        `New public signup created: ${saved.id} (${saved.email})`,
+      );
+
+      return saved;
+    } catch (error: any) {
+      if (error.code === '23505') {
+        throw new ConflictException(
+          'An account with this email or phone already exists',
+        );
+      }
+      throw error;
+    }
+  }
+
+  //get profile
   async getProfile(id: string): Promise<User> {
     return this.findActiveById(id);
   }
@@ -351,6 +402,8 @@ export class UserService {
       throw error;
     }
   }
+
+  //admin change passwod
   async adminResetPassword(
     id: string,
     dto: AdminResetPasswordDto,
