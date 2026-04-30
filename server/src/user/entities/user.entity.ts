@@ -290,6 +290,34 @@ export class User {
     this.deletionReason = null;
     this.isActive = true;
   }
+  scheduleVerificationToken(token: string, expiresAt: Date): void {
+    this.verificationToken = token;
+    this.verificationTokenExpiresAt = expiresAt;
+  }
+
+  scheduleEmailChange(newEmail: string): void {
+    this.newEmailPending = newEmail.toLowerCase().trim();
+  }
+
+  completeEmailChange(): void {
+    if (!this.newEmailPending) {
+      throw new Error('No pending email change');
+    }
+    this.email = this.newEmailPending;
+    this.newEmailPending = null;
+    this.isEmailVerified = true; // Usually verified during change
+  }
+
+  // Two-factor methods
+  enableTwoFactor(secret: string): void {
+    this.twoFactorSecret = secret;
+    this.twoFactorEnabled = true;
+  }
+
+  disableTwoFactor(): void {
+    this.twoFactorSecret = null;
+    this.twoFactorEnabled = false;
+  }
   @BeforeInsert()
   @BeforeUpdate()
   emailToLowerCase(): void {
