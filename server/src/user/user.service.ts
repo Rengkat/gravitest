@@ -16,7 +16,7 @@ import {
   ChangePasswordDto,
   UpdateUserDto,
 } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HashProvider } from 'src/auth/providers/Hash.provider';
@@ -56,9 +56,19 @@ export class UserService {
 
   async findById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { id, isActive: true },
+      where: { id, deletedAt: IsNull() },
     });
     if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async findActiveById(id: string): Promise<User> {
+    const user = await this.findById(id);
+
+    if (!user.isActive) {
+      throw new BadRequestException('User account is inactive');
+    }
+
     return user;
   }
   /**
@@ -120,7 +130,7 @@ export class UserService {
   // PROFILE — any authenticated user
   // ══════════════════════════════════════════
   async getProfile(id: string): Promise<User> {
-    return this.findById(id);
+    return this.findActiveById(id);
   }
 
   async updateProfile(id: string, dto: UpdateUserDto): Promise<User> {

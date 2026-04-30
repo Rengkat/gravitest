@@ -244,6 +244,11 @@ export class User {
     this.lockedUntil = null;
   }
 
+  recordSuccessfulLogin(): void {
+    this.lastLoginAt = new Date();
+    this.resetFailedLoginAttempts();
+  }
+
   scheduleOtp(code: string, expiresAt: Date): void {
     this.otpCode = code;
     this.otpExpiresAt = expiresAt;
@@ -311,6 +316,12 @@ export class User {
     this.deletedAt = null;
     this.deletedBy = null;
     this.deletionReason = null;
+
+    this.deactivatedAt = null;
+    this.deactivatedBy = null;
+    this.deactivationReason = null;
+    this.deactivationType = null;
+
     this.isActive = true;
   }
   scheduleVerificationToken(token: string, expiresAt: Date): void {
@@ -320,6 +331,7 @@ export class User {
 
   scheduleEmailChange(newEmail: string): void {
     this.newEmailPending = newEmail.toLowerCase().trim();
+    this.isEmailVerified = false;
   }
 
   completeEmailChange(): void {
