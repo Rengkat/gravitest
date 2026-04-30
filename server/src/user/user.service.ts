@@ -116,17 +116,24 @@ export class UserService {
     return this.findActiveById(id);
   }
 
-  async updateProfile(id: string, dto: UpdateUserDto): Promise<User> {
-    const user = await this.findById(id);
+  //update profile by user
 
-    // Map DTO field names to entity field names where they differ
-    if (dto.firstName) user.firstName = dto.firstName;
-    if (dto.lastName) user.lastName = dto.lastName;
-    if (dto.middleName !== undefined) user.middleName = dto.middleName ?? null;
-    if (dto.phoneNumber !== undefined)
-      user.phoneNumber = dto.phoneNumber
-        ? this.normalizePhone(dto.phoneNumber)
-        : null;
+  async updateProfile(
+    id: string,
+    dto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.findActiveById(id);
+
+    if (dto.phoneNumber !== undefined && dto.phoneNumber !== null) {
+      const normalizedPhone = this.normalizePhone(dto.phoneNumber);
+      await this.assertUniquePhone(normalizedPhone, id);
+      user.phoneNumber = normalizedPhone;
+    }
+
+    if (dto.firstName !== undefined) user.firstName = dto.firstName.trim();
+    if (dto.lastName !== undefined) user.lastName = dto.lastName.trim();
+    if (dto.middleName !== undefined)
+      user.middleName = dto.middleName?.trim() ?? null;
     if (dto.avatar !== undefined) user.avatarUrl = dto.avatar ?? null;
     if (dto.dateOfBirth !== undefined)
       user.dateOfBirth = dto.dateOfBirth ?? null;
@@ -134,9 +141,12 @@ export class UserService {
       user.stateOfResidence = dto.stateOfResidence ?? null;
     if (dto.lga !== undefined) user.lga = dto.lga ?? null;
 
-    return this.userRepository.save(user);
+    const saved = await this.userRepository.save(user);
+
+    return this.toUserDto(saved);
   }
 
+  //change password
   async changePassword(
     id: string,
     dto: ChangePasswordDto,
