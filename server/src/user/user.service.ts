@@ -53,12 +53,13 @@ export class UserService {
   // ══════════════════════════════════════════
 
   //  Default: does NOT select sensitive columns (passwordHash etc).
-
   async findById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id, deletedAt: IsNull() },
     });
+
     if (!user) throw new NotFoundException('User not found');
+
     return user;
   }
 
@@ -77,20 +78,12 @@ export class UserService {
    * Returns null instead of throwing — caller decides how to handle.
    */
   async findByEmailForAuth(email: string): Promise<User | null> {
-    return this.userRepository
-      .createQueryBuilder('user')
-      .addSelect([
-        'user.passwordHash',
-        'user.otpCode',
-        'user.otpExpiresAt',
-        'user.twoFactorSecret',
-        'user.twoFactorEnabled',
-        'user.lockedUntil',
-        'user.failedLoginAttempts',
-      ])
-      .where('LOWER(user.email) = LOWER(:email)', { email: email.trim() })
+    return this.securityUserQuery()
+      .where('LOWER(user.email) = LOWER(:email)', {
+        email: this.normalizeEmail(email),
+      })
       .andWhere('user.deletedAt IS NULL')
-      .andWhere('user.isActive = :isActive', { isActive: true })
+      .andWhere('user.isActive = true')
       .getOne();
   }
 
@@ -98,32 +91,22 @@ export class UserService {
    * Find by phone — for phone OTP login.
    */
   async findByPhoneForOtp(phone: string): Promise<User | null> {
-    const normalizedPhone = this.normalizePhone(phone);
-
-    return this.userRepository
-      .createQueryBuilder('user')
-      .addSelect([
-        'user.otpCode',
-        'user.otpExpiresAt',
-        'user.otpAttempts',
-        'user.lockedUntil',
-      ])
-      .where('user.phoneNumber = :phone', { phone: normalizedPhone })
+    return this.securityUserQuery()
+      .where('user.phoneNumber = :phone', {
+        phone: this.normalizePhone(phone),
+      })
       .andWhere('user.deletedAt IS NULL')
-      .andWhere('user.isActive = :isActive', { isActive: true })
+      .andWhere('user.isActive = true')
       .getOne();
   }
   /**
    * Find by password reset token — for reset-password flow.
    */
   async findByResetToken(token: string): Promise<User | null> {
-    return this.userRepository
-      .createQueryBuilder('user')
-      .addSelect('user.passwordResetToken')
-      .addSelect('user.passwordResetExpiresAt')
+    return this.securityUserQuery()
       .where('user.passwordResetToken = :token', { token })
       .andWhere('user.deletedAt IS NULL')
-      .andWhere('user.isActive = :isActive', { isActive: true })
+      .andWhere('user.isActive = true')
       .getOne();
   }
 
