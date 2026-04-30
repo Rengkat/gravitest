@@ -302,17 +302,28 @@ export class UserService {
     return this.bulkCreateUserProvider.execute(dto);
   }
 
-  async adminUpdateUser(id: string, dto: AdminUpdateUserDto): Promise<User> {
+  async adminUpdateUser(
+    id: string,
+    dto: AdminUpdateUserDto,
+  ): Promise<UserResponseDto> {
     const user = await this.findById(id);
-    const normalizedPhone = dto.phoneNumber
-      ? this.normalizePhone(dto.phoneNumber)
-      : null;
 
-    // Profile fields
-    if (dto.firstName !== undefined) user.firstName = dto.firstName;
-    if (dto.lastName !== undefined) user.lastName = dto.lastName;
-    if (dto.middleName !== undefined) user.middleName = dto.middleName ?? null;
-    if (dto.phoneNumber !== undefined) user.phoneNumber = normalizedPhone;
+    if (dto.email !== undefined) {
+      const normalizedEmail = this.normalizeEmail(dto.email);
+      await this.assertUniqueEmail(normalizedEmail, id);
+      user.email = normalizedEmail;
+    }
+
+    if (dto.phoneNumber !== undefined && dto.phoneNumber !== null) {
+      const normalizedPhone = this.normalizePhone(dto.phoneNumber);
+      await this.assertUniquePhone(normalizedPhone, id);
+      user.phoneNumber = normalizedPhone;
+    }
+
+    if (dto.firstName !== undefined) user.firstName = dto.firstName.trim();
+    if (dto.lastName !== undefined) user.lastName = dto.lastName.trim();
+    if (dto.middleName !== undefined)
+      user.middleName = dto.middleName?.trim() ?? null;
     if (dto.avatar !== undefined) user.avatarUrl = dto.avatar ?? null;
     if (dto.dateOfBirth !== undefined)
       user.dateOfBirth = dto.dateOfBirth ?? null;
@@ -320,20 +331,26 @@ export class UserService {
     if (dto.stateOfResidence !== undefined)
       user.stateOfResidence = dto.stateOfResidence ?? null;
     if (dto.lga !== undefined) user.lga = dto.lga ?? null;
-
-    // Admin-only fields
-    if (dto.email !== undefined) user.email = dto.email.toLowerCase().trim();
     if (dto.role !== undefined) user.role = dto.role;
     if (dto.isEmailVerified !== undefined)
       user.isEmailVerified = dto.isEmailVerified;
     if (dto.isPhoneVerified !== undefined)
       user.isPhoneVerified = dto.isPhoneVerified;
     if (dto.isActive !== undefined) user.isActive = dto.isActive;
-    const saved = await this.userRepository.save(user);
-    this.logger.log(`Admin updated user ${id}`);
-    return saved;
-  }
 
+    try {
+      const saved = await this.userRepository.save(user);
+
+      this.logger.warn(`ADMIN ACTION: User ${id} updated`);
+
+      return this.toUserDto(saved);
+    } catch (error: any) {
+      if (error.code === '23505') {
+        throw new ConflictException('Update violates unique user constraints');
+      }
+      throw error;
+    }
+  }
   async adminResetPassword(
     id: string,
     dto: AdminResetPasswordDto,
