@@ -21,6 +21,7 @@ import {
 
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
+import { EmailLoginDto } from './common/dto/login.dto';
 // import { Public, CurrentUser } from '../../common/decorators';
 
 @ApiTags('Auth')
@@ -55,4 +56,8 @@ export class AuthController {
   register(@Body() dto: RegisterUserDto) {
     return this.authService.register(dto);
   }
+
+  //══════════════════════════════════════════
+  // LOGIN
+  // ══════════════════════════════════════════
 }
