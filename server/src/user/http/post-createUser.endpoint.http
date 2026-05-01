@@ -1,27 +1,17 @@
-POST http://localhost:3000/api/v1/users
+POST http://localhost:5000/api/v1/users
 Content-Type: application/json
+
 {
-  "firstName": "Adaeze",
-  "lastName": "Okonkwo",
-  "email": "adaeze.okonkwo@example.com",
-  "phoneNumber": "+2348012345678",
-  "passwordHash": "Student@2024",
+  "firstName": "Amina",
+  "lastName": "Ibrahim",
+  "middleName": "Blessing",
+  "email": "amina.ibrahim@example.com",
+  "phoneNumber": "+2348023456789",
+  "password": "StrongP@ss123!",
+  "gender": "female",
+  "dateOfBirth": "2007-07-22",
+  "stateOfResidence": "Federal Capital Territory",
+  "lga": "Municipal",
   "role": "student",
-  "authProvider": "email",
-  "avatarUrl": "https://randomuser.me/api/portraits/women/1.jpg",
-  "isEmailVerified": true,
-  "isPhoneVerified": true,
-  "isActive": true,
-  "studentProfile": {
-    "targetScore": 350,
-    "examDate": "2025-05-15",
-    "examTargets": ["JAMB", "WAEC"],
-    "targetUniversity": "UNILAG",
-    "targetCourse": "Computer Science",
-    "totalXp": 0,
-    "currentStreak": 0,
-    "longestStreak": 0,
-    "stateCode": "LA",
-    "lga": "Ikeja"
-  }
+  "skipEmailVerification": true
 }

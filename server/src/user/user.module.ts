@@ -25,7 +25,7 @@ import { PaginationModule } from 'src/common/pagination/pagination.module';
       useClass: BcryptProvider,
     },
   ],
-  exports: [UserService, HashProvider],
+  exports: [UserService, HashProvider, TypeOrmModule],
   imports: [
     TypeOrmModule.forFeature([
       User,
