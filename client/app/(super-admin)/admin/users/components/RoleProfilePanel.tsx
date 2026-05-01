@@ -1,10 +1,18 @@
 "use client";
 
 import {
-  Star, BookOpen, School, Trophy, Clock, Zap,
-  Users, CheckCircle2, AlertCircle, MapPin,
+  Star,
+  BookOpen,
+  School,
+  Trophy,
+  Clock,
+  Zap,
+  Users,
+  CheckCircle2,
+  AlertCircle,
+  MapPin,
 } from "lucide-react";
-import type { User } from "../../types";
+import type { User } from "../types";
 import { Badge } from "./Primitives";
 
 /**
@@ -18,8 +26,18 @@ export function RoleProfilePanel({ user, compact = false }: { user: User; compac
     return (
       <div className={`flex flex-wrap gap-${compact ? "2" : "4"}`}>
         <Stat icon={Zap} label="XP" value={p.xpPoints.toLocaleString()} color="#f59e0b" />
-        <Stat icon={Trophy} label="Avg Score" value={`${p.averageScore}%`} color={p.averageScore >= 60 ? "#10b981" : "#ef4444"} />
-        <Stat icon={BookOpen} label="Sessions" value={p.sessionsCompleted.toLocaleString()} color="#3b82f6" />
+        <Stat
+          icon={Trophy}
+          label="Avg Score"
+          value={`${p.averageScore}%`}
+          color={p.averageScore >= 60 ? "#10b981" : "#ef4444"}
+        />
+        <Stat
+          icon={BookOpen}
+          label="Sessions"
+          value={p.sessionsCompleted.toLocaleString()}
+          color="#3b82f6"
+        />
         <Stat icon={Clock} label="Study hrs" value={p.totalStudyHours.toString()} color="#8b5cf6" />
         {p.streak > 0 && <Stat icon={Zap} label="Streak" value={`${p.streak}d`} color="#f97316" />}
         {!compact && p.examTargets.length > 0 && (
@@ -44,14 +62,26 @@ export function RoleProfilePanel({ user, compact = false }: { user: User; compac
   if (user.role === "tutor" && user.tutorProfile) {
     const p = user.tutorProfile;
     const availColor =
-      p.availabilityStatus === "available" ? "#10b981"
-      : p.availabilityStatus === "busy" ? "#f59e0b"
-      : "#6b7280";
+      p.availabilityStatus === "available"
+        ? "#10b981"
+        : p.availabilityStatus === "busy"
+          ? "#f59e0b"
+          : "#6b7280";
     return (
       <div className={`flex flex-wrap gap-${compact ? "2" : "4"}`}>
         <Stat icon={Star} label="Rating" value={`${p.rating} ★`} color="#f59e0b" />
-        <Stat icon={Users} label="Students" value={p.totalStudentsTaught.toLocaleString()} color="#3b82f6" />
-        <Stat icon={BookOpen} label="Sessions" value={p.totalSessionsConducted.toLocaleString()} color="#8b5cf6" />
+        <Stat
+          icon={Users}
+          label="Students"
+          value={p.totalStudentsTaught.toLocaleString()}
+          color="#3b82f6"
+        />
+        <Stat
+          icon={BookOpen}
+          label="Sessions"
+          value={p.totalSessionsConducted.toLocaleString()}
+          color="#8b5cf6"
+        />
         <Stat icon={Clock} label="Exp" value={`${p.yearsOfExperience}yr`} color="#2e8b57" />
         {p.isVerified && (
           <span className="flex items-center gap-1 text-[11px] text-green-600 font-semibold">
@@ -70,7 +100,8 @@ export function RoleProfilePanel({ user, compact = false }: { user: User; compac
         )}
         {!compact && p.hourlyRate && (
           <div className="text-[11px] text-text-muted w-full">
-            Hourly rate: <span className="font-semibold text-green-900">₦{p.hourlyRate.toLocaleString()}</span>
+            Hourly rate:{" "}
+            <span className="font-semibold text-green-900">₦{p.hourlyRate.toLocaleString()}</span>
           </div>
         )}
       </div>
@@ -79,12 +110,32 @@ export function RoleProfilePanel({ user, compact = false }: { user: User; compac
 
   if (user.role === "school_admin" && user.schoolAdminProfile) {
     const p = user.schoolAdminProfile;
-    const typeColor = p.schoolType === "private" ? "#7c3aed" : p.schoolType === "international" ? "#3b82f6" : "#2e8b57";
+    const typeColor =
+      p.schoolType === "private"
+        ? "#7c3aed"
+        : p.schoolType === "international"
+          ? "#3b82f6"
+          : "#2e8b57";
     return (
       <div className={`flex flex-wrap gap-${compact ? "2" : "4"}`}>
-        <Stat icon={School} label="Students" value={p.managedStudentCount.toLocaleString()} color="#f59e0b" />
-        <Stat icon={Users} label="Teachers" value={p.managedTeacherCount.toLocaleString()} color="#3b82f6" />
-        <Stat icon={BookOpen} label="Classes" value={p.managedClasses.length.toString()} color="#8b5cf6" />
+        <Stat
+          icon={School}
+          label="Students"
+          value={p.managedStudentCount.toLocaleString()}
+          color="#f59e0b"
+        />
+        <Stat
+          icon={Users}
+          label="Teachers"
+          value={p.managedTeacherCount.toLocaleString()}
+          color="#3b82f6"
+        />
+        <Stat
+          icon={BookOpen}
+          label="Classes"
+          value={p.managedClasses.length.toString()}
+          color="#8b5cf6"
+        />
         {!compact && (
           <>
             <div className="w-full flex items-center gap-2 text-[11px] text-text-muted">
@@ -93,9 +144,15 @@ export function RoleProfilePanel({ user, compact = false }: { user: User; compac
               <Badge label={p.schoolType} color={typeColor} bg={`${typeColor}15`} size="xs" />
             </div>
             <div className="text-[11px] text-text-muted">
-              Role: <span className="font-semibold text-green-900 capitalize">{p.adminRole.replace(/_/g, " ")}</span>
+              Role:{" "}
+              <span className="font-semibold text-green-900 capitalize">
+                {p.adminRole.replace(/_/g, " ")}
+              </span>
               <span className="mx-2">·</span>
-              Plan: <span className="font-semibold text-green-900 capitalize">{p.subscriptionManaged}</span>
+              Plan:{" "}
+              <span className="font-semibold text-green-900 capitalize">
+                {p.subscriptionManaged}
+              </span>
             </div>
           </>
         )}
@@ -109,10 +166,22 @@ export function RoleProfilePanel({ user, compact = false }: { user: User; compac
   return null;
 }
 
-function Stat({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+  color: string;
+}) {
   return (
     <div className="flex items-center gap-1.5">
-      <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: `${color}15` }}>
+      <div
+        className="w-6 h-6 rounded flex items-center justify-center"
+        style={{ background: `${color}15` }}>
         <Icon size={11} style={{ color }} />
       </div>
       <div>

@@ -8,13 +8,8 @@ import type {
   SubscriptionTier,
   AccountType,
   SortField,
-} from "../../types";
-import {
-  ROLE_CONFIG,
-  STATUS_CONFIG,
-  SUBSCRIPTION_CONFIG,
-  ACCOUNT_TYPE_CONFIG,
-} from "../../constants";
+} from "../types";
+import { ROLE_CONFIG, STATUS_CONFIG, SUBSCRIPTION_CONFIG, ACCOUNT_TYPE_CONFIG } from "../constants";
 import { FilterSelect } from "./Primitives";
 
 interface Props {

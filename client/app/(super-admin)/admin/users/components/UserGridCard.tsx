@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Eye, Edit, Trash2, BadgeCheck } from "lucide-react";
-import type { User, UserStatus } from "../../types";
-import { ROLE_CONFIG, STATUS_CONFIG, SUBSCRIPTION_CONFIG } from "../../constants";
+import type { User, UserStatus } from "../types";
+import { ROLE_CONFIG, STATUS_CONFIG, SUBSCRIPTION_CONFIG } from "../constants";
 import { Avatar, Badge } from "./Primitives";
 import { RoleProfilePanel } from "./RoleProfilePanel";
 
@@ -14,17 +14,16 @@ interface Props {
 }
 
 export function UserGridCard({ user, onDelete, onStatusChange }: Props) {
-  const roleCfg   = ROLE_CONFIG[user.role];
+  const roleCfg = ROLE_CONFIG[user.role];
   const statusCfg = STATUS_CONFIG[user.status];
-  const subCfg    = SUBSCRIPTION_CONFIG[user.subscriptionTier];
-  const RoleIcon  = roleCfg.icon;
-  const SubIcon   = subCfg.icon;
+  const subCfg = SUBSCRIPTION_CONFIG[user.subscriptionTier];
+  const RoleIcon = roleCfg.icon;
+  const SubIcon = subCfg.icon;
 
   return (
     <div
       className="rounded-2xl bg-white border overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
-      style={{ borderColor: "rgba(30,80,50,0.08)" }}
-    >
+      style={{ borderColor: "rgba(30,80,50,0.08)" }}>
       {/* Coloured role header stripe */}
       <div className="h-2" style={{ background: roleCfg.color }} />
 
@@ -44,14 +43,25 @@ export function UserGridCard({ user, onDelete, onStatusChange }: Props) {
             </div>
 
             <div className="flex flex-wrap gap-1 mb-1">
-              <Badge label={roleCfg.label} color={roleCfg.color} bg={roleCfg.bg} icon={RoleIcon} size="xs" />
+              <Badge
+                label={roleCfg.label}
+                color={roleCfg.color}
+                bg={roleCfg.bg}
+                icon={RoleIcon}
+                size="xs"
+              />
               <span
                 className="px-1.5 py-0.5 rounded-full text-[9px] font-semibold"
-                style={{ background: statusCfg.bg, color: statusCfg.color }}
-              >
+                style={{ background: statusCfg.bg, color: statusCfg.color }}>
                 {statusCfg.label}
               </span>
-              <Badge label={subCfg.label} color={subCfg.color} bg={subCfg.bg} icon={SubIcon} size="xs" />
+              <Badge
+                label={subCfg.label}
+                color={subCfg.color}
+                bg={subCfg.bg}
+                icon={SubIcon}
+                size="xs"
+              />
             </div>
 
             <div className="text-[11px] text-text-muted truncate">{user.email}</div>
@@ -86,7 +96,11 @@ export function UserGridCard({ user, onDelete, onStatusChange }: Props) {
         {user.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {user.tags.map((t) => (
-              <span key={t} className="px-2 py-0.5 rounded-full bg-green-50 text-[10px] text-green-700">{t}</span>
+              <span
+                key={t}
+                className="px-2 py-0.5 rounded-full bg-green-50 text-[10px] text-green-700">
+                {t}
+              </span>
             ))}
           </div>
         )}
@@ -95,14 +109,16 @@ export function UserGridCard({ user, onDelete, onStatusChange }: Props) {
         <div className="flex items-center gap-2">
           <Link
             href={`/admin/users/${user.id}`}
-            className="flex-1 py-2 rounded-lg bg-green-800 text-white text-[12px] font-semibold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-1"
-          >
+            className="flex-1 py-2 rounded-lg bg-green-800 text-white text-[12px] font-semibold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-1">
             <Eye size={12} /> View Profile
           </Link>
-          <button className="p-2 rounded-lg hover:bg-blue-50 transition-colors">
+          <button title="edit" className="p-2 rounded-lg hover:bg-blue-50 transition-colors">
             <Edit size={14} className="text-text-muted hover:text-blue-600" />
           </button>
-          <button onClick={() => onDelete(user.id)} className="p-2 rounded-lg hover:bg-red-50 transition-colors">
+          <button
+            title="delete"
+            onClick={() => onDelete(user.id)}
+            className="p-2 rounded-lg hover:bg-red-50 transition-colors">
             <Trash2 size={14} className="text-text-muted hover:text-red-500" />
           </button>
         </div>
