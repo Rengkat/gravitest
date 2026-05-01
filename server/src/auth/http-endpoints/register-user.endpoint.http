@@ -1,13 +1,15 @@
-POST http://localhost:5000/api/v1/users
+POST http://localhost:5000/api/v1/auth/register
 Content-Type: application/json
-
 {
   "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "phoneNumber": "+2348012345678",
+  "lastName": "Ibrahim",
+  "middleName": "Amaech",
+  "email": "john.ibrahim@example.com",
+  "phoneNumber": "+2348023456744",
+  "password": "StrongP@ss123!",
   "gender": "male",
-  "dateOfBirth": "2005-03-15",
-  "stateOfResidence": "Lagos",
-  "lga": "Ikeja"
+  "dateOfBirth": "2007-07-22",
+  "stateOfResidence": "Federal Capital Territory",
+  "lga": "Municipal",
+  "role": "student"
 }
