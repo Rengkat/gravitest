@@ -1,25 +1,51 @@
 import { Injectable } from '@nestjs/common';
-import { User } from 'src/user/entities/user.entity';
+import * as crypto from 'crypto';
+
+const OTP_LENGTH = 6;
+const OTP_TTL_MINUTES = 10;
+const MAX_OTP_ATTEMPTS = 5;
+
+export interface OtpBundle {
+  code: string;
+  expiresAt: Date;
+}
 
 @Injectable()
 export class OtpProvider {
-  generateOtp(length: number = 6): { code: string; expiresAt: Date } {
-    // Generate a secure 6-digit numeric string
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+  /**
+   * Generates a secure numeric OTP bundle.
+   */
+  generate(): OtpBundle {
+    const code = crypto
+      .randomInt(0, 10 ** OTP_LENGTH)
+      .toString()
+      .padStart(OTP_LENGTH, '0');
 
-    // Set expiry (e.g., 10 minutes)
     const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+    expiresAt.setMinutes(expiresAt.getMinutes() + OTP_TTL_MINUTES);
 
     return { code, expiresAt };
   }
 
-  async verifyOtp(user: User, inputCode: string): Promise<boolean> {
-    if (!user.otpCode || !user.otpExpiresAt) return false;
+  /**
+   * Checks if the OTP has expired.
+   */
+  isExpired(expiresAt: Date | null): boolean {
+    if (!expiresAt) return true;
+    return new Date() > expiresAt;
+  }
 
-    const isExpired = new Date() > user.otpExpiresAt;
-    const isMatch = user.otpCode === inputCode;
+  /**
+   * Checks if the user has failed too many times.
+   */
+  isMaxAttemptsReached(attempts: number): boolean {
+    return attempts >= MAX_OTP_ATTEMPTS;
+  }
 
-    return isMatch && !isExpired;
+  /**
+   * Formats the OTP for email visibility (e.g., "123 456")
+   */
+  formatForDisplay(code: string): string {
+    return code.replace(/(\d{3})(\d{3})/, '$1 $2');
   }
 }
