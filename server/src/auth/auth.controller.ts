@@ -21,7 +21,7 @@ import {
 
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
-import { EmailLoginDto } from './common/dto/login.dto';
+import { EmailLoginDto } from './dto/login.dto';
 // import { Public, CurrentUser } from '../../common/decorators';
 
 @ApiTags('Auth')

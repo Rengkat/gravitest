@@ -86,15 +86,6 @@ export class User {
   @Exclude()
   otpAttempts: number;
 
-  // ── Email verification (link-based) ───────────────────────────────────
-  @Column({ type: 'varchar', nullable: true, select: false })
-  @Exclude()
-  verificationToken: string | null;
-
-  @Column({ type: 'timestamptz', nullable: true, select: false })
-  @Exclude()
-  verificationTokenExpiresAt: Date | null;
-
   // ── Password reset ─────────────────────────────────────────────────────
   @Column({ type: 'varchar', nullable: true, select: false })
   @Exclude()
@@ -264,8 +255,6 @@ export class User {
   markEmailVerified(): void {
     this.isEmailVerified = true;
     this.clearOtp();
-    this.verificationToken = null;
-    this.verificationTokenExpiresAt = null;
   }
 
   markPhoneVerified(): void {
@@ -323,10 +312,6 @@ export class User {
     this.deactivationType = null;
 
     this.isActive = true;
-  }
-  scheduleVerificationToken(token: string, expiresAt: Date): void {
-    this.verificationToken = token;
-    this.verificationTokenExpiresAt = expiresAt;
   }
 
   scheduleEmailChange(newEmail: string): void {
