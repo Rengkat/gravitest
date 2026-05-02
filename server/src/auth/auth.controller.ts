@@ -34,6 +34,7 @@ export class AuthController {
   // ══════════════════════════════════════════
 
   // @Public()
+
   @Post('register')
   @ApiOperation({
     summary: 'Register a new account',
@@ -60,4 +61,33 @@ export class AuthController {
   //══════════════════════════════════════════
   // LOGIN
   // ══════════════════════════════════════════
+  // @Public()
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Login with email and password',
+    description: 'Returns user info and tokens on successful login.',
+  })
+  @ApiOkResponse({
+    description: 'Login successful',
+    schema: {
+      example: {
+        user: {
+          id: 'uuid',
+          email: 'user@example.com',
+          firstName: 'John',
+          lastName: 'Doe',
+        },
+        tokens: {
+          accessToken: 'dummy-access-token',
+          refreshToken: 'dummy-refresh-token',
+          expiresIn: 900,
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
+  login(@Body() dto: EmailLoginDto) {
+    return this.authService.login(dto);
+  }
 }

@@ -104,6 +104,11 @@ export class AuthService {
     //Record successful login
     user.recordSuccessfulLogin();
     await this.userRepository.save(user);
+    return this.buildAuthResponse(user, {
+      accessToken: 'dummy-access-token',
+      refreshToken: 'dummy-refresh-token',
+      expiresIn: 900,
+    });
   }
 
   //verify email using otp
