@@ -579,8 +579,6 @@ export class UserService {
         'user.otpAttempts',
         'user.passwordResetToken',
         'user.passwordResetExpiresAt',
-        'user.verificationToken',
-        'user.verificationTokenExpiresAt',
         'user.twoFactorSecret',
         'user.twoFactorEnabled',
         'user.failedLoginAttempts',

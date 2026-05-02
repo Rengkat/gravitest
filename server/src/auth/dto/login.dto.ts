@@ -1,5 +1,11 @@
 // login.dto.ts
-import { IsString, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEmail,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -27,7 +33,7 @@ export class LoginDto {
     description: 'Set true for "Remember Me" — extends session to 30 days',
   })
   @IsOptional()
-  @IsString()
+  @IsBoolean()
   rememberMe?: boolean = false;
 }
 
@@ -51,7 +57,7 @@ export class EmailLoginDto {
 
   @ApiPropertyOptional({ default: false })
   @IsOptional()
-  @IsString()
+  @IsBoolean()
   rememberMe?: boolean = false;
 }
 

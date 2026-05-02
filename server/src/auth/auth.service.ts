@@ -8,14 +8,14 @@ import {
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { UserService } from 'src/user/user.service';
 import { EmailLoginDto } from './dto/login.dto';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OtpProvider } from './providers/otp.provider.ts';
 import { HashProvider } from './providers/Hash.provider';
 import { ConfigService } from '@nestjs/config';
 import { AuthResponseDto, AuthUserDto, TokensDto } from './dto/auth.dto';
 import { plainToInstance } from 'class-transformer';
+import { OtpProvider } from './providers/otp.provider';
 
 @Injectable()
 export class AuthService {
@@ -52,16 +52,15 @@ export class AuthService {
   //Login
   //: Promise<AuthResponseDto>
   async login(dto: EmailLoginDto) {
-    //load user with securiry columns
     const user = await this.userService.findByEmailForAuth(dto.email);
     const passwordHash = user?.passwordHash ?? AuthService.DUMMY_PASSWORD_HASH;
 
-    // Constant-time password validation to prevent user enumeration
     const isPasswordValid = await this.hashProvider.comparePassword(
       dto.password,
       passwordHash,
     );
 
+    // Constant-time: evaluate both conditions
     if (!user || !isPasswordValid) {
       if (user) {
         user.incrementFailedLoginAttempts();
@@ -69,41 +68,24 @@ export class AuthService {
       }
       throw new UnauthorizedException('Invalid credentials');
     }
-    // Account lock check
+
+    // Lock check
     if (user.isAccountLocked()) {
-      const lockedTime = user.lockedUntil?.toLocaleTimeString();
-      throw new UnauthorizedException(
-        `Account is locked due to multiple failed login attempts. Please try again later at ${lockedTime}.`,
+      throw new ForbiddenException(
+        `Account locked. Try again after ${user.lockedUntil?.toLocaleTimeString()}.`,
       );
     }
 
-    // Email verification check
     if (!user.isEmailVerified) {
       throw new ForbiddenException(
-        'Email not verified. Please check your inbox for the verification code.',
+        'Email not verified. Please check your inbox.',
       );
     }
-
-    // Password check
-    const isPasswordCorrect = await this.hashProvider.comparePassword(
-      dto.password,
-      user.passwordHash,
-    );
-    if (!isPasswordCorrect) {
-      user.incrementFailedLoginAttempts();
-      await this.userRepository.save(user);
-      const attemptsLeft = 5 - user.failedLoginAttempts;
-      const hint =
-        attemptsLeft > 0
-          ? ` ${attemptsLeft} attempt${attemptsLeft === 1 ? '' : 's'} remaining.`
-          : ' Account is now locked for 15 minutes.';
-      throw new UnauthorizedException(`Invalid credentials.${hint}`);
-    }
-    // TODO: Issue tokens
-
-    //Record successful login
+    // TODO: Implement 2FA check here if enabled
+    //TODO: issue tokens
     user.recordSuccessfulLogin();
     await this.userRepository.save(user);
+
     return this.buildAuthResponse(user, {
       accessToken: 'dummy-access-token',
       refreshToken: 'dummy-refresh-token',
