@@ -120,4 +120,12 @@ export class AuthService {
   //generate and verify OTPs
   //otp expiration and retry logic
   //send emails for verification and password reset
+  private buildAuthResponse(user: User, tokens: TokensDto): AuthResponseDto {
+    return {
+      user: plainToInstance(AuthUserDto, user, {
+        excludeExtraneousValues: true,
+      }),
+      tokens,
+    };
+  }
 }
