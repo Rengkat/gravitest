@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
 import {
   AuthResponseDto,
+  ForgotPasswordDto,
   LoginDto,
   RegisterUserDto,
   ResendVerificationDto,
@@ -104,6 +105,9 @@ export class AuthService {
       expiresIn: 900,
     });
   }
+  // =====================================================
+  // SOCIAL LOGIN (e.g. Google, facebook) - TODO
+  // =====================================================
 
   // =====================================================
   // RESEND EMAIL OTP
@@ -183,6 +187,27 @@ export class AuthService {
       message: 'Email verified successfully',
     };
   }
+  // =======================================================
+  // REFRESH TOKEN - TODO
+  // =======================================================
+
+  // =======================================================
+  // FORGOT/RESET PASSWORD - TODO
+  // =======================================================
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const user = await this.userService.findSensitiveUserByEmail(dto.email);
+    if (!user || !user.isActive) {
+      return {
+        message:
+          'If the email exists in our system, a verification code has been sent.',
+      };
+    }
+    await this.issueOtp(user.id, OtpPurpose.PASSWORD_RESET);
+    return {
+      message:
+        'If the email exists in our system, a verification code has been sent.',
+    };
+  }
 
   // =====================================================
   // INTERNAL OTP HELPERS
@@ -212,6 +237,16 @@ export class AuthService {
     }
 
     return otpBundle.plainCode;
+  }
+
+  // =================================================================
+  // LOGOUT
+  // =================================================================
+
+  async logout(userId: string): Promise<{ message: string }> {
+    //TODO using active user decorator to find user
+    // TODO revoke refresh tokens
+    return { message: 'Logged out successfully' };
   }
 
   private async revokeActiveOtps(
