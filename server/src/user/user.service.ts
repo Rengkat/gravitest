@@ -571,4 +571,9 @@ export class UserService {
         'user.newEmailPending',
       ]);
   }
+
+  //for save to user repository
+  async save(user: User): Promise<User> {
+    return this.userRepository.save(user);
+  }
 }

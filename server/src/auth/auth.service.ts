@@ -2,64 +2,71 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  InternalServerErrorException,
   Logger,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
-import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, IsNull } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Otp } from './entities/otp.entity';
+import { OtpProvider } from './providers/otp.provider';
 import { HashProvider } from './providers/Hash.provider';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
-import { OtpProvider } from './providers/otp.provider';
 import {
   AuthResponseDto,
-  EmailLoginDto,
+  LoginDto,
   RegisterUserDto,
+  ResendVerificationDto,
   TokensDto,
   VerifyEmailOtpDto,
+  // SendEmailOtpDto,
 } from './dto/auth.dto';
+import { OtpPurpose } from 'src/common/enums/enums';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly isDev: boolean;
+
   private static readonly DUMMY_PASSWORD_HASH =
     '$2b$12$C6UzMDM.H6dfI/f/IKxGhuJ8eWQ4P1Q0N9l8o0L8pQx5V6m7n8y9K';
+
   constructor(
     private readonly userService: UserService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-
     private readonly otpProvider: OtpProvider,
     private readonly hashProvider: HashProvider,
     private readonly configService: ConfigService,
+
+    @InjectRepository(Otp)
+    private readonly otpRepository: Repository<Otp>,
   ) {
     this.isDev = this.configService.get('NODE_ENV') === 'development';
   }
-  // ======== BASIC AUTH METHODS ========
-  //Register
-  // : Promise<RegisterResponseDto
-  async register(dto: RegisterUserDto) {
+
+  // =====================================================
+  // REGISTER
+  // =====================================================
+
+  async register(dto: RegisterUserDto): Promise<{ message: string }> {
     const user = await this.userService.registerUser(dto);
-    const { code, expiresAt } = this.otpProvider.generate();
-    const hashedOtp = await this.hashProvider.hashPassword(code);
-    user.scheduleOtp(hashedOtp, expiresAt);
-    await this.userRepository.save(user);
-    // await this.sendEmailVerificationOtp(user.email, otpBundle.code);
+
+    await this.issueOtp(user.id, OtpPurpose.EMAIL_VERIFICATION);
+
     return {
       message:
-        'Account created! Please verify your email with the code we just sent you.',
+        'Account created successfully. A verification code has been sent to your email.',
     };
   }
 
-  //Login
-  //: Promise<AuthResponseDto>
-  async login(dto: EmailLoginDto) {
+  // =====================================================
+  // LOGIN
+  // =====================================================
+
+  async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
+
     const passwordHash = user?.passwordHash ?? AuthService.DUMMY_PASSWORD_HASH;
 
     const isPasswordValid = await this.hashProvider.comparePassword(
@@ -67,31 +74,29 @@ export class AuthService {
       passwordHash,
     );
 
-    // Constant-time: evaluate both conditions
     if (!user || !isPasswordValid) {
       if (user) {
         user.incrementFailedLoginAttempts();
-        await this.userRepository.save(user);
+        await this.userService.save(user);
       }
+
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Lock check
     if (user.isAccountLocked()) {
       throw new ForbiddenException(
-        `Account locked. Try again after ${user.lockedUntil?.toLocaleTimeString()}.`,
+        `Account locked until ${user.lockedUntil?.toLocaleTimeString()}`,
       );
     }
 
     if (!user.isEmailVerified) {
       throw new ForbiddenException(
-        'Email not verified. Please check your inbox.',
+        'Email not verified. Please verify your email first.',
       );
     }
-    // TODO: Implement 2FA check here if enabled
-    //TODO: issue tokens
+
     user.recordSuccessfulLogin();
-    await this.userRepository.save(user);
+    await this.userService.save(user);
 
     return this.buildAuthResponse(user, {
       accessToken: 'dummy-access-token',
@@ -100,67 +105,153 @@ export class AuthService {
     });
   }
 
-  //verify email using otp
+  // =====================================================
+  // RESEND EMAIL OTP
+  // =====================================================
+
+  async sendEmailVerificationOtp(
+    dto: ResendVerificationDto,
+  ): Promise<{ message: string }> {
+    const user = await this.userService.findSensitiveUserByEmail(dto.email);
+
+    if (!user || !user.isActive) {
+      return {
+        message:
+          'If the email exists in our system, a verification code has been sent.',
+      };
+    }
+
+    if (user.isEmailVerified) {
+      return { message: 'Email is already verified.' };
+    }
+
+    const latestOtp = await this.getLatestActiveOtp(
+      user.id,
+      OtpPurpose.EMAIL_VERIFICATION,
+    );
+
+    if (latestOtp && !this.otpProvider.canResend(latestOtp.createdAt)) {
+      throw new BadRequestException(
+        'Please wait a minute before requesting another code.',
+      );
+    }
+
+    await this.issueOtp(user.id, OtpPurpose.EMAIL_VERIFICATION);
+
+    return {
+      message: 'Verification code sent successfully.',
+    };
+  }
+
+  // =====================================================
+  // VERIFY EMAIL OTP
+  // =====================================================
+
   async verifyEmail(dto: VerifyEmailOtpDto): Promise<{ message: string }> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
 
-    if (
-      !user ||
-      user.isEmailVerified ||
-      !user.otpCodeHash ||
-      !user.otpExpiresAt
-    ) {
+    if (!user || user.isEmailVerified) {
       throw new BadRequestException('Invalid or expired verification code');
     }
 
-    if (this.otpProvider.isExpired(user.otpExpiresAt)) {
-      user.clearOtp();
-      await this.userRepository.save(user);
-      throw new BadRequestException('Invalid or expired verification code');
-    }
-
-    if (this.otpProvider.isMaxAttemptsReached(user.otpAttempts)) {
-      user.clearOtp();
-      await this.userRepository.save(user);
-      throw new BadRequestException('Invalid or expired verification code');
-    }
-
-    const isValidOtp = await this.hashProvider.comparePassword(
-      dto.code,
-      user.otpCodeHash,
+    const otp = await this.getLatestActiveOtp(
+      user.id,
+      OtpPurpose.EMAIL_VERIFICATION,
     );
 
-    if (!isValidOtp) {
-      user.incrementOtpAttempts();
-      await this.userRepository.save(user);
+    if (!otp || !otp.canBeValidated()) {
       throw new BadRequestException('Invalid or expired verification code');
     }
 
+    const isValid = this.otpProvider.matches(dto.code, otp.codeHash);
+
+    if (!isValid) {
+      otp.incrementAttempts();
+      await this.otpRepository.save(otp);
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    otp.markUsed();
+    await this.otpRepository.save(otp);
+
     user.markEmailVerified();
-    await this.userRepository.save(user);
+    await this.userService.save(user);
 
-    this.logger.log(`Email verified for user ${user.id}`);
+    this.logger.log(`Email verified successfully for user ${user.id}`);
 
-    return { message: 'Email verified successfully' };
+    return {
+      message: 'Email verified successfully',
+    };
   }
-  //rend email verification otp
-  //reset password using otp
-  //forgot password using otp
-  //phone number verification using otp
-  //restore password using otp
-  //2FA using otp
-  //refresh access token using refresh token
-  //handle social logins (Google, Facebook, etc.)
-  //   ====== HELPER METHODS ======
-  //generate JWT access and refresh tokens
-  //generate and verify OTPs
-  //otp expiration and retry logic
-  //send emails for verification and password reset
-  // ============= HELPER METHODS ===========================
-  /**
-   * Load a user and all OTP columns via a query builder.
-   * Throws NotFoundException if user is not found.
-   */
+
+  // =====================================================
+  // INTERNAL OTP HELPERS
+  // =====================================================
+
+  private async issueOtp(userId: string, purpose: OtpPurpose): Promise<string> {
+    await this.revokeActiveOtps(userId, purpose);
+
+    const otpBundle = this.otpProvider.generate();
+
+    const otp = this.otpRepository.create({
+      userId,
+      purpose,
+      codeHash: otpBundle.codeHash,
+      expiresAt: otpBundle.expiresAt,
+      createdAt: new Date(),
+    });
+
+    await this.otpRepository.save(otp);
+
+    // TODO send email here
+
+    if (this.isDev) {
+      this.logger.warn(
+        `[DEV OTP] ${purpose} for ${userId}: ${otpBundle.plainCode}`,
+      );
+    }
+
+    return otpBundle.plainCode;
+  }
+
+  private async revokeActiveOtps(
+    userId: string,
+    purpose: OtpPurpose,
+  ): Promise<void> {
+    const activeOtps = await this.otpRepository.find({
+      where: {
+        userId,
+        purpose,
+        usedAt: IsNull(),
+        revokedAt: IsNull(),
+      },
+    });
+
+    for (const otp of activeOtps) {
+      otp.revoke();
+    }
+
+    if (activeOtps.length) {
+      await this.otpRepository.save(activeOtps);
+    }
+  }
+
+  private async getLatestActiveOtp(
+    userId: string,
+    purpose: OtpPurpose,
+  ): Promise<Otp | null> {
+    return this.otpRepository.findOne({
+      where: {
+        userId,
+        purpose,
+        usedAt: IsNull(),
+        revokedAt: IsNull(),
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
 
   private buildAuthResponse(user: User, tokens: TokensDto): AuthResponseDto {
     return {

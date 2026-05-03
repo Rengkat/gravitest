@@ -1,46 +1,57 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose, Transform, Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
-  Length,
   Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
 import { BaseUserDto } from 'src/user/dto';
 
-// ── Register ───────────────────────────────────────────────────────────────────
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+const OTP_REGEX = /^\d{6}$/;
+
+const PHONE_REGEX = /^\+234\d{10}$/;
+
+// ───────────────── REGISTER ─────────────────
 
 export class RegisterUserDto extends BaseUserDto {
   @ApiProperty({ example: 'MySecurePass123!' })
   @IsString()
   @MinLength(8)
-  @MaxLength(64)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
-    message: 'Password must contain uppercase, lowercase, and a number',
+  @MaxLength(72)
+  @Matches(PASSWORD_REGEX, {
+    message:
+      'Password must contain uppercase, lowercase, number, and special character',
   })
   password!: string;
 }
 
+// ───────────────── RESPONSE DTOs ─────────────────
+
+export class UserResponseDto extends BaseUserDto {}
+
 export class TokensDto {
-  @ApiProperty({ description: 'JWT Access Token (15 min expiry)' })
+  @ApiProperty()
   accessToken: string;
 
-  @ApiProperty({ description: 'Refresh Token (7 or 30 day expiry)' })
+  @ApiProperty()
   refreshToken: string;
 
-  @ApiProperty({ description: 'Access token TTL in seconds' })
+  @ApiProperty()
   expiresIn: number;
 }
 
 export class AuthResponseDto {
-  @ApiProperty({ type: RegisterUserDto })
-  @Type(() => RegisterUserDto)
-  user: RegisterUserDto;
+  @ApiProperty({ type: UserResponseDto })
+  @Type(() => UserResponseDto)
+  user: UserResponseDto;
 
   @ApiProperty({ type: TokensDto })
   tokens: TokensDto;
@@ -52,55 +63,19 @@ export class MessageResponseDto {
 }
 
 export class RegisterResponseDto extends MessageResponseDto {
-  @ApiPropertyOptional({ description: 'Returned only in development mode' })
+  @ApiPropertyOptional()
   devOtp?: string;
 }
 
-// ── Login  ──────────────────────────────────────────────────────────────
+// ───────────────── LOGIN ─────────────────
 
-/**
- * Standard email + password login
- */
 export class LoginDto {
-  @ApiProperty({
-    example: 'john.doe@example.com',
-    description: 'User email or phone number',
-  })
-  @IsString()
-  @IsNotEmpty()
-  identifier!: string; // Can be email or phone
-
-  @ApiProperty({
-    example: 'MySecurePass123!',
-    description: 'User password',
-  })
-  @IsString()
-  @IsNotEmpty()
-  password!: string;
-
-  @ApiPropertyOptional({
-    default: false,
-    description: 'Set true for "Remember Me" — extends session to 30 days',
-  })
-  @IsOptional()
-  @IsBoolean()
-  rememberMe?: boolean = false;
-}
-
-/**
- * Login with email only (for clarity)
- */
-export class EmailLoginDto {
-  @ApiProperty({
-    example: 'john.doe@example.com',
-  })
+  @ApiProperty({ example: 'john.doe@example.com' })
   @IsEmail()
-  @IsNotEmpty()
+  @Transform(({ value }) => value?.toLowerCase().trim())
   email!: string;
 
-  @ApiProperty({
-    example: 'MySecurePass123!',
-  })
+  @ApiProperty({ example: 'MySecurePass123!' })
   @IsString()
   @IsNotEmpty()
   password!: string;
@@ -111,108 +86,105 @@ export class EmailLoginDto {
   rememberMe?: boolean = false;
 }
 
-/**
- * Login with phone number only
- */
+// Optional if you truly want phone login
 export class PhoneLoginDto {
-  @ApiProperty({
-    example: '+2348012345678',
-    pattern: '^\\+234\\d{10}$',
+  @ApiProperty({ example: '+2348012345678' })
+  @Matches(PHONE_REGEX, {
+    message: 'Phone number must be in +2348012345678 format',
   })
-  @IsString()
-  @IsNotEmpty()
   phoneNumber!: string;
 
-  @ApiProperty({
-    example: 'MySecurePass123!',
-  })
+  @ApiProperty({ example: 'MySecurePass123!' })
   @IsString()
   @IsNotEmpty()
   password!: string;
 
   @ApiPropertyOptional({ default: false })
   @IsOptional()
-  @IsString()
+  @IsBoolean()
   rememberMe?: boolean = false;
 }
 
-// ── Refresh Token ──────────────────────────────────────────────────────────────
+// ───────────────── REFRESH TOKEN ─────────────────
 
 export class RefreshTokenDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  refreshToken: string;
+  refreshToken!: string;
 }
 
-// ── OTP Verify ─────────────────────────────────────────────────────────────────
+// ───────────────── EMAIL OTP ─────────────────
 
 export class VerifyEmailOtpDto {
   @ApiProperty({ example: 'alex@example.com' })
   @IsEmail()
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: '847291' })
-  @IsString()
-  @Length(6, 6, { message: 'OTP must be exactly 6 characters' })
-  code: string; // User sends 6-digit plain code
+  @Matches(OTP_REGEX, {
+    message: 'OTP must be a valid 6-digit code',
+  })
+  code!: string;
 }
 
 export class ResendVerificationDto {
   @ApiProperty({ example: 'alex@example.com' })
   @IsEmail()
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 }
 
-// ── Forgot / Reset Password ────────────────────────────────────────────────────
+// ───────────────── PASSWORD RESET ─────────────────
 
 export class ForgotPasswordDto {
   @ApiProperty({ example: 'alex@example.com' })
   @IsEmail()
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 }
 
 export class ResetPasswordDto {
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  token: string;
+  @MinLength(20)
+  @MaxLength(500)
+  token!: string;
 
   @ApiProperty({ example: 'NewP@ssw0rd!' })
   @IsString()
   @MinLength(8)
   @MaxLength(72)
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/,
-    { message: 'Password must meet complexity requirements' },
-  )
-  newPassword: string;
+  @Matches(PASSWORD_REGEX, {
+    message:
+      'Password must contain uppercase, lowercase, number, and special character',
+  })
+  newPassword!: string;
 }
 
-// ── 2FA ────────────────────────────────────────────────────────────────────────
+// ───────────────── 2FA ─────────────────
 
 export class Verify2FADto {
-  @ApiProperty({ description: 'TOTP code from authenticator app' })
-  @IsString()
-  @MinLength(6)
-  @MaxLength(6)
-  code: string;
+  @ApiProperty({ example: '847291' })
+  @Matches(OTP_REGEX, {
+    message: '2FA code must be a valid 6-digit number',
+  })
+  code!: string;
 }
 
-// ── Phone OTP ──────────────────────────────────────────────────────────────────
+// ───────────────── PHONE OTP ─────────────────
 
 export class VerifyPhoneOtpDto {
-  @ApiProperty({ example: '2348012345678' })
-  @IsString()
-  @IsNotEmpty()
-  phoneNumber: string;
+  @ApiProperty({ example: '+2348012345678' })
+  @Matches(PHONE_REGEX, {
+    message: 'Phone number must be in +2348012345678 format',
+  })
+  phoneNumber!: string;
 
   @ApiProperty({ example: '847291' })
-  @IsString()
-  @MinLength(6)
-  @MaxLength(6)
-  code: string;
+  @Matches(OTP_REGEX, {
+    message: 'OTP must be a valid 6-digit code',
+  })
+  code!: string;
 }

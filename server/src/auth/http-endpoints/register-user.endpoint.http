@@ -1,11 +1,11 @@
 POST http://localhost:5000/api/v1/auth/register
 Content-Type: application/json
 {
-  "firstName": "John",
-  "lastName": "Ibrahim",
-  "middleName": "Amaech",
-  "email": "john.ibrahim@example.com",
-  "phoneNumber": "+2348023456744",
+  "firstName": "Alexander",
+  "lastName": "Rengkat",
+  "middleName": "John",
+  "email": "john.ibrahim@examp.com",
+  "phoneNumber": "+2348023456755",
   "password": "StrongP@ss123!",
   "gender": "male",
   "dateOfBirth": "2007-07-22",

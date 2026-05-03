@@ -20,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
-import { EmailLoginDto, RegisterUserDto } from './dto/auth.dto';
+import { LoginDto, RegisterUserDto } from './dto/auth.dto';
 // import { Public, CurrentUser } from '../../common/decorators';
 
 @ApiTags('Auth')
@@ -86,7 +86,7 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
-  login(@Body() dto: EmailLoginDto) {
+  login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 }
