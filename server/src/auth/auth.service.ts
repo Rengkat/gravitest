@@ -5,17 +5,21 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { UserService } from 'src/user/user.service';
-import { EmailLoginDto } from './dto/login.dto';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HashProvider } from './providers/Hash.provider';
 import { ConfigService } from '@nestjs/config';
-import { AuthResponseDto, AuthUserDto, TokensDto } from './dto/auth.dto';
 import { plainToInstance } from 'class-transformer';
 import { OtpProvider } from './providers/otp.provider';
+import {
+  AuthResponseDto,
+  EmailLoginDto,
+  RegisterUserDto,
+  TokensDto,
+  VerifyEmailOtpDto,
+} from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +44,10 @@ export class AuthService {
   async register(dto: RegisterUserDto) {
     const user = await this.userService.registerUser(dto);
     const otpBundle = this.otpProvider.generate();
-    user.scheduleOtp(otpBundle.code, otpBundle.expiresAt);
+    user.scheduleOtp(
+      this.otpProvider.formatForDisplay(otpBundle.code),
+      otpBundle.expiresAt,
+    );
     await this.userRepository.save(user);
     // await this.sendEmailVerificationOtp(user.email, otpBundle.code);
     return {
@@ -94,6 +101,10 @@ export class AuthService {
   }
 
   //verify email using otp
+  async verifyEmail(dto: VerifyEmailOtpDto) {
+    // 1. Load user with security columns
+    const user = await this.userService.findByEmailForAuth(dto.email);
+  }
   //rend email verification otp
   //reset password using otp
   //forgot password using otp
@@ -109,7 +120,7 @@ export class AuthService {
   //send emails for verification and password reset
   private buildAuthResponse(user: User, tokens: TokensDto): AuthResponseDto {
     return {
-      user: plainToInstance(AuthUserDto, user, {
+      user: plainToInstance(RegisterUserDto, user, {
         excludeExtraneousValues: true,
       }),
       tokens,

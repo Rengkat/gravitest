@@ -20,8 +20,7 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
-import { RegisterUserDto } from 'src/user/dto/register-user.dto';
-import { EmailLoginDto } from './dto/login.dto';
+import { EmailLoginDto, RegisterUserDto } from './dto/auth.dto';
 // import { Public, CurrentUser } from '../../common/decorators';
 
 @ApiTags('Auth')

@@ -34,7 +34,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserFilterDto } from './dto';
 import { PaginatedResult } from 'src/common/pagination/pagination.interface';
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
-import { RegisterUserDto } from './dto/register-user.dto';
+import { RegisterUserDto } from 'src/auth/dto/auth.dto';
 
 @Injectable()
 export class UserService {
