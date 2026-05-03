@@ -18,12 +18,13 @@ import {
   AuthResponseDto,
   ForgotPasswordDto,
   LoginDto,
+  RegisterResponseDto,
   RegisterUserDto,
   ResendVerificationDto,
   ResetPasswordDto,
   TokensDto,
+  UserResponseDto,
   VerifyEmailOtpDto,
-  // SendEmailOtpDto,
 } from './dto/auth.dto';
 import { OtpPurpose } from 'src/common/enums/enums';
 
@@ -51,14 +52,18 @@ export class AuthService {
   // REGISTER
   // =====================================================
 
-  async register(dto: RegisterUserDto): Promise<{ message: string }> {
+  async register(dto: RegisterUserDto): Promise<RegisterResponseDto> {
     const user = await this.userService.registerUser(dto);
 
-    await this.issueOtp(user.id, OtpPurpose.EMAIL_VERIFICATION);
+    const plainOtp = await this.issueOtp(
+      user.id,
+      OtpPurpose.EMAIL_VERIFICATION,
+    );
 
     return {
       message:
         'Account created successfully. A verification code has been sent to your email.',
+      ...(this.isDev && { devOtp: plainOtp }),
     };
   }
 
@@ -106,12 +111,9 @@ export class AuthService {
       expiresIn: 900,
     });
   }
-  // =====================================================
-  // SOCIAL LOGIN (e.g. Google, facebook) - TODO
-  // =====================================================
 
   // =====================================================
-  // RESEND EMAIL OTP
+  // RESEND EMAIL VERIFICATION OTP
   // =====================================================
 
   async sendEmailVerificationOtp(
@@ -130,16 +132,7 @@ export class AuthService {
       return { message: 'Email is already verified.' };
     }
 
-    const latestOtp = await this.getLatestActiveOtp(
-      user.id,
-      OtpPurpose.EMAIL_VERIFICATION,
-    );
-
-    if (latestOtp && !this.otpProvider.canResend(latestOtp.createdAt)) {
-      throw new BadRequestException(
-        'Please wait a minute before requesting another code.',
-      );
-    }
+    await this.enforceOtpResendCooldown(user.id, OtpPurpose.EMAIL_VERIFICATION);
 
     await this.issueOtp(user.id, OtpPurpose.EMAIL_VERIFICATION);
 
@@ -149,7 +142,7 @@ export class AuthService {
   }
 
   // =====================================================
-  // VERIFY EMAIL OTP
+  // VERIFY EMAIL
   // =====================================================
 
   async verifyEmail(dto: VerifyEmailOtpDto): Promise<{ message: string }> {
@@ -159,25 +152,11 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired verification code');
     }
 
-    const otp = await this.getLatestActiveOtp(
+    await this.validateOtpOrThrow(
       user.id,
       OtpPurpose.EMAIL_VERIFICATION,
+      dto.code,
     );
-
-    if (!otp || !otp.canBeValidated()) {
-      throw new BadRequestException('Invalid or expired verification code');
-    }
-
-    const isValid = this.otpProvider.matches(dto.code, otp.codeHash);
-
-    if (!isValid) {
-      otp.incrementAttempts();
-      await this.otpRepository.save(otp);
-      throw new BadRequestException('Invalid or expired verification code');
-    }
-
-    otp.markUsed();
-    await this.otpRepository.save(otp);
 
     user.markEmailVerified();
     await this.userService.save(user);
@@ -188,34 +167,71 @@ export class AuthService {
       message: 'Email verified successfully',
     };
   }
-  // =======================================================
-  // REFRESH TOKEN - TODO
-  // =======================================================
 
-  // =======================================================
-  // FORGOT/RESET PASSWORD - TODO
-  // =======================================================
+  // =====================================================
+  // FORGOT PASSWORD
+  // =====================================================
+
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
-    if (!user || !user.isActive) {
-      return {
-        message:
-          'If the email exists in our system, a verification code has been sent.',
-      };
-    }
-    await this.issueOtp(user.id, OtpPurpose.PASSWORD_RESET);
-    return {
+
+    const response = {
       message:
         'If the email exists in our system, a verification code has been sent.',
     };
+
+    if (!user || !user.isActive || user.isAccountLocked()) {
+      return response;
+    }
+
+    const latestOtp = await this.getLatestActiveOtp(
+      user.id,
+      OtpPurpose.PASSWORD_RESET,
+    );
+
+    if (latestOtp && !this.otpProvider.canResend(latestOtp.createdAt)) {
+      return response;
+    }
+
+    await this.issueOtp(user.id, OtpPurpose.PASSWORD_RESET);
+
+    return response;
   }
 
-  async resetPassword(dto: ResetPasswordDto): Promise<{
-    message: string;
-  }> {
-    // TODO implement
-    return { message: 'Password reset successful' };
+  // =====================================================
+  // RESET PASSWORD
+  // =====================================================
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const user = await this.userService.findSensitiveUserByEmail(dto.email);
+
+    if (!user || !user.isActive) {
+      throw new BadRequestException('Invalid email or OTP');
+    }
+
+    await this.validateOtpOrThrow(user.id, OtpPurpose.PASSWORD_RESET, dto.code);
+
+    const passwordHash = await this.hashProvider.hashPassword(dto.newPassword);
+
+    user.changePassword(passwordHash);
+    await this.userService.save(user);
+
+    this.logger.log(`Password reset successful for user ${user.id}`);
+
+    return {
+      message: 'Password reset successful',
+    };
   }
+
+  // =====================================================
+  // LOGOUT
+  // =====================================================
+
+  async logout(userId: string): Promise<{ message: string }> {
+    // TODO revoke refresh token/session store here
+    return { message: 'Logged out successfully' };
+  }
+
   // =====================================================
   // INTERNAL OTP HELPERS
   // =====================================================
@@ -235,7 +251,7 @@ export class AuthService {
 
     await this.otpRepository.save(otp);
 
-    // TODO send email here
+    // TODO send actual email/sms here
 
     if (this.isDev) {
       this.logger.warn(
@@ -246,14 +262,40 @@ export class AuthService {
     return otpBundle.plainCode;
   }
 
-  // =================================================================
-  // LOGOUT
-  // =================================================================
+  private async validateOtpOrThrow(
+    userId: string,
+    purpose: OtpPurpose,
+    plainCode: string,
+  ): Promise<void> {
+    const otp = await this.getLatestActiveOtp(userId, purpose);
 
-  async logout(userId: string): Promise<{ message: string }> {
-    //TODO using active user decorator to find user
-    // TODO revoke refresh tokens
-    return { message: 'Logged out successfully' };
+    if (!otp || !otp.canBeValidated()) {
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    const isValid = this.otpProvider.matches(plainCode, otp.codeHash);
+
+    if (!isValid) {
+      otp.incrementAttempts();
+      await this.otpRepository.save(otp);
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    otp.markUsed();
+    await this.otpRepository.save(otp);
+  }
+
+  private async enforceOtpResendCooldown(
+    userId: string,
+    purpose: OtpPurpose,
+  ): Promise<void> {
+    const latestOtp = await this.getLatestActiveOtp(userId, purpose);
+
+    if (latestOtp && !this.otpProvider.canResend(latestOtp.createdAt)) {
+      throw new BadRequestException(
+        'Please wait a minute before requesting another code.',
+      );
+    }
   }
 
   private async revokeActiveOtps(
@@ -297,7 +339,7 @@ export class AuthService {
 
   private buildAuthResponse(user: User, tokens: TokensDto): AuthResponseDto {
     return {
-      user: plainToInstance(RegisterUserDto, user, {
+      user: plainToInstance(UserResponseDto, user, {
         excludeExtraneousValues: true,
       }),
       tokens,
