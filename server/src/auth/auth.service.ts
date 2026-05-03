@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
@@ -59,7 +60,7 @@ export class AuthService {
   //Login
   //: Promise<AuthResponseDto>
   async login(dto: EmailLoginDto) {
-    const user = await this.userService.findByEmailForAuth(dto.email);
+    const user = await this.userService.findSensitiveUserByEmail(dto.email);
     const passwordHash = user?.passwordHash ?? AuthService.DUMMY_PASSWORD_HASH;
 
     const isPasswordValid = await this.hashProvider.comparePassword(
@@ -103,7 +104,7 @@ export class AuthService {
   //verify email using otp
   async verifyEmail(dto: VerifyEmailOtpDto) {
     // 1. Load user with security columns
-    const user = await this.userService.findByEmailForAuth(dto.email);
+    const user = await this.userService.findSensitiveUserByEmail(dto.email);
   }
   //rend email verification otp
   //reset password using otp
@@ -118,6 +119,12 @@ export class AuthService {
   //generate and verify OTPs
   //otp expiration and retry logic
   //send emails for verification and password reset
+  // ============= HELPER METHODS ===========================
+  /**
+   * Load a user and all OTP columns via a query builder.
+   * Throws NotFoundException if user is not found.
+   */
+
   private buildAuthResponse(user: User, tokens: TokensDto): AuthResponseDto {
     return {
       user: plainToInstance(RegisterUserDto, user, {

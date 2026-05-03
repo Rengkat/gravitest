@@ -78,7 +78,7 @@ export class UserService {
    * Selects passwordHash (excluded by default in other queries).
    * Returns null instead of throwing — caller decides how to handle.
    */
-  async findByEmailForAuth(email: string): Promise<User | null> {
+  async findSensitiveUserByEmail(email: string): Promise<User | null> {
     return this.securityUserQuery()
       .where('LOWER(user.email) = LOWER(:email)', {
         email: this.normalizeEmail(email),
@@ -91,21 +91,11 @@ export class UserService {
   /**
    * Find by phone — for phone OTP login.
    */
-  async findByPhoneForOtp(phone: string): Promise<User | null> {
+  async findSensitiveUserByPhone(phone: string): Promise<User | null> {
     return this.securityUserQuery()
       .where('user.phoneNumber = :phone', {
         phone: this.normalizePhone(phone),
       })
-      .andWhere('user.deletedAt IS NULL')
-      .andWhere('user.isActive = true')
-      .getOne();
-  }
-  /**
-   * Find by password reset token — for reset-password flow.
-   */
-  async findByResetToken(token: string): Promise<User | null> {
-    return this.securityUserQuery()
-      .where('user.passwordResetToken = :token', { token })
       .andWhere('user.deletedAt IS NULL')
       .andWhere('user.isActive = true')
       .getOne();
@@ -138,7 +128,6 @@ export class UserService {
       passwordHash,
       role: UserRole.STUDENT,
       authProvider: AuthProvider.EMAIL,
-
       isActive: true,
       isEmailVerified: false,
       isPhoneVerified: false,
@@ -206,8 +195,6 @@ export class UserService {
       .createQueryBuilder('user')
       .addSelect([
         'user.passwordHash',
-        'user.passwordResetToken',
-        'user.passwordResetExpiresAt',
         'user.otpCode',
         'user.otpExpiresAt',
         'user.otpAttempts',
@@ -577,8 +564,6 @@ export class UserService {
         'user.otpCode',
         'user.otpExpiresAt',
         'user.otpAttempts',
-        'user.passwordResetToken',
-        'user.passwordResetExpiresAt',
         'user.twoFactorSecret',
         'user.twoFactorEnabled',
         'user.failedLoginAttempts',

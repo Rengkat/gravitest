@@ -86,15 +86,6 @@ export class User {
   @Exclude()
   otpAttempts: number;
 
-  // ── Password reset ─────────────────────────────────────────────────────
-  @Column({ type: 'varchar', nullable: true, select: false })
-  @Exclude()
-  passwordResetToken: string | null;
-
-  @Column({ type: 'timestamptz', nullable: true, select: false })
-  @Exclude()
-  passwordResetExpiresAt: Date | null;
-
   // ── Two-factor auth ────────────────────────────────────────────────────
   @Column({ type: 'varchar', nullable: true, select: false })
   @Exclude()
@@ -262,19 +253,9 @@ export class User {
     this.clearOtp();
   }
 
-  schedulePasswordReset(token: string, expiresAt: Date): void {
-    this.passwordResetToken = token;
-    this.passwordResetExpiresAt = expiresAt;
-  }
-
-  clearPasswordReset(): void {
-    this.passwordResetToken = null;
-    this.passwordResetExpiresAt = null;
-  }
 
   changePassword(newPasswordHash: string): void {
     this.passwordHash = newPasswordHash;
-    this.clearPasswordReset();
     this.clearOtp();
     this.resetFailedLoginAttempts();
     this.lockedUntil = null;
@@ -297,7 +278,6 @@ export class User {
     this.deletionReason = reason ?? null;
     this.isActive = false;
     this.clearOtp();
-    this.clearPasswordReset();
     this.resetFailedLoginAttempts();
   }
 
