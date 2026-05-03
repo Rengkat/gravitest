@@ -22,6 +22,7 @@ import { StudentProfile } from './student-profile.entity';
 import { TutorProfile } from './tutor-profile.entity';
 import { SchoolAdmin } from './school-admin.entity';
 import { Exclude, Expose } from 'class-transformer';
+import { Otp } from 'src/auth/entities/otp.entity';
 // import { Subscription } from './subscription.entity';
 // import { Notification } from './notification.entity';
 // import { AiChatSession } from './ai-chat-session.entity';
@@ -72,19 +73,6 @@ export class User {
   @Column({ type: 'varchar', nullable: true, select: false })
   @Exclude()
   googleId?: string | null;
-
-  // ── OTP — email/phone verification & 2FA ──────────────────────────────
-  @Column({ type: 'varchar', length: 6, nullable: true, select: false })
-  @Exclude()
-  otpCode: string | null;
-
-  @Column({ type: 'timestamptz', nullable: true, select: false })
-  @Exclude()
-  otpExpiresAt: Date | null;
-
-  @Column({ type: 'int', default: 0, select: false })
-  @Exclude()
-  otpAttempts: number;
 
   // ── Two-factor auth ────────────────────────────────────────────────────
   @Column({ type: 'varchar', nullable: true, select: false })
@@ -184,6 +172,8 @@ export class User {
   @OneToOne(() => SchoolAdmin, (a) => a.user, { nullable: true })
   schoolAdmin: SchoolAdmin | null;
 
+  @OneToMany(() => Otp, (otp) => otp.user)
+  otps: Otp[];
   // @OneToMany(() => Subscription, (s) => s.user)
   // subscriptions: Subscription[];
 
@@ -231,32 +221,16 @@ export class User {
     this.resetFailedLoginAttempts();
   }
 
-  scheduleOtp(code: string, expiresAt: Date): void {
-    this.otpCode = code;
-    this.otpExpiresAt = expiresAt;
-    this.otpAttempts = 0;
-  }
-
-  clearOtp(): void {
-    this.otpCode = null;
-    this.otpExpiresAt = null;
-    this.otpAttempts = 0;
-  }
-
   markEmailVerified(): void {
     this.isEmailVerified = true;
-    this.clearOtp();
   }
 
   markPhoneVerified(): void {
     this.isPhoneVerified = true;
-    this.clearOtp();
   }
-
 
   changePassword(newPasswordHash: string): void {
     this.passwordHash = newPasswordHash;
-    this.clearOtp();
     this.resetFailedLoginAttempts();
     this.lockedUntil = null;
   }
@@ -268,7 +242,6 @@ export class User {
     this.deactivationReason = reason ?? null;
     this.deactivationType = type;
 
-    this.clearOtp();
     this.resetFailedLoginAttempts();
   }
 
@@ -277,7 +250,6 @@ export class User {
     this.deletedBy = by;
     this.deletionReason = reason ?? null;
     this.isActive = false;
-    this.clearOtp();
     this.resetFailedLoginAttempts();
   }
 

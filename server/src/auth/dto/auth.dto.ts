@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Length,
   Matches,
   MaxLength,
   MinLength,
@@ -154,9 +155,8 @@ export class VerifyEmailOtpDto {
 
   @ApiProperty({ example: '847291' })
   @IsString()
-  @MinLength(6)
-  @MaxLength(6)
-  code: string;
+  @Length(6, 6, { message: 'OTP must be exactly 6 characters' })
+  code: string; // User sends 6-digit plain code
 }
 
 export class ResendVerificationDto {

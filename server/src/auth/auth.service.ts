@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -44,11 +45,9 @@ export class AuthService {
   // : Promise<RegisterResponseDto
   async register(dto: RegisterUserDto) {
     const user = await this.userService.registerUser(dto);
-    const otpBundle = this.otpProvider.generate();
-    user.scheduleOtp(
-      this.otpProvider.formatForDisplay(otpBundle.code),
-      otpBundle.expiresAt,
-    );
+    const { code, expiresAt } = this.otpProvider.generate();
+    const hashedOtp = await this.hashProvider.hashPassword(code);
+    user.scheduleOtp(hashedOtp, expiresAt);
     await this.userRepository.save(user);
     // await this.sendEmailVerificationOtp(user.email, otpBundle.code);
     return {
@@ -102,9 +101,47 @@ export class AuthService {
   }
 
   //verify email using otp
-  async verifyEmail(dto: VerifyEmailOtpDto) {
-    // 1. Load user with security columns
+  async verifyEmail(dto: VerifyEmailOtpDto): Promise<{ message: string }> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
+
+    if (
+      !user ||
+      user.isEmailVerified ||
+      !user.otpCodeHash ||
+      !user.otpExpiresAt
+    ) {
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    if (this.otpProvider.isExpired(user.otpExpiresAt)) {
+      user.clearOtp();
+      await this.userRepository.save(user);
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    if (this.otpProvider.isMaxAttemptsReached(user.otpAttempts)) {
+      user.clearOtp();
+      await this.userRepository.save(user);
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    const isValidOtp = await this.hashProvider.comparePassword(
+      dto.code,
+      user.otpCodeHash,
+    );
+
+    if (!isValidOtp) {
+      user.incrementOtpAttempts();
+      await this.userRepository.save(user);
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    user.markEmailVerified();
+    await this.userRepository.save(user);
+
+    this.logger.log(`Email verified for user ${user.id}`);
+
+    return { message: 'Email verified successfully' };
   }
   //rend email verification otp
   //reset password using otp
