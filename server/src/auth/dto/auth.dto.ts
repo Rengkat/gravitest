@@ -146,11 +146,15 @@ export class ForgotPasswordDto {
 }
 
 export class ResetPasswordDto {
-  @ApiProperty()
-  @IsString()
-  @MinLength(20)
-  @MaxLength(500)
-  token!: string;
+  @ApiProperty({ example: 'alex@example.com' })
+  @IsEmail()
+  email!: string;
+
+  @ApiProperty({ example: '847291' })
+  @Matches(/^\d{6}$/, {
+    message: 'OTP must be a 6-digit number',
+  })
+  code!: string;
 
   @ApiProperty({ example: 'NewP@ssw0rd!' })
   @IsString()

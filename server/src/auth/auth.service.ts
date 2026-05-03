@@ -20,6 +20,7 @@ import {
   LoginDto,
   RegisterUserDto,
   ResendVerificationDto,
+  ResetPasswordDto,
   TokensDto,
   VerifyEmailOtpDto,
   // SendEmailOtpDto,
@@ -209,6 +210,12 @@ export class AuthService {
     };
   }
 
+  async resetPassword(dto: ResetPasswordDto): Promise<{
+    message: string;
+  }> {
+    // TODO implement
+    return { message: 'Password reset successful' };
+  }
   // =====================================================
   // INTERNAL OTP HELPERS
   // =====================================================
