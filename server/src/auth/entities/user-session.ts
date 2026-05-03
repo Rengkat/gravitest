@@ -3,7 +3,6 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
   Index,
@@ -11,20 +10,23 @@ import {
 import { Exclude } from 'class-transformer';
 import { User } from 'src/user/entities/user.entity';
 
-export enum SessionStatus {
-  ACTIVE = 'active',
-  REVOKED = 'revoked',
+export enum SessionRevokeReason {
+  LOGOUT = 'logout',
+  LOGOUT_ALL = 'logout_all',
+  REFRESH_ROTATED = 'refresh_rotated',
+  ADMIN_REVOKED = 'admin_revoked',
+  SECURITY_REVOKED = 'security_revoked',
 }
 
 @Entity('user_sessions')
 @Index(['userId'])
 @Index(['jti'], { unique: true })
 @Index(['expiresAt'])
-export class RefreshToken {
+export class UserSession {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'varchar', length: 120, unique: true })
+  @Column({ type: 'varchar', length: 64, unique: true })
   jti!: string;
 
   @Column({ type: 'varchar', length: 255 })
@@ -34,16 +36,15 @@ export class RefreshToken {
   @Column({ type: 'uuid' })
   userId!: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.sessions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user!: User;
 
-  @Column({
-    type: 'enum',
-    enum: SessionStatus,
-    default: SessionStatus.ACTIVE,
-  })
-  status!: SessionStatus;
+  @Column({ type: 'varchar', nullable: true })
+  deviceId!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  deviceName!: string | null;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   userAgent!: string | null;
@@ -54,9 +55,6 @@ export class RefreshToken {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
-
   @Column({ type: 'timestamptz', nullable: true })
   lastUsedAt!: Date | null;
 
@@ -66,19 +64,30 @@ export class RefreshToken {
   @Column({ type: 'timestamptz', nullable: true })
   revokedAt!: Date | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  revokedReason!: string | null;
+  @Column({
+    type: 'enum',
+    enum: SessionRevokeReason,
+    nullable: true,
+  })
+  revokedReason!: SessionRevokeReason | null;
 
   isExpired(): boolean {
     return new Date() > this.expiresAt;
   }
 
-  isActive(): boolean {
-    return this.status === SessionStatus.ACTIVE && !this.isExpired();
+  isRevoked(): boolean {
+    return !!this.revokedAt;
   }
 
-  revoke(reason: string): void {
-    this.status = SessionStatus.REVOKED;
+  isActive(): boolean {
+    return !this.isExpired() && !this.isRevoked();
+  }
+
+  touch(): void {
+    this.lastUsedAt = new Date();
+  }
+
+  revoke(reason: SessionRevokeReason): void {
     this.revokedAt = new Date();
     this.revokedReason = reason;
   }

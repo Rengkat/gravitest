@@ -23,6 +23,7 @@ import { TutorProfile } from './tutor-profile.entity';
 import { SchoolAdmin } from './school-admin.entity';
 import { Exclude, Expose } from 'class-transformer';
 import { Otp } from 'src/auth/entities/otp.entity';
+import { UserSession } from 'src/auth/entities/user-session';
 // import { Subscription } from './subscription.entity';
 // import { Notification } from './notification.entity';
 // import { AiChatSession } from './ai-chat-session.entity';
@@ -186,8 +187,8 @@ export class User {
   // @OneToMany(() => ExamSession, (s) => s.user)
   // examSessions: ExamSession[];
 
-  // @OneToMany(() => UserToken, (token) => token.user)
-  // tokens: UserToken[];
+  @OneToMany(() => UserSession, (session) => session.user)
+  sessions: UserSession[];
 
   // ── Computed ───────────────────────────────────────────────────────────
   @Expose()
