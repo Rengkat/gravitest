@@ -7,5 +7,5 @@ export default registerAs('mail', () => ({
   user: process.env.MAIL_USER,
   password: process.env.MAIL_PASSWORD,
   fromName: process.env.MAIL_FROM_NAME || 'Gravitas',
-  fromAddress: process.env.MAIL_FROM_ADDRESS,
+  fromAddress: process.env.MAIL_FROM_ADDRESS || process.env.MAIL_USER,
 }));
