@@ -6,9 +6,11 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaginationModule } from './common/pagination/pagination.module';
+import { MailModule } from './mail/mail.module';
 import * as Joi from 'joi';
 import appConfig from './config/appConfig';
 import databaseConfig from './config/databaseConfig';
+import mailConfig from './config/mailConfig';
 
 const ENV = process.env.NODE_ENV;
 
@@ -17,7 +19,7 @@ const ENV = process.env.NODE_ENV;
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
-      load: [appConfig, databaseConfig],
+      load: [appConfig, databaseConfig, mailConfig],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
@@ -44,6 +46,7 @@ const ENV = process.env.NODE_ENV;
     UserModule,
     AuthModule,
     PaginationModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
