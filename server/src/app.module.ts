@@ -12,7 +12,7 @@ import { MailModule } from './mail/mail.module';
 
 import appConfig from './config/appConfig';
 import databaseConfig from './config/databaseConfig';
-import mailConfig from './config/mailConfig';
+import mailConfig from './mail/config/mailConfig';
 import jwtConfig from './auth/config/jwtConfig';
 
 const ENV = process.env.NODE_ENV;
