@@ -4,9 +4,9 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { htmlToText } from 'html-to-text';
-import { BaseTemplateContext } from '../interfaces/template-context.interface';
 import appConfig from 'src/config/appConfig';
 import mailConfig from '../config/mailConfig';
+import { BaseTemplateContext } from '../interfaces/template-context.interface';
 
 interface RenderedTemplate {
   html: string;
@@ -39,11 +39,11 @@ export class TemplateRendererProvider implements OnModuleInit {
       year: new Date().getFullYear(),
     };
 
-    await this.registerPartials();
+    await this.registerPartialsRecursively();
     this.registerHelpers();
-    await this.preloadTemplates();
+    await this.preloadTemplatesRecursively();
 
-    this.logger.log('Mail templates initialized');
+    this.logger.log('Mail templates initialized successfully');
   }
 
   async render<T extends Partial<BaseTemplateContext>>(
@@ -51,59 +51,136 @@ export class TemplateRendererProvider implements OnModuleInit {
     context: T,
   ): Promise<RenderedTemplate> {
     const compiled = await this.getCompiledTemplate(templateName);
-    const merged = { ...this.baseContext, ...context };
+    const mergedContext = {
+      ...this.baseContext,
+      ...context,
+    };
 
-    const html = compiled(merged);
-    const text = htmlToText(html, { wordwrap: 120 });
+    const html = compiled(mergedContext);
+
+    const text = htmlToText(html, {
+      wordwrap: 120,
+      selectors: [
+        { selector: 'a', options: { hideLinkHrefIfSameAsText: true } },
+      ],
+    });
 
     return { html, text };
   }
 
-  private async preloadTemplates(): Promise<void> {
-    try {
-      const files = await fs.readdir(this.templatesDir);
-
-      for (const file of files.filter((f) => f.endsWith('.hbs'))) {
-        const templateName = path.basename(file, '.hbs');
-        await this.getCompiledTemplate(templateName);
-      }
-    } catch {
-      this.logger.warn('No root templates found during preload');
-    }
-  }
-
   private async getCompiledTemplate(
-    name: string,
+    templateName: string,
   ): Promise<handlebars.TemplateDelegate> {
-    if (this.cache.has(name)) {
-      return this.cache.get(name)!;
+    if (this.cache.has(templateName)) {
+      return this.cache.get(templateName)!;
     }
 
-    const filePath = path.join(this.templatesDir, `${name}.hbs`);
-    const source = await fs.readFile(filePath, 'utf-8');
+    const filePath = path.join(this.templatesDir, `${templateName}.hbs`);
+
+    let source: string;
+
+    try {
+      source = await fs.readFile(filePath, 'utf-8');
+    } catch {
+      throw new Error(`Mail template not found: ${templateName}`);
+    }
+
     const compiled = handlebars.compile(source);
 
-    this.cache.set(name, compiled);
+    this.cache.set(templateName, compiled);
+    this.logger.debug(`Compiled template cached: ${templateName}`);
+
     return compiled;
   }
 
-  private async registerPartials(): Promise<void> {
+  private async preloadTemplatesRecursively(): Promise<void> {
+    const templateFiles = await this.walkDirectory(this.templatesDir);
+
+    for (const absoluteFilePath of templateFiles) {
+      const relativePath = path.relative(this.templatesDir, absoluteFilePath);
+
+      if (
+        relativePath.startsWith('partials') ||
+        relativePath.startsWith('layouts')
+      ) {
+        continue;
+      }
+
+      if (!relativePath.endsWith('.hbs')) {
+        continue;
+      }
+
+      const templateName = relativePath
+        .replace(/\\/g, '/')
+        .replace(/\.hbs$/, '');
+
+      await this.getCompiledTemplate(templateName);
+    }
+  }
+
+  private async registerPartialsRecursively(): Promise<void> {
     const partialsDir = path.join(this.templatesDir, 'partials');
+    const layoutsDir = path.join(this.templatesDir, 'layouts');
+
+    const partialFiles = await this.walkDirectory(partialsDir, true);
+    const layoutFiles = await this.walkDirectory(layoutsDir, true);
+
+    for (const absoluteFilePath of partialFiles) {
+      if (!absoluteFilePath.endsWith('.hbs')) continue;
+
+      const relativeName = path
+        .relative(partialsDir, absoluteFilePath)
+        .replace(/\\/g, '/')
+        .replace(/\.hbs$/, '');
+
+      const content = await fs.readFile(absoluteFilePath, 'utf-8');
+
+      handlebars.registerPartial(relativeName, content);
+
+      this.logger.debug(`Registered partial: ${relativeName}`);
+    }
+
+    for (const absoluteFilePath of layoutFiles) {
+      if (!absoluteFilePath.endsWith('.hbs')) continue;
+
+      const relativeName = path
+        .relative(layoutsDir, absoluteFilePath)
+        .replace(/\\/g, '/')
+        .replace(/\.hbs$/, '');
+
+      const content = await fs.readFile(absoluteFilePath, 'utf-8');
+
+      handlebars.registerPartial(`layout.${relativeName}`, content);
+
+      this.logger.debug(`Registered layout partial: layout.${relativeName}`);
+    }
+  }
+
+  private async walkDirectory(
+    dir: string,
+    silent = false,
+  ): Promise<string[]> {
+    const results: string[] = [];
 
     try {
-      const files = await fs.readdir(partialsDir);
+      const entries = await fs.readdir(dir, { withFileTypes: true });
 
-      for (const file of files.filter((f) => f.endsWith('.hbs'))) {
-        const name = path.basename(file, '.hbs');
-        const content = await fs.readFile(
-          path.join(partialsDir, file),
-          'utf-8',
-        );
-        handlebars.registerPartial(name, content);
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+          results.push(...(await this.walkDirectory(fullPath, silent)));
+        } else {
+          results.push(fullPath);
+        }
       }
     } catch {
-      this.logger.debug('No partials directory found');
+      if (!silent) {
+        this.logger.warn(`Directory not found: ${dir}`);
+      }
     }
+
+    return results;
   }
 
   private registerHelpers(): void {
@@ -119,6 +196,10 @@ export class TemplateRendererProvider implements OnModuleInit {
         timeStyle: 'short',
         timeZone: 'Africa/Lagos',
       }),
+    );
+
+    handlebars.registerHelper('default', (value, fallback) =>
+      value ?? fallback,
     );
   }
 }
