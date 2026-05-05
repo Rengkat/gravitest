@@ -32,14 +32,14 @@ async function bootstrap() {
   // ── Swagger (dev + staging only) ────────────
   if (nodeEnv !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('Gravitas API')
+      .setTitle('Gravitest API')
       .setDescription(
         'Nigerian EdTech SaaS — JAMB, WAEC, ICAN exam prep + AI tutoring + school portal',
       )
       .setVersion('1.0')
       .addBearerAuth()
       .addServer(`http://localhost:${port}`, 'Local')
-      .addServer('https://api.gravitas.ng', 'Production')
+      .addServer('https://api.gravitest.ng', 'Production')
       .addTag('Auth', 'Registration, login, OTP, password reset')
       .addTag('Users', 'User profile management')
       .addTag('CBT', 'Exam sessions, questions, timer')

@@ -1,5 +1,5 @@
 /**
- * Gravitas — Users DTO Barrel Export
+ * Gravitest — Users DTO Barrel Export
  *
  * Import from here instead of individual files:
  *   import { CreateStudentDto, TutorResponseDto } from './dto';

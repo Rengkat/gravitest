@@ -31,7 +31,7 @@ export class CreateUserDto extends BaseUserDto {
 
   /**
    * Optional. If omitted, a secure temp password is auto-generated
-   * and emailed to the user. Format: Gravitas@{year}{random6chars}
+   * and emailed to the user. Format: Gravitest@{year}{random6chars}
    */
   @ApiPropertyOptional({ example: 'TempPass123!' })
   @IsOptional()
@@ -99,7 +99,7 @@ export class BulkCreateUserRowDto extends BaseUserDto {
   subscriptionTier?: SubscriptionTier = SubscriptionTier.FREE;
 
   /**
-   * If omitted: Gravitas@{year}{random6} is used.
+   * If omitted: Gravitest@{year}{random6} is used.
    * User should be forced to change on first login.
    */
   @ApiPropertyOptional({ example: 'TempPass123!' })
@@ -196,8 +196,11 @@ export class BulkCreateUsersResponseDto {
   @ApiProperty({
     type: [GeneratedPasswordDto],
     example: [
-      { identifier: 'ada@school.ng', temporaryPassword: 'Gravitas@2026xR3!mQ' },
-      { identifier: '08012345678', temporaryPassword: 'Gravitas@2026kP9#nZ' },
+      {
+        identifier: 'ada@school.ng',
+        temporaryPassword: 'Gravitest@2026xR3!mQ',
+      },
+      { identifier: '08012345678', temporaryPassword: 'Gravitest@2026kP9#nZ' },
     ],
   })
   generatedPasswords!: GeneratedPasswordDto[];

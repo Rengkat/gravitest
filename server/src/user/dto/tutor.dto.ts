@@ -196,7 +196,7 @@ export class CreateTutorDto extends CreateUserDto {
   education?: EducationDto[];
 
   @ApiPropertyOptional({
-    example: 'https://res.cloudinary.com/gravitas/video/intro.mp4',
+    example: 'https://res.cloudinary.com/gravitest/video/intro.mp4',
     description: 'Short intro video URL (max 2 minutes)',
   })
   @IsOptional()

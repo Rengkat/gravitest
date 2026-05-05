@@ -220,6 +220,6 @@ export class BulkCreateUsersProvider {
       { length: 6 },
       () => chars[Math.floor(Math.random() * chars.length)],
     ).join('');
-    return `Gravitas@${year}${random}`;
+    return `Gravitest@${year}${random}`;
   }
 }

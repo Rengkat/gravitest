@@ -66,7 +66,7 @@ export class UpdateUserDto {
   phoneNumber?: string;
 
   @ApiPropertyOptional({
-    example: 'https://res.cloudinary.com/gravitas/avatar.jpg',
+    example: 'https://res.cloudinary.com/gravitest/avatar.jpg',
   })
   @IsOptional()
   @IsUrl({}, { message: 'Avatar must be a valid URL' })

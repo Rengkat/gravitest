@@ -1,7 +1,7 @@
-{{#> layouts/base title="Verify Your Email" subject="Verify Your Email Address - Gravitas"}}
+{{#> layouts/base title="Verify Your Email" subject="Verify Your Email Address - Gravitest"}}
   
   <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
-    Thanks for joining Gravitas! Please verify your email address to activate your account and start your learning journey.
+    Thanks for joining Gravitest! Please verify your email address to activate your account and start your learning journey.
   </p>
 
   {{> otp-card otpCode=otpCode expiryMinutes=expiryMinutes}}
@@ -12,7 +12,7 @@
       <line x1="12" y1="8" x2="12" y2="12"/>
       <line x1="12" y1="16" x2="12.01" y2="16"/>
     </svg>
-    The verification link will expire in <strong>{{expiryMinutes}} minutes</strong>. If you didn't create an account with Gravitas, you can safely ignore this email.
+    The verification link will expire in <strong>{{expiryMinutes}} minutes</strong>. If you didn't create an account with Gravitest, you can safely ignore this email.
   </p>
 
   {{> action-button buttonText="Verify Email Address" buttonUrl=verificationUrl}}

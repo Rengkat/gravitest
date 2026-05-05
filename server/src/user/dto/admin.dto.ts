@@ -120,7 +120,7 @@ export class CreateClassAdminDto extends CreateUserDto {
 // ─────────────────────────────────────────────
 export class CreateSuperAdminDto extends CreateUserDto {
   /**
-   * Internal Gravitas team designation.
+   * Internal Gravitest team designation.
    * e.g. 'CTO', 'Content Manager', 'Support Lead'
    */
   @ApiPropertyOptional({ example: 'Content Manager' })
@@ -156,7 +156,7 @@ export class SchoolAdminResponseDto extends UserResponseDto {
   schoolName?: string;
 
   @Expose()
-  @ApiPropertyOptional({ example: 'kings-college-lagos.gravitas.ng' })
+  @ApiPropertyOptional({ example: 'kings-college-lagos.gravitest.ng' })
   portalUrl?: string;
 
   @Expose()

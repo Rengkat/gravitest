@@ -68,7 +68,7 @@ export class UserResponseDto {
 
   @Expose()
   @ApiPropertyOptional({
-    example: 'https://res.cloudinary.com/gravitas/avatar.jpg',
+    example: 'https://res.cloudinary.com/gravitest/avatar.jpg',
   })
   avatarUrl?: string;
 
@@ -120,7 +120,7 @@ export class CreateUserResponseDto {
   user!: UserResponseDto;
 
   @ApiPropertyOptional({
-    example: 'Gravitas@2026xR3!mQ',
+    example: 'Gravitest@2026xR3!mQ',
     description:
       'Only returned when no password was supplied at creation. ' +
       'Share this with the student — it is never stored in plaintext.',

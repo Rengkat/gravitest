@@ -150,8 +150,8 @@ export function generateMockUsers(count: number): User[] {
         role === "student" && accountType === "school_based"
           ? "student.school.edu.ng"
           : role === "tutor"
-            ? "tutors.gravitas.ng"
-            : "gravitas.ng"
+            ? "tutors.gravitest.ng"
+            : "gravitest.ng"
       }`,
       phone: `+234${rand(7, 9)}${rand(0, 9)}${rand(10000000, 99999999)}`,
       role,
