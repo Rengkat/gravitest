@@ -1,0 +1,17 @@
+{{#> layouts/base title="Session Revoked" subject="A Session Has Been Revoked - Gravitas"}}
+  
+  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
+    A session on another device has been revoked from your Gravitas account.
+  </p>
+
+  {{#if deviceName}}
+    <div style="background-color: #f3f4f6; border-radius: 12px; padding: 16px; margin: 20px 0;">
+      <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">
+        <strong>Revoked device:</strong> {{deviceName}}
+      </p>
+    </div>
+  {{/if}}
+
+  {{> action-button buttonText="Manage Sessions" buttonUrl=sessionsUrl}}
+
+{{/layouts/base}}

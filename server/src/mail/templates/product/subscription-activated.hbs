@@ -1,0 +1,15 @@
+{{#> layouts/base title="Subscription Activated" subject="Your Subscription is Active - Gravitas"}}
+  
+  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
+    Your Gravitas subscription has been activated! You now have access to all premium features.
+  </p>
+
+  <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 16px; padding: 20px; margin: 20px 0;">
+    <p style="font-size: 14px; margin: 0;"><strong>Plan:</strong> {{planName}} ({{billingCycle}})</p>
+    <p style="font-size: 14px; margin: 8px 0 0;"><strong>Next billing date:</strong> {{nextBillingDate}}</p>
+    <p style="font-size: 14px; margin: 8px 0 0;"><strong>Amount:</strong> ₦{{amount}}/{{billingCycle}}</p>
+  </div>
+
+  {{> action-button buttonText="Start Learning" buttonUrl=dashboardUrl}}
+
+{{/layouts/base}}

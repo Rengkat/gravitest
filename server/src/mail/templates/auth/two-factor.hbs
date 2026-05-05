@@ -1,0 +1,13 @@
+{{#> layouts/base title="Two-Factor Authentication" subject="Your Two-Factor Authentication Code - Gravitas"}}
+  
+  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
+    Use the code below to complete your Two-Factor Authentication login.
+  </p>
+
+  {{> otp-card otpCode=otpCode expiryMinutes=expiryMinutes}}
+
+  {{> info-alert message="Never share this code with anyone. Gravitas will never ask for your 2FA code via phone or email." type="security"}}
+
+  {{> action-button buttonText="Login to Account" buttonUrl=loginUrl}}
+
+{{/layouts/base}}

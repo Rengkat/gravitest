@@ -1,0 +1,22 @@
+{{#> layouts/base title="Email Address Changed" subject="Your Email Address Has Been Changed - Gravitas"}}
+  
+  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
+    The email address associated with your Gravitas account has been changed.
+  </p>
+
+  {{> info-alert message="This change was made to your account." type="info"}}
+
+  <div style="background-color: #f3f4f6; border-radius: 12px; padding: 16px; margin: 20px 0;">
+    <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">
+      <strong>Previous Email:</strong> {{oldEmail}}<br>
+      <strong>New Email:</strong> {{newEmail}}
+    </p>
+  </div>
+
+  {{#if infoMessage}}
+    {{> info-alert message="If you didn't make this change, please contact our support team immediately." type="error"}}
+  {{/if}}
+
+  {{> action-button buttonText="Revert Email Change" buttonUrl=revertUrl}}
+
+{{/layouts/base}}

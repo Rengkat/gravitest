@@ -1,0 +1,23 @@
+{{#> layouts/base title="New Device Login" subject="New Device Login Detected - Gravitas"}}
+  
+  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
+    We detected a login to your Gravitas account from a new device or location.
+  </p>
+
+  {{> security-alert 
+      alertMessage="Login details:" 
+      deviceName=deviceName 
+      browser=browser 
+      ipAddress=ipAddress 
+      time=time
+      location=location}}
+
+  {{#if infoMessage}}
+    {{> info-alert message="If this was you, you can ignore this alert. If not, take immediate action to secure your account." type="warning"}}
+  {{/if}}
+
+  <div style="margin-top: 20px;">
+    {{> action-button buttonText="Secure My Account" buttonUrl=securityUrl}}
+  </div>
+
+{{/layouts/base}}

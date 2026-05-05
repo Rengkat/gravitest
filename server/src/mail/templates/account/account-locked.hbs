@@ -1,0 +1,11 @@
+{{#> layouts/base title="Account Temporarily Locked" subject="Your Account Has Been Temporarily Locked - Gravitas"}}
+  
+  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
+    Your Gravitas account has been temporarily locked due to multiple failed login attempts.
+  </p>
+
+  {{> info-alert message="For your security, your account will be locked for 30 minutes. After that, you can attempt to log in again." type="error"}}
+
+  {{> action-button buttonText="Reset Password" buttonUrl=resetUrl}}
+
+{{/layouts/base}}

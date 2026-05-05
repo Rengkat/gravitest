@@ -1,0 +1,133 @@
+<table
+  width="100%"
+  cellpadding="0"
+  cellspacing="0"
+  style="background-color: #fef2f2; border-left: 4px solid #dc2626; border-radius: 12px; margin: 20px 0;"
+>
+  <tr>
+    <td style="padding: 16px 20px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#dc2626"
+          stroke-width="2"
+        >
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
+          <path d="M12 22V12" />
+        </svg>
+        <div>
+          <p style="font-size: 14px; font-weight: 600; color: #991b1b; margin: 0;">Security Alert</p>
+          <p style="font-size: 13px; color: #7f1d1d; margin: 4px 0 0;">{{alertMessage}}</p>
+        </div>
+      </div>
+      <div
+        style="background-color: #ffffff; border-radius: 8px; padding: 12px; margin-top: 12px; border: 1px solid #fecaca;"
+      >
+        <table width="100%" cellpadding="0" cellspacing="0">
+          {{#if deviceName}}
+            <tr>
+              <td style="padding: 4px 0;"><svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4b5563"
+                  stroke-width="1.5"
+                  style="display: inline; vertical-align: middle; margin-right: 4px;"
+                ><rect x="4" y="2" width="16" height="20" rx="2" ry="2" /><line
+                    x1="12"
+                    y1="18"
+                    x2="12"
+                    y2="18"
+                  /></svg></td>
+              <td style="padding: 4px 0;"><strong
+                  style="font-size: 12px; color: #4b5563;"
+                >Device:</strong>
+                <span style="font-size: 12px; color: #4b5563;">{{deviceName}}</span></td>
+            </tr>
+          {{/if}}
+          {{#if browser}}
+            <tr>
+              <td style="padding: 4px 0;"><svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4b5563"
+                  stroke-width="1.5"
+                  style="display: inline; vertical-align: middle; margin-right: 4px;"
+                ><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                  /></svg></td>
+              <td style="padding: 4px 0;"><strong
+                  style="font-size: 12px; color: #4b5563;"
+                >Browser:</strong>
+                <span style="font-size: 12px; color: #4b5563;">{{browser}}</span></td>
+            </tr>
+          {{/if}}
+          {{#if ipAddress}}
+            <tr>
+              <td style="padding: 4px 0;"><svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4b5563"
+                  stroke-width="1.5"
+                  style="display: inline; vertical-align: middle; margin-right: 4px;"
+                ><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                  /></svg></td>
+              <td style="padding: 4px 0;"><strong style="font-size: 12px; color: #4b5563;">IP
+                  Address:</strong>
+                <span style="font-size: 12px; color: #4b5563;">{{ipAddress}}</span></td>
+            </tr>
+          {{/if}}
+          {{#if time}}
+            <tr>
+              <td style="padding: 4px 0;"><svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4b5563"
+                  stroke-width="1.5"
+                  style="display: inline; vertical-align: middle; margin-right: 4px;"
+                ><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></td>
+              <td style="padding: 4px 0;"><strong
+                  style="font-size: 12px; color: #4b5563;"
+                >Time:</strong>
+                <span style="font-size: 12px; color: #4b5563;">{{time}}</span></td>
+            </tr>
+          {{/if}}
+          {{#if location}}
+            <tr>
+              <td style="padding: 4px 0;"><svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4b5563"
+                  stroke-width="1.5"
+                  style="display: inline; vertical-align: middle; margin-right: 4px;"
+                ><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle
+                    cx="12"
+                    cy="10"
+                    r="3"
+                  /></svg></td>
+              <td style="padding: 4px 0;"><strong
+                  style="font-size: 12px; color: #4b5563;"
+                >Location:</strong>
+                <span style="font-size: 12px; color: #4b5563;">{{location}}</span></td>
+            </tr>
+          {{/if}}
+        </table>
+      </div>
+    </td>
+  </tr>
+</table>
