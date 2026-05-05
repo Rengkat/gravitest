@@ -1,5 +1,3 @@
-import Mail from 'nodemailer/lib/mailer';
-
 export interface MailOptions {
   to: string | string[];
   subject: string;
