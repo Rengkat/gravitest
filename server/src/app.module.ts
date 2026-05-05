@@ -27,6 +27,12 @@ const ENV = process.env.NODE_ENV;
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
           .default('development'),
+        APP_NAME: Joi.string().default('Gravitest'),
+        APP_URL: Joi.string().uri().default('http://localhost:3000'),
+        APP_LOGO_URL: Joi.string()
+          .uri()
+          .default('https://gravitas.ng/logo.png'),
+        APP_PORT: Joi.number().default(5000),
 
         // DATABASE
         DATABASE_TYPE: Joi.string().default('postgres'),
@@ -52,6 +58,7 @@ const ENV = process.env.NODE_ENV;
         MAIL_PASSWORD: Joi.string().required(),
         MAIL_FROM_NAME: Joi.string().default('Gravitas'),
         MAIL_FROM_ADDRESS: Joi.string().email().required(),
+        MAIL_SUPPORT_ADDRESS: Joi.string().email().required(),
       }),
       validationOptions: {
         abortEarly: true,

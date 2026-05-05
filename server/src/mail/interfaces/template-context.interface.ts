@@ -3,6 +3,6 @@ export interface BaseTemplateContext {
   appName: string;
   year: number;
   appUrl: string;
-  supportEmail: string;
+  supportEmail?: string;
   logoUrl?: string;
 }

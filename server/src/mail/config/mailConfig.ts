@@ -9,4 +9,5 @@ export default registerAs('mail', () => ({
   fromName: process.env.MAIL_FROM_NAME,
   fromAddress: process.env.MAIL_FROM_ADDRESS,
   useEthereal: process.env.NODE_ENV === 'development' && !process.env.MAIL_USER,
+  supportAddress: process.env.MAIL_SUPPORT_ADDRESS,
 }));
