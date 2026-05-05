@@ -5,15 +5,18 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { plainToInstance } from 'class-transformer';
+
+import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { Otp } from './entities/otp.entity';
 import { OtpProvider } from './providers/otp.provider';
 import { HashProvider } from './providers/Hash.provider';
-import { ConfigService } from '@nestjs/config';
-import { plainToInstance } from 'class-transformer';
+import { MailService } from 'src/mail/mail.service';
+
 import {
   AuthResponseDto,
   ForgotPasswordDto,
@@ -26,6 +29,7 @@ import {
   UserResponseDto,
   VerifyEmailOtpDto,
 } from './dto/auth.dto';
+
 import { OtpPurpose } from 'src/common/enums/enums';
 
 @Injectable()
@@ -41,6 +45,7 @@ export class AuthService {
     private readonly otpProvider: OtpProvider,
     private readonly hashProvider: HashProvider,
     private readonly configService: ConfigService,
+    private readonly mailService: MailService,
 
     @InjectRepository(Otp)
     private readonly otpRepository: Repository<Otp>,
@@ -48,15 +53,15 @@ export class AuthService {
     this.isDev = this.configService.get('NODE_ENV') === 'development';
   }
 
-  // =====================================================
+  // ===================================================
   // REGISTER
-  // =====================================================
+  // ===================================================
 
   async register(dto: RegisterUserDto): Promise<RegisterResponseDto> {
     const user = await this.userService.registerUser(dto);
 
-    const plainOtp = await this.issueOtp(
-      user.id,
+    const plainOtp = await this.issueOtpAndDispatch(
+      user,
       OtpPurpose.EMAIL_VERIFICATION,
     );
 
@@ -67,9 +72,9 @@ export class AuthService {
     };
   }
 
-  // =====================================================
+  // ===================================================
   // LOGIN
-  // =====================================================
+  // ===================================================
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
@@ -86,11 +91,12 @@ export class AuthService {
         user.incrementFailedLoginAttempts();
         await this.userService.save(user);
       }
-
       throw new UnauthorizedException('Invalid credentials');
     }
 
     if (user.isAccountLocked()) {
+      await this.safeSendAccountLockedEmail(user);
+
       throw new ForbiddenException(
         `Account locked until ${user.lockedUntil?.toLocaleTimeString()}`,
       );
@@ -112,9 +118,9 @@ export class AuthService {
     });
   }
 
-  // =====================================================
-  // RESEND EMAIL VERIFICATION OTP
-  // =====================================================
+  // ===================================================
+  // EMAIL VERIFICATION OTP
+  // ===================================================
 
   async sendEmailVerificationOtp(
     dto: ResendVerificationDto,
@@ -134,16 +140,14 @@ export class AuthService {
 
     await this.enforceOtpResendCooldown(user.id, OtpPurpose.EMAIL_VERIFICATION);
 
-    await this.issueOtp(user.id, OtpPurpose.EMAIL_VERIFICATION);
+    await this.issueOtpAndDispatch(user, OtpPurpose.EMAIL_VERIFICATION);
 
-    return {
-      message: 'Verification code sent successfully.',
-    };
+    return { message: 'Verification code sent successfully.' };
   }
 
-  // =====================================================
+  // ===================================================
   // VERIFY EMAIL
-  // =====================================================
+  // ===================================================
 
   async verifyEmail(dto: VerifyEmailOtpDto): Promise<{ message: string }> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
@@ -161,16 +165,12 @@ export class AuthService {
     user.markEmailVerified();
     await this.userService.save(user);
 
-    this.logger.log(`Email verified successfully for user ${user.id}`);
-
-    return {
-      message: 'Email verified successfully',
-    };
+    return { message: 'Email verified successfully' };
   }
 
-  // =====================================================
+  // ===================================================
   // FORGOT PASSWORD
-  // =====================================================
+  // ===================================================
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
@@ -184,23 +184,16 @@ export class AuthService {
       return response;
     }
 
-    const latestOtp = await this.getLatestActiveOtp(
-      user.id,
-      OtpPurpose.PASSWORD_RESET,
-    );
+    await this.enforceOtpResendCooldown(user.id, OtpPurpose.PASSWORD_RESET);
 
-    if (latestOtp && !this.otpProvider.canResend(latestOtp.createdAt)) {
-      return response;
-    }
-
-    await this.issueOtp(user.id, OtpPurpose.PASSWORD_RESET);
+    await this.issueOtpAndDispatch(user, OtpPurpose.PASSWORD_RESET);
 
     return response;
   }
 
-  // =====================================================
+  // ===================================================
   // RESET PASSWORD
-  // =====================================================
+  // ===================================================
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
@@ -216,51 +209,129 @@ export class AuthService {
     user.changePassword(passwordHash);
     await this.userService.save(user);
 
-    this.logger.log(`Password reset successful for user ${user.id}`);
+    await this.safeSendPasswordChangedEmail(user);
 
-    return {
-      message: 'Password reset successful',
-    };
+    return { message: 'Password reset successful' };
   }
 
-  // =====================================================
+  // ===================================================
   // LOGOUT
-  // =====================================================
+  // ===================================================
 
   async logout(userId: string): Promise<{ message: string }> {
-    // TODO revoke refresh token/session store here
     return { message: 'Logged out successfully' };
   }
 
-  // =====================================================
-  // INTERNAL OTP HELPERS
-  // =====================================================
+  // ===================================================
+  // OTP CORE
+  // ===================================================
 
-  private async issueOtp(userId: string, purpose: OtpPurpose): Promise<string> {
-    await this.revokeActiveOtps(userId, purpose);
+  private async issueOtpAndDispatch(
+    user: User,
+    purpose: OtpPurpose,
+  ): Promise<string> {
+    await this.revokeActiveOtps(user.id, purpose);
 
     const otpBundle = this.otpProvider.generate();
 
     const otp = this.otpRepository.create({
-      userId,
+      userId: user.id,
       purpose,
       codeHash: otpBundle.codeHash,
       expiresAt: otpBundle.expiresAt,
       createdAt: new Date(),
+      sentAt: new Date(),
+      channel: 'email',
+      target: user.email,
     });
 
     await this.otpRepository.save(otp);
 
-    // TODO send actual email/sms here
+    // SAFE EMAIL DISPATCH (no silent failure)
+    try {
+      await this.dispatchOtpMail(
+        user,
+        purpose,
+        otpBundle.plainCode,
+        otp.expiresAt,
+      );
+    } catch (err) {
+      this.logger.error('OTP email failed', err);
+    }
 
     if (this.isDev) {
       this.logger.warn(
-        `[DEV OTP] ${purpose} for ${userId}: ${otpBundle.plainCode}`,
+        `[DEV OTP] ${purpose} for ${user.email}: ${otpBundle.plainCode}`,
       );
     }
 
     return otpBundle.plainCode;
   }
+
+  private async dispatchOtpMail(
+    user: User,
+    purpose: OtpPurpose,
+    plainCode: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    const expiryTime = expiresAt.toISOString();
+
+    const formattedOtp = this.otpProvider.formatForDisplay(plainCode);
+
+    switch (purpose) {
+      case OtpPurpose.EMAIL_VERIFICATION:
+        await this.mailService.sendEmailVerificationOtp(user.email, {
+          firstName: user.firstName,
+          otpCode: formattedOtp,
+          expiryTime,
+        });
+        break;
+
+      case OtpPurpose.PASSWORD_RESET:
+        await this.mailService.sendPasswordResetOtp(user.email, {
+          firstName: user.firstName,
+          otpCode: formattedOtp,
+          expiryTime,
+        });
+        break;
+
+      case OtpPurpose.TWO_FACTOR_AUTH:
+        await this.mailService.sendTwoFactorCode(user.email, {
+          firstName: user.firstName,
+          otpCode: formattedOtp,
+          expiryTime,
+        });
+        break;
+    }
+  }
+
+  // ===================================================
+  // SAFE EMAILS
+  // ===================================================
+
+  private async safeSendPasswordChangedEmail(user: User): Promise<void> {
+    try {
+      await this.mailService.sendPasswordChangedAlert(user.email, {
+        firstName: user.firstName,
+        changedAt: new Date().toISOString(),
+      });
+    } catch {}
+  }
+
+  private async safeSendAccountLockedEmail(user: User): Promise<void> {
+    try {
+      await this.mailService.sendAccountLockedEmail(user.email, {
+        firstName: user.firstName,
+        lockedAt: new Date().toISOString(),
+        reason: 'Multiple failed login attempts',
+        supportLink: `${this.configService.get('FRONTEND_URL')}/support`,
+      });
+    } catch {}
+  }
+
+  // ===================================================
+  // OTP VALIDATION
+  // ===================================================
 
   private async validateOtpOrThrow(
     userId: string,
@@ -331,11 +402,13 @@ export class AuthService {
         usedAt: IsNull(),
         revokedAt: IsNull(),
       },
-      order: {
-        createdAt: 'DESC',
-      },
+      order: { createdAt: 'DESC' },
     });
   }
+
+  // ===================================================
+  // RESPONSE
+  // ===================================================
 
   private buildAuthResponse(user: User, tokens: TokensDto): AuthResponseDto {
     return {

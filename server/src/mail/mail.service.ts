@@ -158,7 +158,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.TWO_FACTOR,
-      `Two-Factor Authentication Code: ${variables.code}`,
+      `Two-Factor Authentication Code: ${variables.otpCode}`,
       variables,
       { type: 'verification' },
     );

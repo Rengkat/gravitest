@@ -6,11 +6,16 @@ import { OtpProvider } from './providers/otp.provider';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
 import { UserSession } from './entities/user-session';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   controllers: [AuthController],
   providers: [AuthService, OtpProvider],
-  imports: [UserModule, TypeOrmModule.forFeature([Otp, UserSession])],
+  imports: [
+    UserModule,
+    TypeOrmModule.forFeature([Otp, UserSession]),
+    MailModule,
+  ],
   exports: [AuthService, OtpProvider],
 })
 export class AuthModule {}
