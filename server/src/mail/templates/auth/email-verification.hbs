@@ -1,20 +1,18 @@
-{{#> layouts/base title="Verify Your Email" subject="Verify Your Email Address - Gravitest"}}
-  
-  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
-    Thanks for joining Gravitest! Please verify your email address to activate your account and start your learning journey.
+{{#> layouts/base title="Verify your email address" subject="Please verify your email address — Gravitest"}}
+
+  <p style="font-size: 15px; color: #3a3832; line-height: 1.7; margin: 0 0 8px;">
+    Please verify your email address to activate your Gravitest account.
+  </p>
+  <p style="font-size: 14px; color: #6b6861; line-height: 1.7; margin: 0 0 4px;">
+    Enter the code below on the verification screen, or click the button to verify directly.
   </p>
 
   {{> otp-card otpCode=otpCode expiryMinutes=expiryMinutes}}
 
-  <p style="font-size: 13px; color: #6b7280; line-height: 1.5; margin: 16px 0 0;">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5" style="display: inline; vertical-align: middle; margin-right: 4px;">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="12" y1="8" x2="12" y2="12"/>
-      <line x1="12" y1="16" x2="12.01" y2="16"/>
-    </svg>
-    The verification link will expire in <strong>{{expiryMinutes}} minutes</strong>. If you didn't create an account with Gravitest, you can safely ignore this email.
-  </p>
+  {{> action-button buttonText="Verify email address" buttonUrl=verificationUrl}}
 
-  {{> action-button buttonText="Verify Email Address" buttonUrl=verificationUrl}}
+  <p style="font-size: 13px; color: #9e9b94; margin: 24px 0 0; line-height: 1.6;">
+    If you did not create a Gravitest account, you can safely ignore this email.
+  </p>
 
 {{/layouts/base}}

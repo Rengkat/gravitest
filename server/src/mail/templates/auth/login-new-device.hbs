@@ -1,23 +1,21 @@
-{{#> layouts/base title="New Device Login" subject="New Device Login Detected - Gravitest"}}
-  
-  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
-    We detected a login to your Gravitest account from a new device or location.
+{{#> layouts/base title="New sign-in detected" subject="New sign-in to your account — Gravitest"}}
+
+  <p style="font-size: 15px; color: #3a3832; line-height: 1.7; margin: 0 0 8px;">
+    We detected a sign-in to your Gravitest account from a new device or location.
   </p>
 
-  {{> security-alert 
-      alertMessage="Login details:" 
-      deviceName=deviceName 
-      browser=browser 
-      ipAddress=ipAddress 
+  {{> security-alert
+      alertMessage="Sign-in details"
+      deviceName=deviceName
+      browser=browser
+      ipAddress=ipAddress
       time=time
       location=location}}
 
-  {{#if infoMessage}}
-    {{> info-alert message="If this was you, you can ignore this alert. If not, take immediate action to secure your account." type="warning"}}
-  {{/if}}
+  <p style="font-size: 14px; color: #6b6861; line-height: 1.7; margin: 20px 0 0;">
+    If this was you, no action is needed. If you do not recognise this activity, secure your account immediately.
+  </p>
 
-  <div style="margin-top: 20px;">
-    {{> action-button buttonText="Secure My Account" buttonUrl=securityUrl}}
-  </div>
+  {{> action-button buttonText="Review account security" buttonUrl=securityUrl}}
 
 {{/layouts/base}}

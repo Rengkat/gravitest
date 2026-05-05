@@ -1,11 +1,11 @@
-{{#> layouts/base title="Account Temporarily Locked" subject="Your Account Has Been Temporarily Locked - Gravitest"}}
-  
-  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
-    Your Gravitest account has been temporarily locked due to multiple failed login attempts.
+{{#> layouts/base title="Account temporarily locked" subject="Your account has been temporarily locked — Gravitest"}}
+
+  <p style="font-size: 15px; color: #3a3832; line-height: 1.7; margin: 0 0 8px;">
+    Your Gravitest account has been temporarily locked due to multiple failed sign-in attempts.
   </p>
 
-  {{> info-alert message="For your security, your account will be locked for 30 minutes. After that, you can attempt to log in again." type="error"}}
+  {{> info-alert message="For your security, the account will remain locked for 30 minutes. After that you may attempt to sign in again, or reset your password now." type="error"}}
 
-  {{> action-button buttonText="Reset Password" buttonUrl=resetUrl}}
+  {{> action-button buttonText="Reset your password" buttonUrl=resetUrl}}
 
 {{/layouts/base}}

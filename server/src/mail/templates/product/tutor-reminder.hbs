@@ -1,25 +1,44 @@
-{{#> layouts/base title="Upcoming Session Reminder" subject="Reminder: Your Tutoring Session Tomorrow - Gravitest"}}
-  
-  <p style="font-size: 15px; color: #4b5563; line-height: 1.6; margin: 0 0 16px;">
-    This is a reminder about your upcoming tutoring session.
+{{#> layouts/base title="Upcoming tutoring session" subject="Reminder: your tutoring session is coming up — Gravitest"}}
+
+  <p style="font-size: 15px; color: #3a3832; line-height: 1.7; margin: 0 0 24px;">
+    This is a reminder about your upcoming tutoring session on Gravitest.
   </p>
 
-  <div style="background-color: #eff6ff; border-radius: 16px; padding: 20px; margin: 20px 0;">
-    <p style="font-size: 14px; font-weight: 600; color: #1e40af; margin: 0 0 12px;">📅 Session Details</p>
-    <p style="font-size: 14px; margin: 6px 0;"><strong>Subject:</strong> {{subject}}</p>
-    <p style="font-size: 14px; margin: 6px 0;"><strong>Tutor:</strong> {{tutorName}}</p>
-    <p style="font-size: 14px; margin: 6px 0;"><strong>Date & Time:</strong> {{date}} at {{time}}</p>
-    <p style="font-size: 14px; margin: 6px 0;"><strong>Duration:</strong> {{duration}} hour(s)</p>
-    
-    {{#if meetingLink}}
-      <div style="margin-top: 16px;">
-        {{> action-button buttonText="Join Session" buttonUrl=meetingLink}}
-      </div>
-    {{/if}}
-  </div>
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation"
+    style="background-color: #f7f6f2; border: 1px solid #e0ddd6; border-radius: 4px; margin: 0 0 28px;">
+    <tr>
+      <td style="padding: 20px 24px;">
+        <p style="font-size: 11px; font-weight: 600; color: #9e9b94; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 14px;">
+          Session details
+        </p>
+        <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
+          <tr>
+            <td style="font-size: 12px; color: #9e9b94; padding: 5px 0; width: 80px; vertical-align: top;">Subject</td>
+            <td style="font-size: 13px; color: #2c2a26; padding: 5px 0; font-weight: 600;">{{subject}}</td>
+          </tr>
+          <tr>
+            <td style="font-size: 12px; color: #9e9b94; padding: 5px 0; width: 80px; vertical-align: top;">Tutor</td>
+            <td style="font-size: 13px; color: #2c2a26; padding: 5px 0; font-weight: 500;">{{tutorName}}</td>
+          </tr>
+          <tr>
+            <td style="font-size: 12px; color: #9e9b94; padding: 5px 0; width: 80px; vertical-align: top;">Date</td>
+            <td style="font-size: 13px; color: #2c2a26; padding: 5px 0; font-weight: 500;">{{date}} at {{time}}</td>
+          </tr>
+          <tr>
+            <td style="font-size: 12px; color: #9e9b94; padding: 5px 0; width: 80px; vertical-align: top;">Duration</td>
+            <td style="font-size: 13px; color: #2c2a26; padding: 5px 0; font-weight: 500;">{{duration}} hour(s)</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 
-  <p style="font-size: 12px; color: #6b7280; margin: 16px 0 0;">
-    Please log in 5 minutes before the session starts.
+  {{#if meetingLink}}
+    {{> action-button buttonText="Join session" buttonUrl=meetingLink}}
+  {{/if}}
+
+  <p style="font-size: 13px; color: #9e9b94; margin: 20px 0 0; line-height: 1.6;">
+    Please sign in at least 5 minutes before the session starts.
   </p>
 
 {{/layouts/base}}
