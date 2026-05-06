@@ -213,6 +213,16 @@ export class AuthService {
 
     return { message: 'Password reset successful' };
   }
+  // =================================================
+  // GET USER PROFILE AFTER AUTH
+  // =================================================
+
+  async getProfile(userId: string): Promise<UserResponseDto> {
+    const user = await this.userService.findById(userId);
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
 
   // ===================================================
   // LOGOUT
