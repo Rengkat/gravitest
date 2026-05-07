@@ -60,10 +60,6 @@ export class MailService {
         html,
         text,
         attachments: metadata?.attachments,
-        tags: [
-          { name: 'template', value: template },
-          { name: 'type', value: metadata?.type ?? 'general' },
-        ],
       });
 
       this.logger.log(`${template} email successfully sent to ${email}`);
@@ -72,13 +68,8 @@ export class MailService {
         `Failed sending ${template} email to ${email}: ${error?.message}`,
         error?.stack,
       );
-
-      /**
-       * IMPORTANT:
-       * Mail should usually not crash auth/account flows.
-       * If later you want strict transactional behavior,
-       * change this policy here only.
-       */
+      // Mail failures do not crash auth/account flows.
+      // For strict transactional behaviour, re-throw here.
     }
   }
 
@@ -93,7 +84,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.EMAIL_VERIFICATION,
-      `Verify Your Email - OTP: ${variables.otpCode}`,
+      'Verify your email address — Gravitest', // OTP never in subject
       variables,
       { type: 'verification' },
     );
@@ -106,7 +97,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.PASSWORD_RESET,
-      'Reset Your Password',
+      'Reset your password — Gravitest',
       variables,
       { type: 'password-reset' },
     );
@@ -119,7 +110,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.PASSWORD_CHANGED,
-      'Your Password Has Been Changed',
+      'Your password has been changed — Gravitest',
       variables,
       { type: 'security' },
     );
@@ -132,7 +123,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.LOGIN_NEW_DEVICE,
-      'New Device Login Detected',
+      'New sign-in to your account — Gravitest',
       variables,
       { type: 'security' },
     );
@@ -145,7 +136,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.EMAIL_CHANGED,
-      'Your Email Address Has Been Changed',
+      'Your email address has been updated — Gravitest',
       variables,
       { type: 'security' },
     );
@@ -158,7 +149,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.TWO_FACTOR,
-      `Two-Factor Authentication Code: ${variables.otpCode}`,
+      'Your two-factor authentication code — Gravitest', // OTP never in subject
       variables,
       { type: 'verification' },
     );
@@ -175,7 +166,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.WELCOME,
-      `Welcome${variables.companyName ? ` to ${variables.companyName}` : ''}!`,
+      'Welcome to Gravitest — your preparation starts now',
       variables,
       { type: 'welcome' },
     );
@@ -188,7 +179,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.ACCOUNT_DEACTIVATED,
-      'Your Account Has Been Deactivated',
+      'Your account has been deactivated — Gravitest',
       variables,
       { type: 'account' },
     );
@@ -201,7 +192,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.ACCOUNT_RESTORED,
-      'Your Account Has Been Restored',
+      'Your account has been restored — Gravitest',
       variables,
       { type: 'account' },
     );
@@ -214,7 +205,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.ACCOUNT_DELETED,
-      'Your Account Has Been Deleted',
+      'Your account has been deleted — Gravitest',
       variables,
       { type: 'account' },
     );
@@ -227,7 +218,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.ACCOUNT_LOCKED,
-      'Your Account Has Been Locked',
+      'Your account has been temporarily locked — Gravitest',
       variables,
       { type: 'security' },
     );
@@ -244,7 +235,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.LOGOUT_ALL,
-      'You Have Been Logged Out From All Devices',
+      'You have been signed out of all devices — Gravitest',
       variables,
       { type: 'security' },
     );
@@ -257,7 +248,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.SESSION_REVOKED,
-      'Your Session Has Been Revoked',
+      'A session has been revoked — Gravitest',
       variables,
       { type: 'security' },
     );
@@ -274,25 +265,24 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.SUBSCRIPTION_ACTIVATED,
-      'Your Subscription Is Now Active!',
+      'Your Gravitest subscription is now active',
       variables,
       { type: 'billing' },
     );
   }
+
   async sendPaymentReceiptEmail(
     email: string,
     variables: PaymentReceiptTemplate,
     attachments?: any[],
   ): Promise<void> {
+    const ref = variables.invoiceNumber ?? variables.reference;
     return this.dispatchEmail(
       email,
       MailTemplate.PAYMENT_RECEIPT,
-      `Payment Receipt - ${variables.invoiceNumber}`,
+      `Payment receipt${ref ? ` — ${ref}` : ''} — Gravitest`,
       variables,
-      {
-        type: 'billing',
-        attachments,
-      },
+      { type: 'billing', attachments },
     );
   }
 
@@ -303,7 +293,7 @@ export class MailService {
     return this.dispatchEmail(
       email,
       MailTemplate.TUTOR_REMINDER,
-      `Reminder: Session with ${variables.tutorName}`,
+      `Reminder: session with ${variables.tutorName} — Gravitest`,
       variables,
       { type: 'reminder' },
     );

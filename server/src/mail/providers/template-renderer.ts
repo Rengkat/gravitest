@@ -51,6 +51,7 @@ export class TemplateRendererProvider implements OnModuleInit {
     context: T,
   ): Promise<RenderedTemplate> {
     const compiled = await this.getCompiledTemplate(templateName);
+
     const mergedContext = {
       ...this.baseContext,
       ...context,
@@ -62,6 +63,7 @@ export class TemplateRendererProvider implements OnModuleInit {
       wordwrap: 120,
       selectors: [
         { selector: 'a', options: { hideLinkHrefIfSameAsText: true } },
+        { selector: 'img', format: 'skip' },
       ],
     });
 
@@ -78,7 +80,6 @@ export class TemplateRendererProvider implements OnModuleInit {
     const filePath = path.join(this.templatesDir, `${templateName}.hbs`);
 
     let source: string;
-
     try {
       source = await fs.readFile(filePath, 'utf-8');
     } catch {
@@ -86,7 +87,6 @@ export class TemplateRendererProvider implements OnModuleInit {
     }
 
     const compiled = handlebars.compile(source);
-
     this.cache.set(templateName, compiled);
     this.logger.debug(`Compiled template cached: ${templateName}`);
 
@@ -99,6 +99,7 @@ export class TemplateRendererProvider implements OnModuleInit {
     for (const absoluteFilePath of templateFiles) {
       const relativePath = path.relative(this.templatesDir, absoluteFilePath);
 
+      // Skip partials and layouts — they are registered separately
       if (
         relativePath.startsWith('partials') ||
         relativePath.startsWith('layouts')
@@ -106,9 +107,7 @@ export class TemplateRendererProvider implements OnModuleInit {
         continue;
       }
 
-      if (!relativePath.endsWith('.hbs')) {
-        continue;
-      }
+      if (!relativePath.endsWith('.hbs')) continue;
 
       const templateName = relativePath
         .replace(/\\/g, '/')
@@ -122,9 +121,10 @@ export class TemplateRendererProvider implements OnModuleInit {
     const partialsDir = path.join(this.templatesDir, 'partials');
     const layoutsDir = path.join(this.templatesDir, 'layouts');
 
+    // ── Register partials under their plain name ─────────────────────────
+    // e.g. partials/header.hbs  → registered as "header"
+    // e.g. partials/otp-card.hbs → registered as "otp-card"
     const partialFiles = await this.walkDirectory(partialsDir, true);
-    const layoutFiles = await this.walkDirectory(layoutsDir, true);
-
     for (const absoluteFilePath of partialFiles) {
       if (!absoluteFilePath.endsWith('.hbs')) continue;
 
@@ -134,25 +134,30 @@ export class TemplateRendererProvider implements OnModuleInit {
         .replace(/\.hbs$/, '');
 
       const content = await fs.readFile(absoluteFilePath, 'utf-8');
-
       handlebars.registerPartial(relativeName, content);
-
       this.logger.debug(`Registered partial: ${relativeName}`);
     }
 
+    // ── Register layouts under "layouts/<name>" ───────────────────────────
+    // e.g. layouts/base.layout.hbs → registered as "layouts/base"
+    // Templates call {{#> layouts/base}} so the name must match exactly.
+    const layoutFiles = await this.walkDirectory(layoutsDir, true);
     for (const absoluteFilePath of layoutFiles) {
       if (!absoluteFilePath.endsWith('.hbs')) continue;
 
-      const relativeName = path
+      // Strip the ".layout" suffix so "base.layout" becomes "base"
+      const baseName = path
         .relative(layoutsDir, absoluteFilePath)
         .replace(/\\/g, '/')
+        .replace(/\.layout\.hbs$/, '')
         .replace(/\.hbs$/, '');
 
+      // Register as "layouts/<name>" to match {{#> layouts/base}}
+      const partialName = `layouts/${baseName}`;
+
       const content = await fs.readFile(absoluteFilePath, 'utf-8');
-
-      handlebars.registerPartial(`layout.${relativeName}`, content);
-
-      this.logger.debug(`Registered layout partial: layout.${relativeName}`);
+      handlebars.registerPartial(partialName, content);
+      this.logger.debug(`Registered layout: ${partialName}`);
     }
   }
 
@@ -161,13 +166,10 @@ export class TemplateRendererProvider implements OnModuleInit {
     silent = false,
   ): Promise<string[]> {
     const results: string[] = [];
-
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
-
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
-
         if (entry.isDirectory()) {
           results.push(...(await this.walkDirectory(fullPath, silent)));
         } else {
@@ -179,7 +181,6 @@ export class TemplateRendererProvider implements OnModuleInit {
         this.logger.warn(`Directory not found: ${dir}`);
       }
     }
-
     return results;
   }
 
@@ -198,7 +199,7 @@ export class TemplateRendererProvider implements OnModuleInit {
       }),
     );
 
-    handlebars.registerHelper('default', (value, fallback) =>
+    handlebars.registerHelper('default', (value: any, fallback: any) =>
       value ?? fallback,
     );
   }

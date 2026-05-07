@@ -1,9 +1,7 @@
 // ================= USER==================
 export enum UserRole {
   STUDENT = 'student',
-  PARENT = 'parent',
   TUTOR = 'tutor',
-  TEACHER = 'teacher',
   SCHOOL_ADMIN = 'school_admin',
   PROFESSIONAL = 'professional',
   SUPER_ADMIN = 'super_admin',

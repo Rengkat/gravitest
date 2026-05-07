@@ -2,5 +2,5 @@ POST http://localhost:5000/api/v1/auth/verify-email
 Content-Type: application/json
 {
   "email": "alexrengkat@gmail.com",
-  "code": "100353"
+  "code": "166594"
 }

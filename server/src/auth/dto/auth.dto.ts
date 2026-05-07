@@ -123,9 +123,8 @@ export class VerifyEmailOtpDto {
   email!: string;
 
   @ApiProperty({ example: '847291' })
-  @Matches(OTP_REGEX, {
-    message: 'OTP must be a valid 6-digit code',
-  })
+  @Transform(({ value }) => value?.replace(/\s/g, ''))
+  @Matches(OTP_REGEX, { message: 'OTP must be a valid 6-digit code' })
   code!: string;
 }
 

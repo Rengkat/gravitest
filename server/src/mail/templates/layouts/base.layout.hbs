@@ -45,7 +45,8 @@
 
                       {{> greeting firstName=firstName}}
 
-                      {{{body}}}
+                      {{!-- @partial-block is the correct Handlebars way to render layout body content --}}
+                      {{> @partial-block}}
 
                     </td>
                   </tr>
@@ -64,11 +65,11 @@
                 <p style="font-size: 11px; color: #9e9b94; margin: 0; line-height: 1.6;">
                   &copy; {{year}} Gravitest. All rights reserved.
                   &nbsp;&middot;&nbsp;
-                  <a href="https://gravitest.ng/privacy" style="color: #9e9b94; text-decoration: none;">Privacy</a>
+                  <a href="{{appUrl}}/privacy" style="color: #9e9b94; text-decoration: none;">Privacy</a>
                   &nbsp;&middot;&nbsp;
-                  <a href="https://gravitest.ng/terms" style="color: #9e9b94; text-decoration: none;">Terms</a>
+                  <a href="{{appUrl}}/terms" style="color: #9e9b94; text-decoration: none;">Terms</a>
                   &nbsp;&middot;&nbsp;
-                  <a href="https://gravitest.ng/unsubscribe" style="color: #9e9b94; text-decoration: none;">Unsubscribe</a>
+                  <a href="{{appUrl}}/unsubscribe" style="color: #9e9b94; text-decoration: none;">Unsubscribe</a>
                 </p>
                 <p style="font-size: 11px; color: #b8b5ae; margin: 6px 0 0; line-height: 1.6;">
                   Gravitest &mdash; Building Nigeria&rsquo;s brightest futures.

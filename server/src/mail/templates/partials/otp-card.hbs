@@ -1,3 +1,4 @@
+<!-- OTP CARD --><!-- OTP CARD -->
 <!-- OTP CARD -->
 <table
   width='100%'
@@ -13,12 +14,14 @@
       >
         Verification Code
       </p>
-      <p
-        class='otp-code'
-        style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 700; letter-spacing: 10px; color: #0d2b1a; margin: 0 0 16px; line-height: 1;"
+
+      <!-- OTP digits wrapped individually for wrapping control -->
+      <div
+        style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 700; color: #0d2b1a; margin: 0 0 16px; line-height: 1.2; letter-spacing: 6px; word-break: break-all;"
       >
         {{otpCode}}
-      </p>
+      </div>
+
       <p style='font-size: 13px; color: #6b6861; margin: 0; line-height: 1.5;'>
         This code expires in
         <strong style='color: #0d2b1a;'>{{expiryMinutes}} minutes.</strong>

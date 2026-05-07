@@ -73,6 +73,12 @@ export class UserService {
 
     return user;
   }
+  // This will be used  by auth service to verify email
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { email: this.normalizeEmail(email), deletedAt: IsNull() },
+    });
+  }
   /**
    * Find user by email for auth purposes.
    * Selects passwordHash (excluded by default in other queries).

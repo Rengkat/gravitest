@@ -78,16 +78,15 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
-
     const passwordHash = user?.passwordHash ?? AuthService.DUMMY_PASSWORD_HASH;
-
     const isPasswordValid = await this.hashProvider.comparePassword(
       dto.password,
       passwordHash,
     );
 
     if (!user || !isPasswordValid) {
-      if (user) {
+      // Only increment if user exists and account is NOT already locked
+      if (user && !user.isAccountLocked()) {
         user.incrementFailedLoginAttempts();
         await this.userService.save(user);
       }
@@ -96,7 +95,6 @@ export class AuthService {
 
     if (user.isAccountLocked()) {
       await this.safeSendAccountLockedEmail(user);
-
       throw new ForbiddenException(
         `Account locked until ${user.lockedUntil?.toLocaleTimeString()}`,
       );
@@ -123,7 +121,7 @@ export class AuthService {
   // ===================================================
 
   async verifyEmail(dto: VerifyEmailOtpDto): Promise<{ message: string }> {
-    const user = await this.userService.findSensitiveUserByEmail(dto.email);
+    const user = await this.userService.findByEmail(dto.email);
     if (!user || user.isEmailVerified) {
       throw new BadRequestException('Invalid or expired verification code');
     }
@@ -139,9 +137,7 @@ export class AuthService {
     // // Send welcome email or any post-verification actions here
     await this.mailService.sendWelcomeEmail(user.email, {
       firstName: user.firstName,
-      loginLink: 'https://yourapp.com/login',
-      companyName: 'Gravitest',
-      features: ['Feature 1', 'Feature 2', 'Feature 3'],
+      dashboardUrl: `${this.configService.get('FRONTEND_URL')}/dashboard`,
     });
     return { message: 'Email verified successfully' };
   }
@@ -153,7 +149,7 @@ export class AuthService {
   async sendEmailVerificationOtp(
     dto: ResendVerificationDto,
   ): Promise<{ message: string }> {
-    const user = await this.userService.findSensitiveUserByEmail(dto.email);
+    const user = await this.userService.findByEmail(dto.email);
 
     if (!user || !user.isActive) {
       return {
@@ -301,7 +297,6 @@ export class AuthService {
         await this.mailService.sendEmailVerificationOtp(user.email, {
           firstName: user.firstName,
           otpCode: formattedOtp,
-          expiryTime,
           expiryMinutes,
         });
         break;
@@ -310,7 +305,6 @@ export class AuthService {
         await this.mailService.sendPasswordResetOtp(user.email, {
           firstName: user.firstName,
           otpCode: formattedOtp,
-          expiryTime,
           expiryMinutes,
         });
         break;
@@ -319,7 +313,6 @@ export class AuthService {
         await this.mailService.sendTwoFactorCode(user.email, {
           firstName: user.firstName,
           otpCode: formattedOtp,
-          expiryTime,
           expiryMinutes,
         });
         break;
@@ -335,7 +328,7 @@ export class AuthService {
       await this.mailService.sendPasswordChangedAlert(user.email, {
         firstName: user.firstName,
         changedAt: new Date().toISOString(),
-        expiryMinutes: 10, // Example value, replace with actual expiry minutes
+        securityUrl: `${this.configService.get('FRONTEND_URL')}/security`,
       });
     } catch {}
   }
@@ -344,9 +337,8 @@ export class AuthService {
     try {
       await this.mailService.sendAccountLockedEmail(user.email, {
         firstName: user.firstName,
-        lockedAt: new Date().toISOString(),
         reason: 'Multiple failed login attempts',
-        supportLink: `${this.configService.get('FRONTEND_URL')}/support`,
+        resetUrl: `${this.configService.get('FRONTEND_URL')}/forgot-password`,
       });
     } catch {}
   }
@@ -394,37 +386,30 @@ export class AuthService {
     userId: string,
     purpose: OtpPurpose,
   ): Promise<void> {
-    const activeOtps = await this.otpRepository.find({
-      where: {
-        userId,
-        purpose,
-        usedAt: IsNull(),
-        revokedAt: IsNull(),
-      },
-    });
-
-    for (const otp of activeOtps) {
-      otp.revoke();
-    }
-
-    if (activeOtps.length) {
-      await this.otpRepository.save(activeOtps);
-    }
+    await this.otpRepository
+      .createQueryBuilder()
+      .update(Otp)
+      .set({ revokedAt: new Date() })
+      .where('"userId" = :userId', { userId })
+      .andWhere('purpose = :purpose', { purpose })
+      .andWhere('"usedAt" IS NULL')
+      .andWhere('"revokedAt" IS NULL')
+      .execute();
   }
 
   private async getLatestActiveOtp(
     userId: string,
     purpose: OtpPurpose,
   ): Promise<Otp | null> {
-    return this.otpRepository.findOne({
-      where: {
-        userId,
-        purpose,
-        usedAt: IsNull(),
-        revokedAt: IsNull(),
-      },
-      order: { createdAt: 'DESC' },
-    });
+    return this.otpRepository
+      .createQueryBuilder('otp')
+      .addSelect('otp.codeHash')
+      .where('otp.userId = :userId', { userId })
+      .andWhere('otp.purpose = :purpose', { purpose })
+      .andWhere('otp.usedAt IS NULL')
+      .andWhere('otp.revokedAt IS NULL')
+      .orderBy('otp.createdAt', 'DESC')
+      .getOne();
   }
 
   // ===================================================
