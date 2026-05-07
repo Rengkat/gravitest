@@ -7,11 +7,13 @@ import { UserTemplateContext } from './template-context.interface';
 export interface EmailVerificationTemplate extends UserTemplateContext {
   otpCode: string;
   expiryTime: string;
+  expiryMinutes: number;
 }
 
 export interface PasswordResetTemplate extends UserTemplateContext {
   otpCode: string;
   expiryTime: string;
+  expiryMinutes: number;
 }
 
 export interface PasswordChangedTemplate extends UserTemplateContext {
@@ -37,10 +39,12 @@ export interface EmailChangedTemplate extends UserTemplateContext {
 export interface TwoFactorTemplate extends UserTemplateContext {
   otpCode: string;
   expiryTime: string;
+  expiryMinutes: number;
 }
 
 export interface PasswordChangedTemplate extends UserTemplateContext {
   changedAt: string;
+  expiryMinutes: number;
 }
 
 /* =========================

@@ -195,10 +195,6 @@ export class UserService {
       .createQueryBuilder('user')
       .addSelect([
         'user.passwordHash',
-        'user.otpCodeHash',
-        'user.otpExpiresAt',
-        'user.otpAttempts',
-        'user.refreshToken',
         'user.failedLoginAttempts',
         'user.lockedUntil',
       ])
@@ -561,9 +557,6 @@ export class UserService {
       .createQueryBuilder('user')
       .addSelect([
         'user.passwordHash',
-        'user.otpCode',
-        'user.otpExpiresAt',
-        'user.otpAttempts',
         'user.twoFactorSecret',
         'user.twoFactorEnabled',
         'user.failedLoginAttempts',

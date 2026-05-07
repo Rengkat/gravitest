@@ -40,6 +40,7 @@ export class MailProvider implements OnModuleInit {
         host: this.mailConfiguration.host,
         port: this.mailConfiguration.port,
         secure: this.mailConfiguration.secure,
+        family: 4, // Force IPv4 to avoid potential issues in some environments
         auth: {
           user: this.mailConfiguration.user,
           pass: this.mailConfiguration.password,

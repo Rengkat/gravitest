@@ -119,7 +119,35 @@ export class AuthService {
   }
 
   // ===================================================
-  // EMAIL VERIFICATION OTP
+  // VERIFY EMAIL
+  // ===================================================
+
+  async verifyEmail(dto: VerifyEmailOtpDto): Promise<{ message: string }> {
+    const user = await this.userService.findSensitiveUserByEmail(dto.email);
+    if (!user || user.isEmailVerified) {
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    await this.validateOtpOrThrow(
+      user.id,
+      OtpPurpose.EMAIL_VERIFICATION,
+      dto.code,
+    );
+
+    user.markEmailVerified();
+    await this.userService.save(user);
+    // // Send welcome email or any post-verification actions here
+    await this.mailService.sendWelcomeEmail(user.email, {
+      firstName: user.firstName,
+      loginLink: 'https://yourapp.com/login',
+      companyName: 'Gravitest',
+      features: ['Feature 1', 'Feature 2', 'Feature 3'],
+    });
+    return { message: 'Email verified successfully' };
+  }
+
+  // ===================================================
+  // RESEND EMAIL VERIFICATION OTP
   // ===================================================
 
   async sendEmailVerificationOtp(
@@ -143,29 +171,6 @@ export class AuthService {
     await this.issueOtpAndDispatch(user, OtpPurpose.EMAIL_VERIFICATION);
 
     return { message: 'Verification code sent successfully.' };
-  }
-
-  // ===================================================
-  // VERIFY EMAIL
-  // ===================================================
-
-  async verifyEmail(dto: VerifyEmailOtpDto): Promise<{ message: string }> {
-    const user = await this.userService.findSensitiveUserByEmail(dto.email);
-
-    if (!user || user.isEmailVerified) {
-      throw new BadRequestException('Invalid or expired verification code');
-    }
-
-    await this.validateOtpOrThrow(
-      user.id,
-      OtpPurpose.EMAIL_VERIFICATION,
-      dto.code,
-    );
-
-    user.markEmailVerified();
-    await this.userService.save(user);
-
-    return { message: 'Email verified successfully' };
   }
 
   // ===================================================
@@ -285,6 +290,9 @@ export class AuthService {
     expiresAt: Date,
   ): Promise<void> {
     const expiryTime = expiresAt.toISOString();
+    const expiryMinutes = Math.round(
+      (expiresAt.getTime() - Date.now()) / 1000 / 60,
+    );
 
     const formattedOtp = this.otpProvider.formatForDisplay(plainCode);
 
@@ -294,6 +302,7 @@ export class AuthService {
           firstName: user.firstName,
           otpCode: formattedOtp,
           expiryTime,
+          expiryMinutes,
         });
         break;
 
@@ -302,6 +311,7 @@ export class AuthService {
           firstName: user.firstName,
           otpCode: formattedOtp,
           expiryTime,
+          expiryMinutes,
         });
         break;
 
@@ -310,6 +320,7 @@ export class AuthService {
           firstName: user.firstName,
           otpCode: formattedOtp,
           expiryTime,
+          expiryMinutes,
         });
         break;
     }
@@ -324,6 +335,7 @@ export class AuthService {
       await this.mailService.sendPasswordChangedAlert(user.email, {
         firstName: user.firstName,
         changedAt: new Date().toISOString(),
+        expiryMinutes: 10, // Example value, replace with actual expiry minutes
       });
     } catch {}
   }
@@ -349,7 +361,6 @@ export class AuthService {
     plainCode: string,
   ): Promise<void> {
     const otp = await this.getLatestActiveOtp(userId, purpose);
-
     if (!otp || !otp.canBeValidated()) {
       throw new BadRequestException('Invalid or expired verification code');
     }

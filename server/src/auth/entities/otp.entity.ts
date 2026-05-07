@@ -33,7 +33,7 @@ export class Otp {
   })
   purpose: OtpPurpose;
 
-  @Column({ type: 'varchar', length: 255, select: false })
+  @Column({ type: 'varchar', length: 255 })
   codeHash: string;
 
   @Column({ type: 'timestamptz' })
