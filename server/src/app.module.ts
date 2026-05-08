@@ -14,6 +14,9 @@ import appConfig from './config/appConfig';
 import databaseConfig from './config/databaseConfig';
 import mailConfig from './mail/config/mailConfig';
 import jwtConfig from './auth/config/jwtConfig';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 const ENV = process.env.NODE_ENV;
 
@@ -80,6 +83,10 @@ const ENV = process.env.NODE_ENV;
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}
