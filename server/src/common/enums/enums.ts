@@ -1,16 +1,15 @@
 // ================= USER==================
 export enum UserRole {
   STUDENT = 'student',
+  PROFESSIONAL_STUDENT = 'professional_student',
   TUTOR = 'tutor',
   SCHOOL_ADMIN = 'school_admin',
-  PROFESSIONAL = 'professional',
   SUPER_ADMIN = 'super_admin',
 }
 
 export enum AuthProvider {
   LOCAL = 'local',
   GOOGLE = 'google',
-  APPLE = 'apple',
   FACEBOOK = 'facebook',
   PHONE = 'phone',
   EMAIL = 'email',
