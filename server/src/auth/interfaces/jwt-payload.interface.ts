@@ -2,7 +2,6 @@ import { UserRole } from 'src/common/enums/enums';
 
 export interface JwtAccessPayload {
   sub: string; // userId
-  email: string;
   role: UserRole;
   jti: string;
   iss?: string;
