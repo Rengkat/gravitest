@@ -6,15 +6,18 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { plainToInstance } from 'class-transformer';
+import { Request } from 'express';
 
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { Otp } from './entities/otp.entity';
 import { OtpProvider } from './providers/otp.provider';
 import { HashProvider } from './providers/Hash.provider';
+import { TokenProvider } from './providers/token.provider';
+import { SessionRevokeReason } from './entities/user-session';
 import { MailService } from 'src/mail/mail.service';
 
 import {
@@ -31,12 +34,44 @@ import {
 } from './dto/auth.dto';
 
 import { OtpPurpose } from 'src/common/enums/enums';
+import { SessionService } from './session.service';
+
+// ─── Helpers to extract request metadata ────────────────────────────────────
+
+function extractIp(req: Request): string | null {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return (typeof forwarded === 'string' ? forwarded : forwarded[0])
+      .split(',')[0]
+      .trim();
+  }
+  return req.ip ?? null;
+}
+
+function extractUserAgent(req: Request): string | null {
+  return req.headers['user-agent'] ?? null;
+}
+
+// ─── Refresh token body shape (from JwtRefreshStrategy.validate) ─────────────
+
+export interface RefreshTokenContext {
+  userId: string;
+  jti: string;
+  rawToken: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly isDev: boolean;
 
+  /**
+   * Constant-time dummy hash prevents timing attacks on the login endpoint
+   * when a user does not exist (avoids "user not found" being faster than
+   * "wrong password").
+   */
   private static readonly DUMMY_PASSWORD_HASH =
     '$2b$12$C6UzMDM.H6dfI/f/IKxGhuJ8eWQ4P1Q0N9l8o0L8pQx5V6m7n8y9K';
 
@@ -44,6 +79,8 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly otpProvider: OtpProvider,
     private readonly hashProvider: HashProvider,
+    private readonly tokenProvider: TokenProvider,
+    private readonly sessionService: SessionService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
 
@@ -76,16 +113,16 @@ export class AuthService {
   // LOGIN
   // ===================================================
 
-  async login(dto: LoginDto): Promise<AuthResponseDto> {
+  async login(dto: LoginDto, req: Request): Promise<AuthResponseDto> {
     const user = await this.userService.findSensitiveUserByEmail(dto.email);
     const passwordHash = user?.passwordHash ?? AuthService.DUMMY_PASSWORD_HASH;
+
     const isPasswordValid = await this.hashProvider.comparePassword(
       dto.password,
       passwordHash,
     );
 
     if (!user || !isPasswordValid) {
-      // Only increment if user exists and account is NOT already locked
       if (user && !user.isAccountLocked()) {
         user.incrementFailedLoginAttempts();
         await this.userService.save(user);
@@ -109,11 +146,99 @@ export class AuthService {
     user.recordSuccessfulLogin();
     await this.userService.save(user);
 
-    return this.buildAuthResponse(user, {
-      accessToken: 'dummy-access-token',
-      refreshToken: 'dummy-refresh-token',
-      expiresIn: 900,
+    // Issue real tokens and persist the session
+    const tokenBundle = await this.tokenProvider.generateTokenBundle(
+      user.id,
+      user.role,
+    );
+
+    await this.sessionService.create({
+      userId: user.id,
+      jti: tokenBundle.jti,
+      refreshTokenHash: tokenBundle.refreshTokenHash,
+      refreshExpiresAt: tokenBundle.refreshExpiresAt,
+      ipAddress: extractIp(req),
+      userAgent: extractUserAgent(req),
+      deviceId: dto.deviceId ?? null,
+      deviceName: dto.deviceName ?? null,
     });
+
+    this.logger.log(`User ${user.id} logged in from ${extractIp(req)}`);
+
+    return this.buildAuthResponse(user, {
+      accessToken: tokenBundle.accessToken,
+      refreshToken: tokenBundle.refreshToken,
+      expiresIn: tokenBundle.expiresIn,
+    });
+  }
+
+  // ===================================================
+  // REFRESH TOKEN  (rotate — old token is consumed)
+  // ===================================================
+
+  /**
+   * Called by the refresh endpoint, guarded by JwtRefreshGuard.
+   * `ctx` comes from JwtRefreshStrategy.validate().
+   */
+  async refreshTokens(
+    ctx: RefreshTokenContext,
+    req: Request,
+  ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
+    // Validate hash, detect reuse attacks, revoke old session
+    const oldSession = await this.sessionService.validateAndConsume(
+      ctx.jti,
+      ctx.rawToken,
+    );
+
+    const user = await this.userService.findActiveById(oldSession.userId);
+
+    // Generate a new token pair with a fresh JTI (full rotation)
+    const tokenBundle = await this.tokenProvider.generateTokenBundle(
+      user.id,
+      user.role,
+    );
+
+    // Persist the new session, inheriting device metadata from the old one
+    await this.sessionService.create({
+      userId: user.id,
+      jti: tokenBundle.jti,
+      refreshTokenHash: tokenBundle.refreshTokenHash,
+      refreshExpiresAt: tokenBundle.refreshExpiresAt,
+      ipAddress: extractIp(req),
+      userAgent: extractUserAgent(req),
+      deviceId: oldSession.deviceId,
+      deviceName: oldSession.deviceName,
+    });
+
+    return {
+      accessToken: tokenBundle.accessToken,
+      refreshToken: tokenBundle.refreshToken,
+      expiresIn: tokenBundle.expiresIn,
+    };
+  }
+
+  // ===================================================
+  // LOGOUT  (single session)
+  // ===================================================
+
+  /**
+   * Revokes the session that matches the JTI embedded in the current
+   * access token.  The JTI is injected by JwtAccessStrategy.validate().
+   */
+  async logout(userId: string, jti: string): Promise<{ message: string }> {
+    await this.sessionService.revokeByJti(jti, SessionRevokeReason.LOGOUT);
+    this.logger.log(`User ${userId} logged out (JTI: ${jti})`);
+    return { message: 'Logged out successfully' };
+  }
+
+  // ===================================================
+  // LOGOUT ALL  (all sessions — e.g. "sign out everywhere")
+  // ===================================================
+
+  async logoutAll(userId: string): Promise<{ message: string }> {
+    await this.sessionService.revokeAll(userId, SessionRevokeReason.LOGOUT_ALL);
+    this.logger.log(`User ${userId} signed out of all sessions`);
+    return { message: 'Signed out of all devices successfully' };
   }
 
   // ===================================================
@@ -134,11 +259,12 @@ export class AuthService {
 
     user.markEmailVerified();
     await this.userService.save(user);
-    // // Send welcome email or any post-verification actions here
+
     await this.mailService.sendWelcomeEmail(user.email, {
       firstName: user.firstName,
       dashboardUrl: `${this.configService.get('FRONTEND_URL')}/dashboard`,
     });
+
     return { message: 'Email verified successfully' };
   }
 
@@ -163,7 +289,6 @@ export class AuthService {
     }
 
     await this.enforceOtpResendCooldown(user.id, OtpPurpose.EMAIL_VERIFICATION);
-
     await this.issueOtpAndDispatch(user, OtpPurpose.EMAIL_VERIFICATION);
 
     return { message: 'Verification code sent successfully.' };
@@ -186,7 +311,6 @@ export class AuthService {
     }
 
     await this.enforceOtpResendCooldown(user.id, OtpPurpose.PASSWORD_RESET);
-
     await this.issueOtpAndDispatch(user, OtpPurpose.PASSWORD_RESET);
 
     return response;
@@ -206,17 +330,23 @@ export class AuthService {
     await this.validateOtpOrThrow(user.id, OtpPurpose.PASSWORD_RESET, dto.code);
 
     const passwordHash = await this.hashProvider.hashPassword(dto.newPassword);
-
     user.changePassword(passwordHash);
     await this.userService.save(user);
 
+    // Revoke ALL sessions — password change is a security event
+    await this.sessionService.revokeAll(
+      user.id,
+      SessionRevokeReason.SECURITY_REVOKED,
+    );
+
     await this.safeSendPasswordChangedEmail(user);
 
-    return { message: 'Password reset successful' };
+    return { message: 'Password reset successful. Please log in again.' };
   }
-  // =================================================
-  // GET USER PROFILE AFTER AUTH
-  // =================================================
+
+  // ===================================================
+  // GET PROFILE
+  // ===================================================
 
   async getProfile(userId: string): Promise<UserResponseDto> {
     const user = await this.userService.findById(userId);
@@ -226,15 +356,7 @@ export class AuthService {
   }
 
   // ===================================================
-  // LOGOUT
-  // ===================================================
-
-  async logout(userId: string): Promise<{ message: string }> {
-    return { message: 'Logged out successfully' };
-  }
-
-  // ===================================================
-  // OTP CORE
+  // OTP — CORE (private)
   // ===================================================
 
   private async issueOtpAndDispatch(
@@ -258,7 +380,6 @@ export class AuthService {
 
     await this.otpRepository.save(otp);
 
-    // SAFE EMAIL DISPATCH (no silent failure)
     try {
       await this.dispatchOtpMail(
         user,
@@ -267,7 +388,7 @@ export class AuthService {
         otp.expiresAt,
       );
     } catch (err) {
-      this.logger.error('OTP email failed', err);
+      this.logger.error('OTP email dispatch failed', err);
     }
 
     if (this.isDev) {
@@ -285,11 +406,9 @@ export class AuthService {
     plainCode: string,
     expiresAt: Date,
   ): Promise<void> {
-    const expiryTime = expiresAt.toISOString();
     const expiryMinutes = Math.round(
       (expiresAt.getTime() - Date.now()) / 1000 / 60,
     );
-
     const formattedOtp = this.otpProvider.formatForDisplay(plainCode);
 
     switch (purpose) {
@@ -320,7 +439,7 @@ export class AuthService {
   }
 
   // ===================================================
-  // SAFE EMAILS
+  // SAFE EMAILS (fire-and-forget, never throw)
   // ===================================================
 
   private async safeSendPasswordChangedEmail(user: User): Promise<void> {
@@ -344,7 +463,7 @@ export class AuthService {
   }
 
   // ===================================================
-  // OTP VALIDATION
+  // OTP VALIDATION (private)
   // ===================================================
 
   private async validateOtpOrThrow(
@@ -413,7 +532,7 @@ export class AuthService {
   }
 
   // ===================================================
-  // RESPONSE
+  // RESPONSE BUILDER
   // ===================================================
 
   private buildAuthResponse(user: User, tokens: TokensDto): AuthResponseDto {
