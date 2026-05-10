@@ -15,6 +15,8 @@ import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { SessionService } from './session.service';
+import { TokenProvider } from './providers/token.provider';
 
 @Module({
   controllers: [AuthController],
@@ -25,6 +27,8 @@ import { RolesGuard } from './guards/roles.guard';
     JwtRefreshStrategy,
     JwtAuthGuard,
     RolesGuard,
+    SessionService,
+    TokenProvider,
   ],
   imports: [
     UserModule,
@@ -43,6 +47,13 @@ import { RolesGuard } from './guards/roles.guard';
       }),
     }),
   ],
-  exports: [AuthService, OtpProvider, JwtAuthGuard, RolesGuard],
+  exports: [
+    AuthService,
+    OtpProvider,
+    JwtAuthGuard,
+    RolesGuard,
+    SessionService,
+    TokenProvider,
+  ],
 })
 export class AuthModule {}

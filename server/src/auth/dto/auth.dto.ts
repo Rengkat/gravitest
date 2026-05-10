@@ -80,6 +80,16 @@ export class LoginDto {
   @IsNotEmpty()
   password!: string;
 
+  @ApiProperty({ example: '123345' })
+  @IsString()
+  @IsOptional()
+  deviceId?: string;
+
+  @ApiProperty({ example: 'Iphone 12' })
+  @IsString()
+  @IsOptional()
+  deviceName?: string;
+
   @ApiPropertyOptional({ default: false })
   @IsOptional()
   @IsBoolean()
