@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
@@ -35,7 +35,43 @@ export class RegisterUserDto extends BaseUserDto {
 
 // ───────────────── RESPONSE DTOs ─────────────────
 
-export class UserResponseDto extends BaseUserDto {}
+export class UserResponseDto {
+  @ApiProperty()
+  @Expose()
+  id: string;
+
+  @ApiProperty()
+  @Expose()
+  email: string;
+
+  @ApiProperty()
+  @Expose()
+  firstName: string;
+
+  @ApiProperty()
+  @Expose()
+  lastName: string;
+
+  @ApiProperty()
+  @Expose()
+  role: string;
+
+  @ApiProperty()
+  @Expose()
+  isEmailVerified: boolean;
+
+  @ApiProperty()
+  @Expose()
+  isActive: boolean;
+
+  @ApiProperty()
+  @Expose()
+  createdAt: Date;
+
+  @ApiProperty()
+  @Expose()
+  updatedAt: Date;
+}
 
 export class TokensDto {
   @ApiProperty()

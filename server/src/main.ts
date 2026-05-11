@@ -3,12 +3,16 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-
+import * as passport from 'passport';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // ── Get ConfigService from the DI container ──
   const configService = app.get(ConfigService);
+
+  // console.log('=== PASSPORT STRATEGIES ===');
+  // console.log((passport as any)._strategies);
+  // console.log('===========================');
 
   const port = configService.get<number>('app.port', 5000);
   const nodeEnv = configService.get<string>('appConfig.env', 'production');

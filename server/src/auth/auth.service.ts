@@ -15,7 +15,6 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { Otp } from './entities/otp.entity';
 import { OtpProvider } from './providers/otp.provider';
-import { HashProvider } from './providers/Hash.provider';
 import { TokenProvider } from './providers/token.provider';
 import { SessionRevokeReason } from './entities/user-session';
 import { MailService } from 'src/mail/mail.service';
@@ -35,6 +34,7 @@ import {
 
 import { OtpPurpose } from 'src/common/enums/enums';
 import { SessionService } from './session.service';
+import { HashProvider } from 'src/common/hash/providers/Hash.provider';
 
 // ─── Helpers to extract request metadata ────────────────────────────────────
 
@@ -54,7 +54,7 @@ function extractUserAgent(req: Request): string | null {
 
 // ─── Refresh token body shape (from JwtRefreshStrategy.validate) ─────────────
 
-export interface RefreshTokenContext {
+export class RefreshTokenContext {
   userId: string;
   jti: string;
   rawToken: string;
@@ -276,7 +276,7 @@ export class AuthService {
     dto: ResendVerificationDto,
   ): Promise<{ message: string }> {
     const user = await this.userService.findByEmail(dto.email);
-
+    // console.log(user);
     if (!user || !user.isActive) {
       return {
         message:

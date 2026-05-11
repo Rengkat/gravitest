@@ -17,7 +17,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { SessionService } from './session.service';
 import { TokenProvider } from './providers/token.provider';
-
+import { APP_GUARD } from '@nestjs/core';
+import { HashModule } from 'src/common/hash/hash.module';
 @Module({
   controllers: [AuthController],
   providers: [
@@ -29,9 +30,12 @@ import { TokenProvider } from './providers/token.provider';
     RolesGuard,
     SessionService,
     TokenProvider,
+    // { provide: APP_GUARD, useClass: JwtAuthGuard },
+    // { provide: APP_GUARD, useClass: RolesGuard },
   ],
   imports: [
     UserModule,
+    HashModule,
     TypeOrmModule.forFeature([Otp, UserSession]),
     MailModule,
     PassportModule.register({ defaultStrategy: 'jwt-access' }),

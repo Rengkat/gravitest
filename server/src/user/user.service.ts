@@ -19,7 +19,6 @@ import {
 import { IsNull, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HashProvider } from 'src/auth/providers/Hash.provider';
 import { BulkCreateUsersProvider } from './providers/BulkCreateUsersProvider';
 import {
   AuthProvider,
@@ -35,6 +34,7 @@ import { UserFilterDto } from './dto';
 import { PaginatedResult } from 'src/common/pagination/pagination.interface';
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
 import { RegisterUserDto } from 'src/auth/dto/auth.dto';
+import { HashProvider } from 'src/common/hash/providers/Hash.provider';
 
 @Injectable()
 export class UserService {

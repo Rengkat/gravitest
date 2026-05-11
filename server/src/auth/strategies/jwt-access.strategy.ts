@@ -1,11 +1,10 @@
+// jwt-access.strategy.ts
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { ConfigType } from '@nestjs/config';
 import { JwtAccessPayload } from '../interfaces/jwt-payload.interface';
 import jwtConfig from '../config/jwtConfig';
-
-import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class JwtAccessStrategy extends PassportStrategy(
@@ -15,7 +14,6 @@ export class JwtAccessStrategy extends PassportStrategy(
   constructor(
     @Inject(jwtConfig.KEY)
     private readonly jwtConf: ConfigType<typeof jwtConfig>,
-    private readonly userService: UserService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -27,12 +25,14 @@ export class JwtAccessStrategy extends PassportStrategy(
   }
 
   async validate(payload: JwtAccessPayload) {
-    const user = await this.userService.findById(payload.sub);
-
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('User account is inactive or not found');
+    if (!payload.sub || !payload.jti) {
+      throw new UnauthorizedException('Invalid token payload');
     }
 
-    return { ...user, jti: payload.jti };
+    return {
+      id: payload.sub,
+      role: payload.role,
+      jti: payload.jti,
+    };
   }
 }

@@ -21,32 +21,18 @@ export class MailProvider implements OnModuleInit {
   }
 
   async onModuleInit(): Promise<void> {
-    if (this.mailConfiguration.useEthereal) {
-      const testAccount = await nodemailer.createTestAccount();
+    const smtpHost = this.mailConfiguration.host;
+    if (!smtpHost) throw new Error('MAIL_HOST is not configured');
 
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
-
-      this.logger.warn(`[DEV] Using Ethereal account ${testAccount.user}`);
-    } else {
-      this.transporter = nodemailer.createTransport({
-        host: this.mailConfiguration.host,
-        port: this.mailConfiguration.port,
-        secure: this.mailConfiguration.secure,
-        family: 4, // Force IPv4 to avoid potential issues in some environments
-        auth: {
-          user: this.mailConfiguration.user,
-          pass: this.mailConfiguration.password,
-        },
-      });
-    }
+    this.transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: this.mailConfiguration.port,
+      secure: this.mailConfiguration.secure,
+      auth: {
+        user: this.mailConfiguration.user,
+        pass: this.mailConfiguration.password,
+      },
+    });
 
     await this.verifyConnection();
   }
@@ -66,12 +52,6 @@ export class MailProvider implements OnModuleInit {
 
     try {
       const info = await this.transporter.sendMail(message);
-
-      const previewUrl = nodemailer.getTestMessageUrl(info);
-      if (previewUrl) {
-        this.logger.debug(`[DEV EMAIL PREVIEW] ${previewUrl}`);
-      }
-
       this.logger.log(`Mail sent to ${options.to} | id=${info.messageId}`);
     } catch (error: any) {
       this.logger.error(
@@ -85,7 +65,7 @@ export class MailProvider implements OnModuleInit {
   private async verifyConnection(): Promise<void> {
     try {
       await this.transporter.verify();
-      this.logger.log('SMTP transport verified');
+      this.logger.log('SMTP transport verified ✓');
     } catch (error: any) {
       this.logger.warn(`SMTP verification failed: ${error?.message}`);
     }

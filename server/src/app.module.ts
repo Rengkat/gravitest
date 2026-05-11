@@ -17,6 +17,7 @@ import jwtConfig from './auth/config/jwtConfig';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { HashModule } from './common/hash/hash.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -55,8 +56,8 @@ const ENV = process.env.NODE_ENV;
 
         // MAIL
         MAIL_HOST: Joi.string().required(),
-        MAIL_PORT: Joi.number().default(465),
-        MAIL_SECURE: Joi.boolean().default(true),
+        MAIL_PORT: Joi.number().default(2525),
+        MAIL_SECURE: Joi.boolean().default(false),
         MAIL_USER: Joi.string().required(),
         MAIL_PASSWORD: Joi.string().required(),
         MAIL_FROM_NAME: Joi.string().default('Gravitest'),
@@ -81,6 +82,7 @@ const ENV = process.env.NODE_ENV;
 
     UserModule,
     AuthModule,
+    HashModule,
   ],
   controllers: [AppController],
   providers: [

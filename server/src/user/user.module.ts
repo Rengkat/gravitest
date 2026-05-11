@@ -10,22 +10,14 @@ import { StudyActivity } from './entities/study-activity.entity';
 import { StudyStreak } from './entities/study-streak.entity';
 import { TopicMasteryHistory } from './entities/topic-mastery-history.entity';
 import { WeakTopic } from './entities/weak-topic.entity';
-import { HashProvider } from 'src/auth/providers/Hash.provider';
-import { BcryptProvider } from 'src/auth/providers/Bcrypt.provider';
 import { BulkCreateUsersProvider } from './providers/BulkCreateUsersProvider';
 import { PaginationModule } from 'src/common/pagination/pagination.module';
+import { HashModule } from 'src/common/hash/hash.module';
 
 @Module({
   controllers: [UserController],
-  providers: [
-    UserService,
-    BulkCreateUsersProvider,
-    {
-      provide: HashProvider,
-      useClass: BcryptProvider,
-    },
-  ],
-  exports: [UserService, HashProvider, TypeOrmModule],
+  providers: [UserService, BulkCreateUsersProvider],
+  exports: [UserService, TypeOrmModule],
   imports: [
     TypeOrmModule.forFeature([
       User,
@@ -38,6 +30,7 @@ import { PaginationModule } from 'src/common/pagination/pagination.module';
       WeakTopic,
     ]),
     PaginationModule,
+    HashModule,
   ],
 })
 export class UserModule {}
