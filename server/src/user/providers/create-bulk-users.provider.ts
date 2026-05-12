@@ -7,7 +7,6 @@ import {
   BulkCreateUsersDto,
   BulkCreateUserRowDto,
   BulkCreateUsersResponseDto,
-  GeneratedPasswordDto,
 } from '../dto/create-user.dto';
 import { AuthProvider, UserRole } from 'src/common/enums/enums';
 import { HashProvider } from 'src/common/hash/providers/Hash.provider';
