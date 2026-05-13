@@ -1,4 +1,3 @@
-import { AdminRole } from 'src/common/enums/enums';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,16 +8,15 @@ import {
   // OneToMany,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { User } from './user.entity';
+import { School } from 'src/schools/entities/school.entity';
 
 @Entity('school_admins')
 export class SchoolAdmin {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
-
-  @Column({ type: 'enum', enum: AdminRole, default: AdminRole.TEACHER })
-  adminRole!: AdminRole;
 
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
@@ -35,6 +33,6 @@ export class SchoolAdmin {
   @JoinColumn()
   user!: User;
 
-  // @ManyToOne(() => School, (s) => s.admins)
-  // school: School;
+  @ManyToOne(() => School, (s) => s.admins)
+  school: School;
 }
