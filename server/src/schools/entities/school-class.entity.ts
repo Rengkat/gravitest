@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { School } from './school.entity';
-import { StudentProfile } from 'src/user/entities/student-profile.entity';
+import { StudentProfile } from 'src/students/entities/student-profile.entity';
 
 @Entity('school_classes')
 @Index(['schoolId', 'name'], { unique: true })
