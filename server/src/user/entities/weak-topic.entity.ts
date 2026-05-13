@@ -110,4 +110,22 @@ export class WeakTopic {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  // ── Domain Methods ─────────────────────────────────────────
+  updateAfterAttempt(score: number, minutesSpent: number): void {
+    this.questionsAttempted++;
+    if (score >= 50) this.questionsCorrect++;
+    this.lowestScore = Math.min(this.lowestScore || score, score);
+    this.highestScore = Math.max(this.highestScore, score);
+    this.averageScore =
+      (this.averageScore * this.timesPracticed + score) /
+      (this.timesPracticed + 1);
+    this.recentScore = score; // Simplified; real impl uses rolling average
+    this.totalMinutesSpent += minutesSpent;
+    this.timesPracticed++;
+    this.lastPracticedAt = new Date();
+
+    if (this.averageScore >= 70) this.status = WeakTopicStatus.IMPROVING;
+    if (this.averageScore >= 85) this.status = WeakTopicStatus.RESOLVED;
+  }
 }
