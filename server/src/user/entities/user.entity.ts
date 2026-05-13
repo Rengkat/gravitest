@@ -18,9 +18,9 @@ import {
 import { Exclude, Expose } from 'class-transformer';
 
 // ── Lazy imports (avoid circular deps) ────────────────────
-import type { StudentProfile } from './student-profile.entity';
-import type { TutorProfile } from './tutor-profile.entity';
-import type { SchoolAdmin } from './school-admin.entity';
+import type { StudentProfile } from '../../students/entities/student-profile.entity';
+import type { TutorProfile } from '../../tutors/entities/tutor-profile.entity';
+import type { SchoolAdmin } from '../../schools/entities/school-admin.entity';
 import {
   AuthProvider,
   DeactivationType,
@@ -33,6 +33,9 @@ import { UserNotificationPreferences } from './user-notification-preferences.ent
 import { Subscription } from './subscription.entity';
 import { Otp } from 'src/auth/entities/otp.entity';
 import { Notification } from './notification.entity';
+import { LibraryAccess } from './library-content-access.entity';
+import { UserSession } from 'src/auth/entities/user-session';
+import { ExamSession } from '../../students/entities/exam-session.entity';
 // import type { UserSession } from './user-session.entity';
 // import type { AiChatSession } from './ai-chat-session.entity';
 // import type { Payment } from './payment.entity';
@@ -207,8 +210,8 @@ export class User {
   @OneToMany('Subscription', (s: Subscription) => s.user)
   subscriptions: Subscription[];
 
-  // @OneToMany('UserSession', (s: UserSession) => s.user)
-  // sessions: UserSession[];
+  @OneToMany('UserSession', (s: UserSession) => s.user)
+  sessions: UserSession[];
 
   @OneToMany('Otp', (o: Otp) => o.user)
   otps: Otp[];
@@ -221,9 +224,6 @@ export class User {
 
   // @OneToMany('Payment', (p: Payment) => p.user)
   // payments: Payment[];
-
-  // @OneToMany('LibraryAccess', (a: LibraryAccess) => a.user)
-  // libraryAccesses: LibraryAccess[];
 
   // ── Computed ───────────────────────────────────────────────
   @Expose()

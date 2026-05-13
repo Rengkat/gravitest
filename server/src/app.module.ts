@@ -19,6 +19,8 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { HashModule } from './common/hash/hash.module';
 import { SchoolsModule } from './schools/schools.module';
+import { StudentsModule } from './students/students.module';
+import { TutorsModule } from './tutors/tutors.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -85,6 +87,8 @@ const ENV = process.env.NODE_ENV;
     AuthModule,
     HashModule,
     SchoolsModule,
+    StudentsModule,
+    TutorsModule,
   ],
   controllers: [AppController],
   providers: [
