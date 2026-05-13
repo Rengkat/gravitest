@@ -18,6 +18,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { HashModule } from './common/hash/hash.module';
+import { SchoolsModule } from './schools/schools.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -83,6 +84,7 @@ const ENV = process.env.NODE_ENV;
     UserModule,
     AuthModule,
     HashModule,
+    SchoolsModule,
   ],
   controllers: [AppController],
   providers: [

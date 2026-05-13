@@ -1,8 +1,14 @@
-// ================= USER==================
+// =================================================================
+// ENUMS
+// =================================================================
+
+// ── 1. USER & AUTH ────────────────────────────────────────────────
+
 export enum UserRole {
   STUDENT = 'student',
   PROFESSIONAL_STUDENT = 'professional_student',
   TUTOR = 'tutor',
+  CLASS_ADMIN = 'class_admin',
   SCHOOL_ADMIN = 'school_admin',
   SUPER_ADMIN = 'super_admin',
 }
@@ -15,11 +21,35 @@ export enum AuthProvider {
   EMAIL = 'email',
 }
 
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
+  PREFER_NOT_TO_SAY = 'prefer_not_to_say',
+}
+
+export enum OtpPurpose {
+  EMAIL_VERIFICATION = 'EMAIL_VERIFICATION',
+  PASSWORD_RESET = 'PASSWORD_RESET',
+  PHONE_VERIFICATION = 'PHONE_VERIFICATION',
+  TWO_FACTOR_AUTH = 'TWO_FACTOR_AUTH',
+}
+
+export enum DeactivationType {
+  ADMIN_SUSPENSION = 'ADMIN_SUSPENSION',
+  SECURITY_LOCK = 'SECURITY_LOCK',
+  USER_REQUEST = 'USER_REQUEST',
+  UNVERIFIED_EMAIL = 'UNVERIFIED_EMAIL',
+}
+
+// ── 2. SUBSCRIPTION ───────────────────────────────────────────────
+
 export enum SubscriptionTier {
   FREE = 'free',
+  BASIC = 'basic',
   PRO = 'pro',
+  PREMIUM = 'premium',
   SCHOOL = 'school',
-  ENTERPRISE = 'enterprise',
 }
 
 export enum SubscriptionStatus {
@@ -28,7 +58,46 @@ export enum SubscriptionStatus {
   CANCELLED = 'cancelled',
   TRIAL = 'trial',
 }
-// =================== EXAM /CBT=================
+
+export enum BillingInterval {
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  ANNUALLY = 'annually',
+}
+
+// ── 3. SCHOOL ─────────────────────────────────────────────────────
+
+export enum SchoolType {
+  PRIMARY = 'primary',
+  SECONDARY = 'secondary',
+  TERTIARY = 'tertiary',
+  VOCATIONAL = 'vocational',
+}
+
+export enum ClassLevel {
+  JSS1 = 'jss1',
+  JSS2 = 'jss2',
+  JSS3 = 'jss3',
+  SS1 = 'ss1',
+  SS2 = 'ss2',
+  SS3 = 'ss3',
+}
+
+export enum EnrollmentStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  GRADUATED = 'graduated',
+  SUSPENDED = 'suspended',
+}
+
+export enum TestStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+  CLOSED = 'closed',
+  ARCHIVED = 'archived',
+}
+
+// ── 4. EXAM / CBT ─────────────────────────────────────────────────
 
 export enum ExamType {
   JAMB = 'jamb',
@@ -42,13 +111,14 @@ export enum ExamType {
   CIPM = 'cipm',
   NIM = 'nim',
   NIESV = 'niesv',
-  CIBN = 'cibn', // Chartered Institute of Bankers of Nigeria
-  NSE = 'nse', // Nigerian Society of Engineers  NCS = "ncs", // Nigerian Computer Society
-  ICEN = 'icen', // Institute of Chartered Economists of Nigeria
-  NIQS = 'niqs', // Nigerian Institute of Quantity Surveyors
-  ARCON = 'arcon', // Architects Registration Council of Nigeria
-  MLSCN = 'mlscn', // Medical Laboratory Science Council of Nigeria
-  PCN = 'pcn', // Pharmacists Council of Nigeria
+  CIBN = 'cibn',
+  NSE = 'nse',
+  ICEN = 'icen',
+  NIQS = 'niqs',
+  ARCON = 'arcon',
+  MLSCN = 'mlscn',
+  PCN = 'pcn',
+  COMMON_ENTRANCE = 'common_entrance',
 }
 
 export enum ExamMode {
@@ -73,38 +143,34 @@ export enum DifficultyLevel {
   MEDIUM = 'medium',
   HARD = 'hard',
 }
+
 export enum SessionStatus {
   IN_PROGRESS = 'in_progress',
+  SCHEDULED = 'scheduled',
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
   SUBMITTED = 'submitted',
+  CANCELLED = 'cancelled',
+  RESCHEDULED = 'rescheduled',
+  NO_SHOW = 'no_show',
+  MISSED = 'missed',
   ABANDONED = 'abandoned',
   TIMED_OUT = 'timed_out',
 }
 
-// ============= SCHOOL===================
+// ── 5. TUTORING ───────────────────────────────────────────────────
 
-export enum ClassLevel {
-  JSS1 = 'jss1',
-  JSS2 = 'jss2',
-  JSS3 = 'jss3',
-  SS1 = 'ss1',
-  SS2 = 'ss2',
-  SS3 = 'ss3',
-}
-
-export enum EnrollmentStatus {
+export enum TutorStatus {
+  PENDING = 'pending',
+  UNDER_REVIEW = 'under_review',
   ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  GRADUATED = 'graduated',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
   SUSPENDED = 'suspended',
 }
 
-export enum TestStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  CLOSED = 'closed',
-  ARCHIVED = 'archived',
-}
-// =============== TUTORING ================
 export enum BookingStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
@@ -115,26 +181,12 @@ export enum BookingStatus {
   NO_SHOW = 'no_show',
 }
 
-// ==================== SESSION & BOOKING ENUMS ====================
-
 export enum SessionType {
   ONLINE = 'online',
   PHYSICAL = 'physical',
   HYBRID = 'hybrid',
   GROUP = 'group',
   ONE_ON_ONE = 'one_on_one',
-}
-
-export enum SessionStatus {
-  SCHEDULED = 'scheduled',
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  ONGOING = 'ongoing',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  RESCHEDULED = 'rescheduled',
-  NO_SHOW = 'no_show',
-  MISSED = 'missed',
 }
 
 export enum SessionMode {
@@ -161,10 +213,53 @@ export enum RecurringPattern {
   MONTHLY = 'monthly',
   CUSTOM = 'custom',
 }
+
+// ── 6. PAYMENT ────────────────────────────────────────────────────
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  SUCCESS = 'success',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  REFUNDED = 'refunded',
+  CANCELLED = 'cancelled',
+  ABANDONED = 'abandoned',
+}
+
+export enum PaymentPurpose {
+  SUBSCRIPTION = 'subscription',
+  TUTOR_SESSION = 'tutor_session',
+  LIBRARY_CONTENT = 'library_content',
+  SCHOOL_PLAN = 'school_plan',
+}
+
+export enum PayoutStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
+// ── 7. CONTENT & LIBRARY ──────────────────────────────────────────
+
+export enum ContentType {
+  EBOOK = 'ebook',
+  VIDEO = 'video',
+  IMAGE = 'image',
+  DOCUMENT = 'document',
+  AUDIO = 'audio',
+  QUIZ = 'quiz',
+  PRACTICE_SET = 'practice_set',
+}
+
+// ── 8. STUDY & PROGRESS ───────────────────────────────────────────
+
 export enum StreakStatus {
   ACTIVE = 'active',
   BROKEN = 'broken',
-  ACHIEVED = 'achieved', // For milestone achievements (e.g., 7-day, 30-day)
+  FROZEN = 'frozen',
+  ACHIEVED = 'achieved',
 }
 
 export enum WeakTopicStatus {
@@ -172,26 +267,98 @@ export enum WeakTopicStatus {
   IMPROVING = 'improving',
   MASTERED = 'mastered',
   NEEDS_REVIEW = 'needs_review',
+  RESOLVED = 'resolved',
+  IGNORED = 'ignored',
 }
 
-// =============== PAYMENT================
-export enum PaymentStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
+export enum PrimaryGoal {
+  EXAM_PREP = 'exam_prep',
+  SKILL_BUILDING = 'skill_building',
+  SCHOOL_SUPPORT = 'school_support',
+  GENERAL_LEARNING = 'general_learning',
+}
+
+// ── 9. AI CHAT ────────────────────────────────────────────────────
+
+export enum AiChatRole {
+  USER = 'user',
+  ASSISTANT = 'assistant',
+  SYSTEM = 'system',
+}
+
+export enum AiChatSessionStatus {
+  ACTIVE = 'active',
   COMPLETED = 'completed',
-  FAILED = 'failed',
-  REFUNDED = 'refunded',
-  CANCELLED = 'cancelled',
+  ARCHIVED = 'archived',
 }
 
-export enum PaymentPurpose {
-  SUBSCRIPTION = 'subscription',
-  TUTOR_SESSION = 'tutor_session',
-  SCHOOL_PLAN = 'school_plan',
+// ── 10. NOTIFICATIONS ─────────────────────────────────────────────
+
+export enum NotificationChannel {
+  IN_APP = 'in_app',
+  EMAIL = 'email',
+  SMS = 'sms',
+  PUSH = 'push',
+  WHATSAPP = 'whatsapp',
 }
-// ================== SUBJECTS ====================
+
+export enum NotificationType {
+  EXAM_REMINDER = 'exam_reminder',
+  STREAK_ALERT = 'streak_alert',
+  NEW_MESSAGE = 'new_message',
+  TUTOR_BOOKING = 'tutor_booking',
+  SESSION_START = 'session_start',
+  SESSION_COMPLETE = 'session_complete',
+  PAYMENT_SUCCESS = 'payment_success',
+  PAYMENT_FAILED = 'payment_failed',
+  SUBSCRIPTION_EXPIRING = 'subscription_expiring',
+  RESULT_PUBLISHED = 'result_published',
+  NEW_CONTENT = 'new_content',
+  ACHIEVEMENT_UNLOCKED = 'achievement_unlocked',
+  LEADERBOARD_UPDATE = 'leaderboard_update',
+  ACCOUNT_ALERT = 'account_alert',
+  WEEKLY_REPORT = 'weekly_report',
+  SYSTEM = 'system',
+}
+
+export enum NotificationStatus {
+  UNREAD = 'unread',
+  READ = 'read',
+  ARCHIVED = 'archived',
+}
+
+// ── 11. SETTINGS & PREFERENCES ───────────────────────────────────
+
+export enum ThemePreference {
+  LIGHT = 'light',
+  DARK = 'dark',
+  SYSTEM = 'system',
+}
+
+export enum FontSize {
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+  EXTRA_LARGE = 'extra_large',
+}
+
+export enum DashboardLayout {
+  DEFAULT = 'default',
+  COMPACT = 'compact',
+  EXPANDED = 'expanded',
+  MINIMAL = 'minimal',
+}
+
+export enum PrivacyLevel {
+  PUBLIC = 'public',
+  FRIENDS = 'friends',
+  PRIVATE = 'private',
+}
+
+// ── 12. SUBJECTS ──────────────────────────────────────────────────
+
 export enum Subject {
-  // ========== CORE SCIENCES ==========
+  // ── Core Sciences ──
   MATHEMATICS = 'mathematics',
   FURTHER_MATHEMATICS = 'further_mathematics',
   PHYSICS = 'physics',
@@ -201,7 +368,7 @@ export enum Subject {
   BASIC_SCIENCE = 'basic_science',
   INTEGRATED_SCIENCE = 'integrated_science',
 
-  // ========== ENGLISH & LANGUAGES ==========
+  // ── English & Languages ──
   ENGLISH = 'english',
   ENGLISH_LITERATURE = 'english_literature',
   LITERATURE_IN_ENGLISH = 'literature_in_english',
@@ -213,7 +380,7 @@ export enum Subject {
   GERMAN = 'german',
   LATIN = 'latin',
 
-  // ========== HUMANITIES & SOCIAL SCIENCES ==========
+  // ── Humanities & Social Sciences ──
   ECONOMICS = 'economics',
   GOVERNMENT = 'government',
   HISTORY = 'history',
@@ -228,7 +395,7 @@ export enum Subject {
   SOCIOLOGY = 'sociology',
   ANTHROPOLOGY = 'anthropology',
 
-  // ========== COMMERCE & BUSINESS ==========
+  // ── Commerce & Business ──
   COMMERCE = 'commerce',
   ACCOUNTING = 'accounting',
   FINANCIAL_ACCOUNTING = 'financial_accounting',
@@ -240,7 +407,7 @@ export enum Subject {
   STORE_KEEPING = 'store_keeping',
   ENTREPRENEURSHIP = 'entrepreneurship',
 
-  // ========== TECHNICAL & VOCATIONAL ==========
+  // ── Technical & Vocational ──
   TECHNICAL_DRAWING = 'technical_drawing',
   BUILDING_CONSTRUCTION = 'building_construction',
   WOODWORK = 'woodwork',
@@ -255,7 +422,7 @@ export enum Subject {
   PROGRAMMING = 'programming',
   WEB_DEVELOPMENT = 'web_development',
 
-  // ========== ARTS & CREATIVE ==========
+  // ── Arts & Creative ──
   FINE_ARTS = 'fine_arts',
   CREATIVE_ARTS = 'creative_arts',
   MUSIC = 'music',
@@ -263,7 +430,7 @@ export enum Subject {
   DANCE = 'dance',
   CULTURAL_AND_CREATIVE_ARTS = 'cultural_and_creative_arts',
 
-  // ========== HOME ECONOMICS & PRACTICAL ==========
+  // ── Home Economics & Practical ──
   HOME_ECONOMICS = 'home_economics',
   FOOD_AND_NUTRITION = 'food_and_nutrition',
   TEXTILES = 'textiles',
@@ -271,22 +438,21 @@ export enum Subject {
   CATERING = 'catering',
   HOSPITALITY = 'hospitality',
 
-  // ========== AGRICULTURE ==========
+  // ── Agriculture ──
   AGRICULTURAL_SCIENCE = 'agricultural_science',
   ANIMAL_HUSBANDRY = 'animal_husbandry',
   CROP_PRODUCTION = 'crop_production',
   FISHERIES = 'fisheries',
   FORESTRY = 'forestry',
 
-  // ========== HEALTH & PHYSICAL ==========
+  // ── Health & Physical ──
   HEALTH_EDUCATION = 'health_education',
   PHYSICAL_EDUCATION = 'physical_education',
   HUMAN_KINETICS = 'human_kinetics',
   NUTRITION = 'nutrition',
   PUBLIC_HEALTH = 'public_health',
 
-  // ========== PROFESSIONAL EXAMS ==========
-  // ICAN Subjects
+  // ── Professional Exams: ICAN ──
   FINANCIAL_REPORTING = 'financial_reporting',
   MANAGEMENT_ACCOUNTING = 'management_accounting',
   TAXATION = 'taxation',
@@ -294,7 +460,7 @@ export enum Subject {
   CORPORATE_LAW = 'corporate_law',
   PERFORMANCE_MANAGEMENT = 'performance_management',
 
-  // Medical/Nursing Subjects
+  // ── Professional Exams: Medical/Nursing ──
   ANATOMY = 'anatomy',
   PHYSIOLOGY = 'physiology',
   PHARMACOLOGY = 'pharmacology',
@@ -305,7 +471,7 @@ export enum Subject {
   MIDWIFERY = 'midwifery',
   COMMUNITY_HEALTH = 'community_health',
 
-  // Engineering Subjects
+  // ── Professional Exams: Engineering ──
   ENGINEERING_MATHEMATICS = 'engineering_mathematics',
   STRENGTH_OF_MATERIALS = 'strength_of_materials',
   FLUID_MECHANICS = 'fluid_mechanics',
@@ -317,7 +483,7 @@ export enum Subject {
   CONTROL_ENGINEERING = 'control_engineering',
   TELECOMMUNICATIONS = 'telecommunications',
 
-  // Law Subjects
+  // ── Professional Exams: Law ──
   CONSTITUTIONAL_LAW = 'constitutional_law',
   CRIMINAL_LAW = 'criminal_law',
   CONTRACT_LAW = 'contract_law',
@@ -326,7 +492,7 @@ export enum Subject {
   COMPANY_LAW = 'company_law',
   EVIDENCE_LAW = 'evidence_law',
 
-  // ========== ADVANCED & SPECIALIZED ==========
+  // ── Advanced & Specialized ──
   STATISTICS = 'statistics',
   QUANTITATIVE_METHODS = 'quantitative_methods',
   OPERATIONS_RESEARCH = 'operations_research',
@@ -335,7 +501,7 @@ export enum Subject {
   LOGIC = 'logic',
   ETHICS = 'ethics',
 
-  // ========== TEST PREP ==========
+  // ── Test Prep ──
   VERBAL_REASONING = 'verbal_reasoning',
   QUANTITATIVE_REASONING = 'quantitative_reasoning',
   GENERAL_KNOWLEDGE = 'general_knowledge',
@@ -343,24 +509,8 @@ export enum Subject {
   IQ_TEST = 'iq_test',
   APTITUDE_TEST = 'aptitude_test',
 }
-// =========== CONTNENT =============
-export enum ContentType {
-  EBOOK = 'ebook',
-  VIDEO = 'video',
-  IMAGE = 'image',
-  DOCUMENT = 'document',
-  AUDIO = 'audio',
-  QUIZ = 'quiz',
-  PRACTICE_SET = 'practice_set',
-}
 
-// ==================== ADDITIONAL ENUMS ====================
-export enum Gender {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
-  PREFER_NOT_TO_SAY = 'prefer_not_to_say',
-}
+// ── 13. LOCATION ──────────────────────────────────────────────────
 
 export enum NigerianState {
   ABIA = 'Abia',
@@ -400,29 +550,4 @@ export enum NigerianState {
   YOBE = 'Yobe',
   ZAMFARA = 'Zamfara',
   FCT_ABUJA = 'Federal Capital Territory',
-}
-//======= FOR SCHOOL ===========
-export enum AdminRole {
-  SCHOOL_ADMIN = 'school_admin', // the school that signed up
-  TEACHER = 'teacher', // can build tests and view results
-}
-
-export enum TutorStatus {
-  PENDING = 'pending', // awaiting verification
-  ACTIVE = 'active',
-  SUSPENDED = 'suspended',
-}
-
-export enum DeactivationType {
-  ADMIN_SUSPENSION = 'ADMIN_SUSPENSION',
-  SECURITY_LOCK = 'SECURITY_LOCK',
-  USER_REQUEST = 'USER_REQUEST',
-  UNVERIFIED_EMAIL = 'UNVERIFIED_EMAIL',
-}
-
-export enum OtpPurpose {
-  EMAIL_VERIFICATION = 'EMAIL_VERIFICATION',
-  PASSWORD_RESET = 'PASSWORD_RESET',
-  PHONE_VERIFICATION = 'PHONE_VERIFICATION',
-  TWO_FACTOR_AUTH = 'TWO_FACTOR_AUTH',
 }
