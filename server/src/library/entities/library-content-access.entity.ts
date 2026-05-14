@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ContentType } from '../../common/enums/enums';
+import { LibraryContent } from './library.entity';
 
 @Entity('library_accesses')
 @Index(['userId', 'contentId'], { unique: true })
@@ -68,6 +71,10 @@ export class LibraryAccess {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+  // ── relationship ───────────────────────────────────────────
+  @ManyToOne(() => LibraryContent, (c) => c.accesses, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'content_id' })
+  content!: LibraryContent;
 
   isExpired(): boolean {
     if (!this.expiresAt) return false;

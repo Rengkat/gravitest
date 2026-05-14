@@ -11,7 +11,7 @@ import { UserSettings } from './entities/user-settings.entity';
 import { UserNotificationPreferences } from './entities/user-notification-preferences.entity';
 import { Subscription } from './entities/subscription.entity';
 import { Notification } from './entities/notification.entity';
-import { LibraryAccess } from './entities/library-content-access.entity';
+import { LibraryAccess } from '../library/entities/library-content-access.entity';
 
 @Module({
   controllers: [UserController],
