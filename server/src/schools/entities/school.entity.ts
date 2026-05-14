@@ -7,9 +7,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import type { SchoolClass } from './school-class.entity';
+import { SchoolClass } from './school-class.entity';
 import { NigerianState, SchoolType } from 'src/common/enums/enums';
-import type { SchoolAdmin } from 'src/schools/entities/school-admin.entity';
+import { SchoolAdmin } from './school-admin.entity';
 
 @Entity('schools')
 @Index(['subdomain'], { unique: true })
@@ -67,9 +67,9 @@ export class School {
   updatedAt!: Date;
 
   // ── Relations ──────────────────────────────────────────────
-  @OneToMany('SchoolAdmin', (a: SchoolAdmin) => a.school)
+  @OneToMany(() => SchoolAdmin, (a: SchoolAdmin) => a.school)
   admins: SchoolAdmin[];
 
-  @OneToMany('SchoolClass', (c: SchoolClass) => c.school)
+  @OneToMany(() => SchoolClass, (c: SchoolClass) => c.school)
   classes: SchoolClass[];
 }

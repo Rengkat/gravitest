@@ -10,8 +10,8 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { School } from 'src/schools/entities/school.entity';
+import type { User } from '../../user/entities/user.entity';
+import { School } from './school.entity';
 
 @Entity('school_admins')
 export class SchoolAdmin {
@@ -29,10 +29,11 @@ export class SchoolAdmin {
 
   // ── Relations ──────────────────────────────────────────────────────────
 
-  @OneToOne(() => User, (u) => u.schoolAdmin)
+  @OneToOne('User', (u: User) => u.schoolAdmin)
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
   @ManyToOne(() => School, (s) => s.admins)
-  school: School;
+  @JoinColumn({ name: 'school_id' })
+  school!: School;
 }
