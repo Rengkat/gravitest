@@ -1,7 +1,3 @@
-// ============================================================
-// 22. TUTOR REVIEW  (tutor_reviews table)
-//    Student reviews a tutor after a completed session.
-
 import {
   Column,
   CreateDateColumn,
@@ -70,7 +66,7 @@ export class TutorReview {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne('TutorProfile', (t: TutorProfile) => t.reviews, {
+  @ManyToOne(() => TutorProfile, (t) => t.reviews, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'tutor_id' })

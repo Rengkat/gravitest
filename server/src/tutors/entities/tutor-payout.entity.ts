@@ -59,7 +59,7 @@ export class TutorPayout {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne('TutorProfile', (t: TutorProfile) => t.payouts, {
+  @ManyToOne(() => TutorProfile, (t) => t.payouts, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'tutor_id' })

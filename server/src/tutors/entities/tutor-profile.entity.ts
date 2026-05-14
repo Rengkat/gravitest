@@ -1,9 +1,4 @@
 import { SessionMode, TutorStatus } from 'src/common/enums/enums';
-// ============================================================
-// 5. TUTOR PROFILE  (tutor_profiles table)
-//    Created at registration when role = TUTOR (status = PENDING).
-//    Covers: subjects, earnings, availability, qualifications.
-// ============================================================
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -15,7 +10,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import type { User } from '../../user/entities/user.entity';
 import { TutorReview } from './tutor-review.entity';
 import { TutorAvailability } from './tutor-availability.entity';
 import { TutorPayout } from './tutor-payout.entity';
@@ -184,16 +179,16 @@ export class TutorProfile {
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
-  @OneToMany('TutorSession', (s: TutorSession) => s.tutor)
+  @OneToMany(() => TutorSession, (s) => s.tutor)
   sessions: TutorSession[];
 
-  @OneToMany('TutorReview', (r: TutorReview) => r.tutor)
+  @OneToMany(() => TutorReview, (r) => r.tutor)
   reviews: TutorReview[];
 
-  @OneToMany('TutorAvailability', (a: TutorAvailability) => a.tutor)
+  @OneToMany(() => TutorAvailability, (a) => a.tutor)
   availability: TutorAvailability[];
 
-  @OneToMany('TutorPayout', (p: TutorPayout) => p.tutor)
+  @OneToMany(() => TutorPayout, (p) => p.tutor)
   payouts: TutorPayout[];
 
   // ── Domain Methods ─────────────────────────────────────────

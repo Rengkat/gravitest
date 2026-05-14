@@ -8,7 +8,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import type { TutorProfile } from './tutor-profile.entity';
+import { TutorProfile } from './tutor-profile.entity';
 
 @Entity('tutor_availability')
 @Index(['tutorId', 'dayOfWeek'])
@@ -43,7 +43,7 @@ export class TutorAvailability {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne('TutorProfile', (t: TutorProfile) => t.availability, {
+  @ManyToOne(() => TutorProfile, (t) => t.availability, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'tutor_id' })

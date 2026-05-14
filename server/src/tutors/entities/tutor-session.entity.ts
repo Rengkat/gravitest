@@ -110,7 +110,7 @@ export class TutorSession {
   updatedAt!: Date;
 
   // ── Relations ──────────────────────────────────────────────
-  @ManyToOne('TutorProfile', (t: TutorProfile) => t.sessions)
+  @ManyToOne(() => TutorProfile, (t) => t.sessions)
   @JoinColumn({ name: 'tutor_id' })
   tutor!: TutorProfile;
 
