@@ -21,6 +21,8 @@ import { HashModule } from './common/hash/hash.module';
 import { SchoolsModule } from './schools/schools.module';
 import { StudentsModule } from './students/students.module';
 import { TutorsModule } from './tutors/tutors.module';
+import { QuestionsModule } from './questions/questions.module';
+import { GamesModule } from './games/games.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -89,6 +91,8 @@ const ENV = process.env.NODE_ENV;
     SchoolsModule,
     StudentsModule,
     TutorsModule,
+    QuestionsModule,
+    GamesModule,
   ],
   controllers: [AppController],
   providers: [
