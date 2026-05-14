@@ -12,38 +12,45 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  OneToMany,
 } from 'typeorm';
 import { StudentProfile } from './student-profile.entity';
 import {
   DifficultyLevel,
+  ExamMode,
   ExamType,
   QuestionType,
+  SessionStatus,
+  Subject,
 } from 'src/common/enums/enums';
+import { SessionQuestion } from './session-questions.entity';
 
 @Entity('exam_sessions')
 @Index(['studentProfileId', 'createdAt'])
 @Index(['studentProfileId', 'examType'])
-@Index(['studentProfileId', 'subject'])
 @Index(['schoolId', 'createdAt'])
 export class ExamSession {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', name: 'student_profile_id' })
   studentProfileId!: string;
 
   // ── Exam Identity ──────────────────────────────────────────
   @Column({ type: 'enum', enum: ExamType, nullable: true })
   examType: ExamType | null; // WAEC, JAMB, etc. Null = school custom exam
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  subject: string | null; // 'Mathematics', 'Physics'
+  @Column({ type: 'jsonb' })
+  subjects!: Subject[]; // JAMB = 4 subjects
 
   @Column({ type: 'varchar', length: 200, nullable: true })
   topic: string | null; // For topic-specific practice
 
   @Column({ type: 'enum', enum: QuestionType, default: QuestionType.MCQ })
   questionType!: QuestionType;
+
+  @Column({ type: 'enum', enum: ExamMode })
+  mode!: ExamMode; // PRACTICE, MOCK, SCHOOL_EXAM
 
   @Column({ type: 'enum', enum: DifficultyLevel, nullable: true })
   difficulty: DifficultyLevel | null;
@@ -65,17 +72,18 @@ export class ExamSession {
   @Column({ type: 'timestamptz', nullable: true })
   completedAt: Date | null;
 
-  @Column({ type: 'int', nullable: true })
-  durationSeconds: number | null; // Actual time taken
+  @Column({ type: 'int', default: 0 })
+  timeSpentSeconds!: number; // how long they actually took
 
   @Column({ type: 'int', nullable: true })
   allowedDurationSeconds: number | null; // Time limit set
 
-  @Column({ type: 'boolean', default: false })
-  isCompleted!: boolean;
+  @Column({ type: 'enum', enum: SessionStatus })
+  status!: SessionStatus;
 
-  @Column({ type: 'boolean', default: false })
-  isTimedOut!: boolean; // Auto-submitted by timer
+  get isTimedOut(): boolean {
+    return this.status === SessionStatus.TIMED_OUT;
+  }
 
   // ── Scoring ────────────────────────────────────────────────
   @Column({ type: 'int', default: 0 })
@@ -91,26 +99,13 @@ export class ExamSession {
   questionsSkipped!: number;
 
   @Column({ type: 'float', default: 0 })
-  score!: number; // Raw percentage 0–100
+  percentage!: number;
 
   @Column({ type: 'float', nullable: true })
   scaledScore: number | null; // JAMB: out of 400, WAEC: out of 100
 
   @Column({ type: 'int', default: 0 })
   xpEarned!: number;
-
-  // ── Per-Question Detail ────────────────────────────────────
-  @Column({ type: 'jsonb', nullable: true })
-  answers:
-    | {
-        questionId: string;
-        selectedOptionId: string | null;
-        isCorrect: boolean;
-        timeSpentSeconds: number;
-        markedForReview: boolean;
-        writtenAnswer?: string; // For theory questions
-      }[]
-    | null;
 
   // ── Per-Topic Breakdown ────────────────────────────────────
   @Column({ type: 'jsonb', nullable: true })
@@ -120,6 +115,16 @@ export class ExamSession {
         total: number;
         correct: number;
         score: number;
+      }[]
+    | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  subjectScores:
+    | {
+        subject: Subject;
+        score: number;
+        total: number;
+        percentage: number;
       }[]
     | null;
 
@@ -133,6 +138,10 @@ export class ExamSession {
     ipAddress?: string;
   } | null;
 
+  // ── Relations (same module) ────────────────
+  @OneToMany(() => SessionQuestion, (sq) => sq.examSession, { cascade: true })
+  sessionQuestions: SessionQuestion[];
+
   @CreateDateColumn()
   createdAt!: Date;
 
@@ -144,25 +153,59 @@ export class ExamSession {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'student_profile_id' })
-  studentProfile: StudentProfile;
-
+  studentProfile!: StudentProfile;
   // ── Domain Methods ─────────────────────────────────────────
   get accuracyRate(): number {
     if (!this.questionsAttempted) return 0;
     return (this.questionsCorrect / this.questionsAttempted) * 100;
   }
 
-  complete(): void {
-    this.isCompleted = true;
-    this.completedAt = new Date();
-    if (this.startedAt) {
-      this.durationSeconds = Math.floor(
-        (this.completedAt.getTime() - this.startedAt.getTime()) / 1000,
-      );
-    }
-    this.score =
-      this.questionsAttempted > 0
+  get isCompleted(): boolean {
+    return (
+      this.status === SessionStatus.SUBMITTED ||
+      this.status === SessionStatus.TIMED_OUT
+    );
+  }
+
+  private calculateScores(): void {
+    this.percentage =
+      this.totalQuestions > 0
         ? (this.questionsCorrect / this.totalQuestions) * 100
         : 0;
+
+    this.scaledScore = this.examType
+      ? this.getScaledScore(this.percentage)
+      : null; // practice mode — no scaled score
+  }
+
+  private getScaledScore(percentage: number): number {
+    switch (this.examType) {
+      case ExamType.JAMB:
+        return Math.round((percentage / 100) * 400);
+      case ExamType.WAEC:
+      case ExamType.NECO:
+      case ExamType.NABTEB:
+        return Math.round((percentage / 100) * 100);
+      case ExamType.ICAN:
+        return Math.round((percentage / 100) * 150);
+      default:
+        return Math.round(percentage);
+    }
+  }
+
+  complete(): void {
+    this.status = SessionStatus.SUBMITTED;
+    this.completedAt = new Date();
+    this.timeSpentSeconds = Math.floor(
+      (this.completedAt.getTime() - this.startedAt.getTime()) / 1000,
+    );
+    this.calculateScores();
+  }
+
+  timeout(): void {
+    this.status = SessionStatus.TIMED_OUT;
+    this.completedAt = new Date();
+    this.timeSpentSeconds = this.allowedDurationSeconds ?? 0;
+    this.calculateScores();
   }
 }

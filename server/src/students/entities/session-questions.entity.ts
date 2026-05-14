@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ExamSession } from './exam-session.enetity';
-import { StudentAnswer } from './student-answers.entity';
+import { StudentAnswer } from '../../students/entities/student-answers.entity';
 
 @Entity('session_questions')
 export class SessionQuestion {

@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { SessionQuestion } from './session-questions.entity';
+import { SessionQuestion } from '../../questions/entities/session-questions.entity';
 
 @Entity('student_answers')
 export class StudentAnswer {
