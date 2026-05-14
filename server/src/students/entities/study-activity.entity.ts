@@ -10,7 +10,6 @@ import {
 } from 'typeorm';
 import { StudentProfile } from './student-profile.entity';
 
-// or tracking daily study activity (more granular)
 @Entity('study_activities')
 @Index(['studentProfileId', 'date'], { unique: true })
 @Index(['date'])
@@ -74,7 +73,7 @@ export class StudyActivity {
   @UpdateDateColumn()
   updatedAt!: Date;
 
-  @ManyToOne('StudentProfile', (p: StudentProfile) => p.studyActivities, {
+  @ManyToOne(() => StudentProfile, (p) => p.studyActivities, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'student_profile_id' })

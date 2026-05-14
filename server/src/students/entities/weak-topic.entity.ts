@@ -104,6 +104,9 @@ export class WeakTopic {
     notes?: string;
   } | null;
 
+  @Column({ type: 'jsonb', nullable: true })
+  recentScoresHistory: number[] | null;
+
   // ── Timestamps ─────────────────────────────────────────────────────────
   @CreateDateColumn()
   createdAt!: Date;
@@ -115,12 +118,23 @@ export class WeakTopic {
   updateAfterAttempt(score: number, minutesSpent: number): void {
     this.questionsAttempted++;
     if (score >= 50) this.questionsCorrect++;
+
     this.lowestScore = Math.min(this.lowestScore || score, score);
     this.highestScore = Math.max(this.highestScore, score);
+
     this.averageScore =
       (this.averageScore * this.timesPracticed + score) /
       (this.timesPracticed + 1);
-    this.recentScore = score; // Simplified; real impl uses rolling average
+
+    this.recentScoresHistory = [
+      ...(this.recentScoresHistory ?? []),
+      score,
+    ].slice(-3);
+
+    this.recentScore =
+      this.recentScoresHistory.reduce((a, b) => a + b, 0) /
+      this.recentScoresHistory.length;
+
     this.totalMinutesSpent += minutesSpent;
     this.timesPracticed++;
     this.lastPracticedAt = new Date();
