@@ -4,7 +4,16 @@ import {
   QuestionType,
   Subject,
 } from 'src/common/enums/enums';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { QuestionOption } from './question-option.entity';
+import { QuestionAnswer } from './question-answer.entity';
+import { QuestionExplanation } from './question-explanation.entity';
 
 @Entity('questions')
 export class Question {
