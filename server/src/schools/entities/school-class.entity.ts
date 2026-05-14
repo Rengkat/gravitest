@@ -10,7 +10,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { School } from './school.entity';
-import { StudentProfile } from 'src/students/entities/student-profile.entity';
 
 @Entity('school_classes')
 @Index(['schoolId', 'name'], { unique: true })
@@ -82,9 +81,6 @@ export class SchoolClass {
   @ManyToOne(() => School, (s) => s.classes)
   @JoinColumn({ name: 'school_id' })
   school!: School;
-
-  @OneToMany(() => StudentProfile, (s) => s.schoolClass)
-  students: StudentProfile[];
 
   // ── Domain Methods ─────────────────────────────────────────
   rotatePin(newPinHash: string): void {

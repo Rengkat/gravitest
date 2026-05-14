@@ -12,7 +12,7 @@ import {
   NotificationStatus,
   NotificationType,
 } from '../../common/enums/enums';
-import type { User } from './user.entity';
+import { User } from './user.entity';
 
 @Entity('notifications')
 @Index(['userId', 'status'])
@@ -64,7 +64,7 @@ export class Notification {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @ManyToOne('User', (u: User) => u.notifications, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (u: User) => u.notifications, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 

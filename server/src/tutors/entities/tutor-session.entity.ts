@@ -1,10 +1,5 @@
-// ============================================================
-// 21. TUTOR SESSION  (tutor_sessions table)
-//    A booked tutoring session between tutor and student.
-
 import { BookingStatus, SessionMode } from 'src/common/enums/enums';
 
-import { StudentProfile } from '../../students/entities/student-profile.entity';
 import {
   Column,
   CreateDateColumn,
@@ -118,10 +113,6 @@ export class TutorSession {
   @ManyToOne('TutorProfile', (t: TutorProfile) => t.sessions)
   @JoinColumn({ name: 'tutor_id' })
   tutor!: TutorProfile;
-
-  @ManyToOne('StudentProfile', (s: StudentProfile) => s.tutorSessions)
-  @JoinColumn({ name: 'student_profile_id' })
-  student!: StudentProfile;
 
   // ── Domain Methods ─────────────────────────────────────────
   start(): void {

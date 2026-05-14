@@ -1,9 +1,3 @@
-// ============================================================
-// 4. STUDENT PROFILE  (student_profiles table)
-//    Created at registration when role = STUDENT.
-//    Also created when a school admin enrolls a student.
-//    Covers: academic targets, gamification, performance cache.
-// ============================================================
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -12,20 +6,16 @@ import {
   UpdateDateColumn,
   OneToOne,
   OneToMany,
-  ManyToOne,
   JoinColumn,
   Index,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
+import type { User } from '../../user/entities/user.entity';
 import { ExamType } from 'src/common/enums/enums';
-import { School } from 'src/schools/entities/school.entity';
-import { SchoolClass } from 'src/schools/entities/school-class.entity';
 import { WeakTopic } from './weak-topic.entity';
 import { ExamSession } from './exam-session.entity';
 import { StudyStreak } from './study-streak.entity';
 import { TopicMasteryHistory } from './topic-mastery-history.entity';
 import { StudyActivity } from './study-activity.entity';
-import { TutorSession } from '../../tutors/entities/tutor-session.entity';
 // import type { AiChatSession } from './ai-chat-session.entity';
 
 @Entity('student_profiles')
@@ -171,9 +161,9 @@ export class StudentProfile {
   updatedAt!: Date;
 
   // ── Relations ──────────────────────────────────────────────
-  @OneToOne(() => User, (user) => user.studentProfile)
+  @OneToOne('User', (u: User) => u.studentProfile)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user!: User;
 
   // Null for self-registered students not enrolled in a school portal
   @Column({ type: 'uuid', nullable: true, name: 'school_id' })
@@ -198,11 +188,8 @@ export class StudentProfile {
   )
   topicMasteryHistory: TopicMasteryHistory[];
 
-  @OneToMany(() => ExamSession, (session) => session.studentProfile)
+  @OneToMany('ExamSession', (s: ExamSession) => s.studentProfile)
   examSessions: ExamSession[];
-
-  @OneToMany(() => TutorSession, (session) => session.student)
-  tutorSessions: TutorSession[];
 
   // @OneToMany('AiChatSession', (s: AiChatSession) => s.studentProfile)
   // aiChatSessions: AiChatSession[];

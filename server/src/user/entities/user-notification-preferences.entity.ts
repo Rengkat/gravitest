@@ -12,7 +12,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import type { User } from './user.entity';
+import { User } from './user.entity';
 
 @Entity('user_notification_preferences')
 export class UserNotificationPreferences {
@@ -101,7 +101,7 @@ export class UserNotificationPreferences {
   updatedAt!: Date;
 
   // ── Relations ──────────────────────────────────────────────
-  @OneToOne('User', (u: User) => u.notificationPreferences)
-  @JoinColumn()
+  @OneToOne(() => User, (u: User) => u.notificationPreferences)
+  @JoinColumn({ name: 'user_id' })
   user!: User;
 }

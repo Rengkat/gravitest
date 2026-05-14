@@ -23,6 +23,7 @@ import { StudentsModule } from './students/students.module';
 import { TutorsModule } from './tutors/tutors.module';
 import { QuestionsModule } from './questions/questions.module';
 import { GamesModule } from './games/games.module';
+import { LibraryModule } from './library/library.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -93,6 +94,7 @@ const ENV = process.env.NODE_ENV;
     TutorsModule,
     QuestionsModule,
     GamesModule,
+    LibraryModule,
   ],
   controllers: [AppController],
   providers: [

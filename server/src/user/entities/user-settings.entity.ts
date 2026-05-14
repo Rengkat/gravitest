@@ -1,8 +1,3 @@
-// ============================================================
-// 2. USER SETTINGS  (user_settings table)
-//    Created immediately after User on registration (all roles).
-//    Covers: UI, study preferences, accessibility, privacy.
-// ============================================================
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -19,7 +14,7 @@ import {
   PrivacyLevel,
   ThemePreference,
 } from '../../common/enums/enums';
-import type { User } from './user.entity';
+import { User } from './user.entity';
 
 @Entity('user_settings')
 export class UserSettings {
@@ -148,7 +143,7 @@ export class UserSettings {
   updatedAt!: Date;
 
   // ── Relations ──────────────────────────────────────────────
-  @OneToOne('User', (u: User) => u.settings)
-  @JoinColumn()
+  @OneToOne(() => User, (u) => u.settings)
+  @JoinColumn({ name: 'user_id' })
   user!: User;
 }

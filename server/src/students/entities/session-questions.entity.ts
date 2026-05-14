@@ -6,8 +6,8 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ExamSession } from './exam-session.enetity';
 import { StudentAnswer } from '../../students/entities/student-answers.entity';
+import { ExamSession } from './exam-session.entity';
 
 @Entity('session_questions')
 export class SessionQuestion {

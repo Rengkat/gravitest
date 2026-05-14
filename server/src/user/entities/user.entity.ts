@@ -1,7 +1,3 @@
-// ============================================================
-// 1. USER ENTITY  (users table)
-//    Central hub. Created first. All other entities reference this.
-// ============================================================
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -95,7 +91,7 @@ export class User {
 
   @Column({ type: 'varchar', nullable: true, select: false })
   @Exclude()
-  appleId: string | null;
+  facebookId: string | null;
 
   // ── Two-Factor Auth ────────────────────────────────────────
   @Column({ type: 'varchar', nullable: true, select: false })
@@ -190,17 +186,15 @@ export class User {
   @OneToOne('SchoolAdmin', (a: SchoolAdmin) => a.user, { nullable: true })
   schoolAdmin: SchoolAdmin | null;
 
-  @OneToOne('UserSettings', (s: UserSettings) => s.user, { nullable: true })
+  @OneToOne(() => UserSettings, (s) => s.user, { nullable: true })
   settings: UserSettings | null;
 
-  @OneToOne(
-    'UserNotificationPreferences',
-    (n: UserNotificationPreferences) => n.user,
-    { nullable: true },
-  )
+  @OneToOne(() => UserNotificationPreferences, (n) => n.user, {
+    nullable: true,
+  })
   notificationPreferences: UserNotificationPreferences | null;
 
-  @OneToMany('Subscription', (s: Subscription) => s.user)
+  @OneToMany(() => Subscription, (s) => s.user)
   subscriptions: Subscription[];
 
   @OneToMany('UserSession', (s: UserSession) => s.user)
@@ -209,7 +203,7 @@ export class User {
   @OneToMany('Otp', (o: Otp) => o.user)
   otps: Otp[];
 
-  @OneToMany('Notification', (n: Notification) => n.user)
+  @OneToMany(() => Notification, (n) => n.user)
   notifications: Notification[];
 
   // @OneToMany('AiChatSession', (s: AiChatSession) => s.user)

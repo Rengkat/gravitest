@@ -1,8 +1,3 @@
-// ============================================================
-// 9. SUBSCRIPTION  (subscriptions table)
-//    Created when a user subscribes to a plan.
-//    Free tier subscription auto-created at registration.
-// ============================================================
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -18,7 +13,7 @@ import {
   SubscriptionStatus,
   SubscriptionTier,
 } from './../../common/enums/enums';
-import type { User } from './user.entity';
+import { User } from './user.entity';
 
 @Entity('subscriptions')
 @Index(['userId', 'status'])
@@ -90,7 +85,7 @@ export class Subscription {
   updatedAt!: Date;
 
   // ── Relations ──────────────────────────────────────────────
-  @ManyToOne('User', (u: User) => u.subscriptions)
+  @ManyToOne(() => User, (u: User) => u.subscriptions)
   @JoinColumn({ name: 'user_id' })
   user!: User;
 

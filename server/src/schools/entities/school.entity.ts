@@ -9,8 +9,7 @@ import {
 } from 'typeorm';
 import type { SchoolClass } from './school-class.entity';
 import { NigerianState, SchoolType } from 'src/common/enums/enums';
-import { SchoolAdmin } from 'src/schools/entities/school-admin.entity';
-import { StudentProfile } from 'src/students/entities/student-profile.entity';
+import type { SchoolAdmin } from 'src/schools/entities/school-admin.entity';
 
 @Entity('schools')
 @Index(['subdomain'], { unique: true })
@@ -73,7 +72,4 @@ export class School {
 
   @OneToMany('SchoolClass', (c: SchoolClass) => c.school)
   classes: SchoolClass[];
-
-  @OneToMany('StudentProfile', (s: StudentProfile) => s.school)
-  students: StudentProfile[];
 }
