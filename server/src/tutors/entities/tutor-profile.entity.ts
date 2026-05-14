@@ -17,9 +17,9 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { TutorReview } from './tutor-review.entity';
-import { TutorSession } from './tutor-session.entity';
 import { TutorAvailability } from './tutor-availability.entity';
 import { TutorPayout } from './tutor-payout.entity';
+import { TutorSession } from './tutor-session.entity';
 
 @Entity('tutor_profiles')
 @Index(['status'])
