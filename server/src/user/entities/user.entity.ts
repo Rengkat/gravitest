@@ -17,7 +17,6 @@ import {
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
 
-// ── Lazy imports (avoid circular deps) ────────────────────
 import type { StudentProfile } from '../../students/entities/student-profile.entity';
 import type { TutorProfile } from '../../tutors/entities/tutor-profile.entity';
 import type { SchoolAdmin } from '../../schools/entities/school-admin.entity';
@@ -33,13 +32,7 @@ import { UserNotificationPreferences } from './user-notification-preferences.ent
 import { Subscription } from './subscription.entity';
 import { Otp } from 'src/auth/entities/otp.entity';
 import { Notification } from './notification.entity';
-import { LibraryAccess } from './library-content-access.entity';
-import { UserSession } from 'src/auth/entities/user-session';
-import { ExamSession } from '../../students/entities/exam-session.entity';
-// import type { UserSession } from './user-session.entity';
-// import type { AiChatSession } from './ai-chat-session.entity';
-// import type { Payment } from './payment.entity';
-// import type { LibraryAccess } from './library-access.entity';
+import { UserSession } from 'src/auth/entities/user-session.entity';
 
 @Entity('users')
 @Index(['email'], { unique: true, where: '"email" IS NOT NULL' })
@@ -53,7 +46,7 @@ export class User {
   firstName!: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
-  middleName?: string | null;
+  middleName: string | null;
 
   @Column({ type: 'varchar', length: 100 })
   lastName!: string;
@@ -68,7 +61,7 @@ export class User {
     nullable: true,
     name: 'phone_number',
   })
-  phoneNumber?: string | null;
+  phoneNumber: string | null;
 
   @Column({ type: 'date', nullable: true })
   dateOfBirth: Date | null;
@@ -83,7 +76,7 @@ export class User {
   lga: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  avatarUrl?: string | null;
+  avatarUrl: string | null;
 
   @Column({ type: 'text', nullable: true })
   bio: string | null;
@@ -98,16 +91,16 @@ export class User {
 
   @Column({ type: 'varchar', nullable: true, select: false })
   @Exclude()
-  googleId?: string | null;
+  googleId: string | null;
 
   @Column({ type: 'varchar', nullable: true, select: false })
   @Exclude()
-  appleId?: string | null;
+  appleId: string | null;
 
   // ── Two-Factor Auth ────────────────────────────────────────
   @Column({ type: 'varchar', nullable: true, select: false })
   @Exclude()
-  twoFactorSecret?: string | null;
+  twoFactorSecret: string | null;
 
   @Column({ type: 'boolean', default: false, select: false })
   @Exclude()

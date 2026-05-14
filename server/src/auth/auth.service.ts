@@ -16,7 +16,7 @@ import { User } from 'src/user/entities/user.entity';
 import { Otp } from './entities/otp.entity';
 import { OtpProvider } from './providers/otp.provider';
 import { TokenProvider } from './providers/token.provider';
-import { SessionRevokeReason } from './entities/user-session';
+import { SessionRevokeReason } from './entities/user-session.entity';
 import { MailService } from 'src/mail/mail.service';
 
 import {

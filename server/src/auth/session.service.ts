@@ -1,7 +1,10 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
-import { SessionRevokeReason, UserSession } from './entities/user-session';
+import {
+  SessionRevokeReason,
+  UserSession,
+} from './entities/user-session.entity';
 import { TokenProvider } from './providers/token.provider';
 
 export interface CreateSessionInput {

@@ -5,7 +5,7 @@ import { UserModule } from 'src/user/user.module';
 import { OtpProvider } from './providers/otp.provider';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './entities/otp.entity';
-import { UserSession } from './entities/user-session';
+import { UserSession } from './entities/user-session.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
