@@ -12,7 +12,7 @@ import { DifficultyLevel, Subject } from 'src/common/enums/enums';
 
 // For tracking topic mastery over time (historical data)
 @Entity('topic_mastery_history')
-@Index(['studentProfileId', 'subject', 'topic', 'recordedAt'])
+@Index(['subject', 'topic', 'recordedAt'])
 export class TopicMasteryHistory {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

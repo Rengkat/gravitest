@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ContentType } from '../../common/enums/enums';
-import { LibraryContent } from './library.entity';
+import { LibraryContent } from './library-contnent.entity';
 
 @Entity('library_accesses')
 @Index(['userId', 'contentId'], { unique: true })
