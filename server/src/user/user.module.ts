@@ -16,7 +16,7 @@ import { UserRegistrationProvider } from './providers/create-user.provider';
 @Module({
   controllers: [UserController],
   providers: [UserService, BulkCreateUsersProvider, UserRegistrationProvider],
-  exports: [UserService, TypeOrmModule],
+  exports: [UserService, TypeOrmModule, UserRegistrationProvider],
   imports: [
     TypeOrmModule.forFeature([
       User,

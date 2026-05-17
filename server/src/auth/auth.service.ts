@@ -35,6 +35,7 @@ import {
 import { OtpPurpose } from 'src/common/enums/enums';
 import { SessionService } from './session.service';
 import { HashProvider } from 'src/common/hash/providers/Hash.provider';
+import { UserRegistrationProvider } from 'src/user/providers/create-user.provider';
 
 // ─── Helpers to extract request metadata ────────────────────────────────────
 
@@ -77,6 +78,7 @@ export class AuthService {
 
   constructor(
     private readonly userService: UserService,
+    private readonly userRegistrationProvider: UserRegistrationProvider,
     private readonly otpProvider: OtpProvider,
     private readonly hashProvider: HashProvider,
     private readonly tokenProvider: TokenProvider,
@@ -95,7 +97,7 @@ export class AuthService {
   // ===================================================
 
   async register(dto: RegisterUserDto): Promise<RegisterResponseDto> {
-    const user = await this.userService.registerUser(dto);
+    const user = await this.userRegistrationProvider.registerUser(dto);
 
     const plainOtp = await this.issueOtpAndDispatch(
       user,
