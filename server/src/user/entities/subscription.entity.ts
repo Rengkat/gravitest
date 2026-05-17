@@ -16,14 +16,11 @@ import {
 import { User } from './user.entity';
 
 @Entity('subscriptions')
-@Index(['userId', 'status'])
+@Index(['user', 'status'])
 @Index(['expiresAt'])
 export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
-
-  @Column({ type: 'uuid' })
-  userId!: string;
 
   // ── Plan Details ───────────────────────────────────────────
   @Column({ type: 'enum', enum: SubscriptionTier })
@@ -85,7 +82,7 @@ export class Subscription {
   updatedAt!: Date;
 
   // ── Relations ──────────────────────────────────────────────
-  @ManyToOne(() => User, (u: User) => u.subscriptions)
+  @ManyToOne(() => User, (u: User) => u.subscriptions, { nullable: false })
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
