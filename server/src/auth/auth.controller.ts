@@ -10,11 +10,9 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser, UserId } from './decorators/current-user.decorator';
-import { User } from 'src/user/entities/user.entity';
 
 import {
   ForgotPasswordDto,
@@ -26,7 +24,6 @@ import {
 } from './dto/auth.dto';
 import { AuthService, RefreshTokenContext } from './auth.service';
 
-// @UseGuards(JwtAuthGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -89,7 +86,7 @@ export class AuthController {
    * { userId, jti, rawToken } into req.user via JwtRefreshStrategy.
    */
   @Public()
-  @UseGuards(JwtRefreshGuard) // apply refresh guard instead
+  @UseGuards(JwtRefreshGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   refresh(@CurrentUser() ctx: RefreshTokenContext, @Req() req: Request) {
@@ -104,6 +101,7 @@ export class AuthController {
   getProfile(@UserId() userId: string) {
     return this.authService.getProfile(userId);
   }
+  s;
 
   /**
    * POST /auth/logout

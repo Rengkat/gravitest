@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -20,30 +21,42 @@ import {
   ApiBadRequestResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
+import {
+  CreateUserDto,
+  BulkCreateUsersDto,
+  BulkCreateUsersResponseDto,
+} from './dto/create-user.dto';
 import {
   UpdateUserDto,
   AdminUpdateUserDto,
   ChangePasswordDto,
   AdminResetPasswordDto,
 } from './dto/update-user.dto';
+import { UpdateUserSettingsDto } from './dto/update-user-settings.dto';
+import { UpdateNotificationPreferencesDto } from './dto/update-notification-preferences.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import {
   UserResponseDto,
   CreateUserResponseDto,
 } from './dto/user-response.dto';
-import {
-  BulkCreateUsersDto,
-  BulkCreateUsersResponseDto,
-} from './dto/create-user.dto';
 import { UserService } from './user.service';
+import { UserSettingsProvider } from './providers/user-settings.provider';
+import { UserNotificationPreferencesProvider } from './providers/user-notification-preferences.provider';
 import { DeactivateUserDto } from './dto/admin.dto';
-import { DeactivationType } from 'src/common/enums/enums';
+import { DeactivationType, UserRole } from 'src/common/enums/enums';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { UserId } from 'src/auth/decorators/current-user.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @ApiTags('Users')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UserController {
-  constructor(private readonly usersService: UserService) {}
+  constructor(
+    private readonly usersService: UserService,
+    private readonly userSettingsProvider: UserSettingsProvider,
+    private readonly userNotificationPreferencesProvider: UserNotificationPreferencesProvider,
+  ) {}
 
   // ══════════════════════════════════════════
   // SELF — authenticated user's own profile
@@ -52,9 +65,8 @@ export class UserController {
   @Get('me')
   @ApiOperation({ summary: 'Get my profile' })
   @ApiOkResponse({ type: UserResponseDto })
-  getMe() {
-    // TODO: replace 'temp-user-id' with @CurrentUser('id') when JWT is implemented
-    return this.usersService.getProfile('temp-user-id');
+  getMe(@UserId() userId: string) {
+    return this.usersService.getProfile(userId);
   }
 
   @Patch('me')
@@ -63,9 +75,8 @@ export class UserController {
   })
   @ApiOkResponse({ type: UserResponseDto })
   @ApiBadRequestResponse({ description: 'Validation error' })
-  updateMe(@Body() dto: UpdateUserDto) {
-    // TODO: replace 'temp-user-id' with @CurrentUser('id') when JWT is implemented
-    return this.usersService.updateProfile('temp-user-id', dto);
+  updateMe(@UserId() userId: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.updateProfile(userId, dto);
   }
 
   @Patch('me/password')
@@ -75,25 +86,56 @@ export class UserController {
     schema: { example: { message: 'Password changed successfully' } },
   })
   @ApiBadRequestResponse({ description: 'Current password is incorrect' })
-  changePassword(@Body() dto: ChangePasswordDto) {
-    // TODO: replace 'temp-user-id' with @CurrentUser('id') when JWT is implemented
-    return this.usersService.changePassword('temp-user-id', dto);
+  changePassword(@UserId() userId: string, @Body() dto: ChangePasswordDto) {
+    return this.usersService.changePassword(userId, dto);
   }
+
   @Delete('me')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Deactivate my account — soft delete, cannot be undone by user',
-  })
+  @ApiOperation({ summary: 'Deactivate my account' })
   @ApiOkResponse({
     schema: { example: { message: 'Account deactivated successfully' } },
   })
-  deactivateMe() {
-    // TODO: replace 'temp-user-id' with @CurrentUser('id') when JWT is implemented
+  deactivateMe(@UserId() userId: string) {
     return this.usersService.deactivate(
-      'temp-user-id',
+      userId,
       DeactivationType.USER_REQUEST,
-      'temp-user-id',
+      userId,
       'User requested account deactivation',
+    );
+  }
+
+  // ── Settings ───────────────────────────────────────────────
+
+  @Get('me/settings')
+  @ApiOperation({ summary: 'Get my settings' })
+  getSettings(@UserId() userId: string) {
+    return this.userSettingsProvider.getSettings(userId);
+  }
+
+  @Patch('me/settings')
+  @ApiOperation({ summary: 'Update my settings' })
+  updateSettings(@UserId() userId: string, @Body() dto: UpdateUserSettingsDto) {
+    return this.userSettingsProvider.updateSettings(userId, dto);
+  }
+
+  // ── Notification Preferences ───────────────────────────────
+
+  @Get('me/notification-preferences')
+  @ApiOperation({ summary: 'Get my notification preferences' })
+  getNotificationPreferences(@UserId() userId: string) {
+    return this.userNotificationPreferencesProvider.getPreferences(userId);
+  }
+
+  @Patch('me/notification-preferences')
+  @ApiOperation({ summary: 'Update my notification preferences' })
+  updateNotificationPreferences(
+    @UserId() userId: string,
+    @Body() dto: UpdateNotificationPreferencesDto,
+  ) {
+    return this.userNotificationPreferencesProvider.updatePreferences(
+      userId,
+      dto,
     );
   }
 
@@ -102,6 +144,7 @@ export class UserController {
   // ══════════════════════════════════════════
 
   @Post()
+  @Roles(UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary: '[Admin] Create a user directly',
     description:
@@ -111,17 +154,14 @@ export class UserController {
   @ApiCreatedResponse({ type: CreateUserResponseDto })
   @ApiConflictResponse({ description: 'Email already exists' })
   create(@Body() dto: CreateUserDto) {
-    console.log(dto);
     return this.usersService.adminCreateUser(dto);
   }
 
   @Post('bulk')
+  @Roles(UserRole.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '[Admin] Bulk create up to 500 users in one request',
-    description:
-      'Processes in chunks of 50. Duplicates are skipped by default. ' +
-      'Returns a detailed report with created/skipped/failed counts.',
   })
   @ApiOkResponse({ type: BulkCreateUsersResponseDto })
   bulkCreate(@Body() dto: BulkCreateUsersDto) {
@@ -137,6 +177,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @Roles(UserRole.SUPER_ADMIN)
   @ApiOperation({ summary: '[Admin] Get a user by ID' })
   @ApiOkResponse({ type: UserResponseDto })
   @ApiNotFoundResponse({ description: 'User not found' })
@@ -145,10 +186,8 @@ export class UserController {
   }
 
   @Patch(':id')
-  @ApiOperation({
-    summary:
-      '[Admin] Update any user field including role and subscription tier',
-  })
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: '[Admin] Update any user field including role' })
   @ApiOkResponse({ type: UserResponseDto })
   @ApiNotFoundResponse({ description: 'User not found' })
   adminUpdate(
@@ -159,13 +198,9 @@ export class UserController {
   }
 
   @Post(':id/reset-password')
+  @Roles(UserRole.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: "[Admin] Reset a user's password",
-    description:
-      'If newPassword is omitted, a secure temp password is generated. ' +
-      'If notifyUser is false, the temp password is returned in the response.',
-  })
+  @ApiOperation({ summary: "[Admin] Reset a user's password" })
   adminResetPassword(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AdminResetPasswordDto,
@@ -174,21 +209,23 @@ export class UserController {
   }
 
   @Patch(':id/deactivate')
+  @Roles(UserRole.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: '[Admin] Deactivate a user account' })
   adminDeactivate(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: DeactivateUserDto,
+    @UserId() adminId: string,
   ) {
-    // TODO: replace 'admin-id' with @CurrentUser('id') when JWT is implemented
     return this.usersService.deactivate(
       id,
       dto.type ?? DeactivationType.ADMIN_SUSPENSION,
-      'admin-id',
+      adminId,
       dto.reason,
     );
   }
+
   @Patch(':id/reactivate')
+  @Roles(UserRole.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '[Admin] Reactivate a previously deactivated user' })
   adminReactivate(@Param('id', ParseUUIDPipe) id: string) {
