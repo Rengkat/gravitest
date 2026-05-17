@@ -1,15 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { Inject } from '@nestjs/common';
 import { User } from '../entities/user.entity';
+import { UserSettings } from '../entities/user-settings.entity';
+import { UserNotificationPreferences } from '../entities/user-notification-preferences.entity';
+
 import {
   BulkCreateUsersDto,
   BulkCreateUserRowDto,
   BulkCreateUsersResponseDto,
 } from '../dto/create-user.dto';
-import { AuthProvider, UserRole } from 'src/common/enums/enums';
+import {
+  AuthProvider,
+  SubscriptionStatus,
+  SubscriptionTier,
+  UserRole,
+} from 'src/common/enums/enums';
 import { HashProvider } from 'src/common/hash/providers/Hash.provider';
+import { Subscription } from '../entities/subscription.entity';
+import { StudentProfile } from 'src/students/entities/student-profile.entity';
 
 @Injectable()
 export class BulkCreateUsersProvider {
@@ -19,7 +28,6 @@ export class BulkCreateUsersProvider {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @Inject(HashProvider)
     private readonly hashProvider: HashProvider,
     private readonly dataSource: DataSource,
   ) {}
@@ -34,85 +42,71 @@ export class BulkCreateUsersProvider {
     };
 
     const chunks = this.chunk(dto.users, this.CHUNK_SIZE);
-
     for (const chunk of chunks) {
       await this.processChunk(chunk, dto, result);
     }
 
     this.logger.log(
-      `Bulk create complete — created: ${result.created}, ` +
-        `skipped: ${result.skipped}, failed: ${result.failed}`,
+      `Bulk create complete — created: ${result.created}, skipped: ${result.skipped}, failed: ${result.failed}`,
     );
 
     return result;
   }
-  // PROCES THE CHUNK
+
   private async processChunk(
     rows: BulkCreateUserRowDto[],
     dto: BulkCreateUsersDto,
     result: BulkCreateUsersResponseDto,
   ): Promise<void> {
-    // ── 1. Collect identifiers from the chunk ──────────────────────────────
+    // ── 1. Collect identifiers ─────────────────────────────────
     const emails = rows
       .map((r) => r.email?.toLowerCase().trim())
-      .filter((email): email is string => !!email);
+      .filter((e): e is string => !!e);
 
     const phoneNumbers = rows
       .map((r) => r.phoneNumber?.trim())
-      .filter((phone): phone is string => !!phone);
+      .filter((p): p is string => !!p);
 
-    // ── 2. Single duplicate-check query (skipped if no identifiers) ────────
+    // ── 2. Single duplicate-check query ────────────────────────
     let existingUsers: User[] = [];
-
     if (emails.length > 0 || phoneNumbers.length > 0) {
       const qb = this.userRepository
         .createQueryBuilder('u')
         .select(['u.email', 'u.phoneNumber']);
 
-      if (emails.length > 0) {
+      if (emails.length > 0)
         qb.orWhere('LOWER(u.email) IN (:...emails)', { emails });
-      }
-      if (phoneNumbers.length > 0) {
+      if (phoneNumbers.length > 0)
         qb.orWhere('u.phoneNumber IN (:...phoneNumbers)', { phoneNumbers });
-      }
 
       existingUsers = await qb.getMany();
     }
 
     const existingEmails = new Set(
-      existingUsers
-        .map((u) => u.email?.toLowerCase().trim())
-        .filter((e): e is string => !!e),
+      existingUsers.map((u) => u.email?.toLowerCase().trim()).filter(Boolean),
     );
     const existingPhones = new Set(
-      existingUsers
-        .map((u) => u.phoneNumber?.trim())
-        .filter((p): p is string => !!p),
+      existingUsers.map((u) => u.phoneNumber?.trim()).filter(Boolean),
     );
 
-    // ── 3. Classify each row: fail | skip | create ─────────────────────────
+    // ── 3. Classify rows ───────────────────────────────────────
     const toCreate: BulkCreateUserRowDto[] = [];
 
     for (const row of rows) {
       const email = row.email?.toLowerCase().trim();
       const phone = row.phoneNumber?.trim();
 
-      // Row must have at least one identifier
       if (!email && !phone) {
         result.failed++;
         result.errors.push('Row missing both email and phone — skipped');
         continue;
       }
 
-      // Collect ALL duplicate reasons before deciding what to do
       const duplicateReasons: string[] = [];
-
-      if (email && existingEmails.has(email)) {
+      if (email && existingEmails.has(email))
         duplicateReasons.push(`email ${email} already exists`);
-      }
-      if (phone && existingPhones.has(phone)) {
+      if (phone && existingPhones.has(phone))
         duplicateReasons.push(`phone ${phone} already exists`);
-      }
 
       if (duplicateReasons.length > 0) {
         if (dto.skipDuplicates) {
@@ -129,18 +123,15 @@ export class BulkCreateUsersProvider {
 
     if (toCreate.length === 0) return;
 
-    // ── 4. Hash passwords in parallel before opening the transaction ────────
-    const usersToInsert = await Promise.all(
+    // ── 4. Prepare all user objects (hash passwords in parallel) ──
+    const prepared = await Promise.all(
       toCreate.map(async (row) => {
         try {
-          // Track whether the password was auto-generated
           const wasGenerated = !row.password;
           const rawPassword = row.password ?? this.generateTempPassword();
           const passwordHash =
             await this.hashProvider.hashPassword(rawPassword);
 
-          // Store the generated password in the result so the caller
-          //    can send it to the student via email/SMS
           if (wasGenerated) {
             result.generatedPasswords.push({
               identifier: row.email || row.phoneNumber || 'unknown',
@@ -148,7 +139,30 @@ export class BulkCreateUsersProvider {
             });
           }
 
-          return this.userRepository.create({
+          return { row, passwordHash };
+        } catch (err) {
+          result.failed++;
+          result.errors.push(
+            `${row.email || row.phoneNumber || 'unknown'}: failed to prepare — ${(err as Error).message}`,
+          );
+          return null;
+        }
+      }),
+    );
+
+    const validRows = prepared.filter(
+      (p): p is { row: BulkCreateUserRowDto; passwordHash: string } =>
+        p !== null,
+    );
+
+    if (validRows.length === 0) return;
+
+    // ── 5. Single transaction — batch insert each entity type ──
+    try {
+      await this.dataSource.transaction(async (manager) => {
+        // ── 5a. Insert all Users first ───────────────────────
+        const users = validRows.map(({ row, passwordHash }) =>
+          manager.create(User, {
             firstName: row.firstName.trim(),
             lastName: row.lastName.trim(),
             middleName: row.middleName?.trim() ?? null,
@@ -158,46 +172,130 @@ export class BulkCreateUsersProvider {
             role: row.role ?? UserRole.STUDENT,
             stateOfResidence: row.stateOfResidence ?? null,
             lga: row.lga ?? null,
-            isEmailVerified: false,
             isActive: true,
+            // Admin-created users skip email verification
+            isEmailVerified: true,
             authProvider: AuthProvider.EMAIL,
-          });
-        } catch (err) {
-          result.failed++;
-          result.errors.push(
-            // 'unknown' fallback across ALL error paths
-            `${row.email || row.phoneNumber || 'unknown'}: failed to prepare — ${(err as Error).message}`,
+          }),
+        );
+
+        // Batch insert — one INSERT with all rows, not N inserts
+        const savedUsers = await manager.save(User, users);
+
+        // ── 5b. Batch insert UserSettings ────────────────────
+        const settings = savedUsers.map((user) =>
+          manager.create(UserSettings, { user }),
+        );
+        await manager.save(UserSettings, settings);
+
+        // ── 5c. Batch insert NotificationPreferences ─────────
+        const notifPrefs = savedUsers.map((user) =>
+          manager.create(UserNotificationPreferences, { user }),
+        );
+        await manager.save(UserNotificationPreferences, notifPrefs);
+
+        // ── 5d. Batch insert Subscriptions ────────────────────
+        const subscriptions = savedUsers.map((user) =>
+          manager.create(Subscription, {
+            user,
+            tier: SubscriptionTier.FREE,
+            status: SubscriptionStatus.ACTIVE,
+            startedAt: new Date(),
+            expiresAt: null,
+            autoRenew: false,
+          }),
+        );
+        await manager.save(Subscription, subscriptions);
+
+        // ── 5e. Batch insert StudentProfiles (STUDENT role only) ──
+        const studentUsers = savedUsers.filter(
+          (u) => u.role === UserRole.STUDENT,
+        );
+
+        if (studentUsers.length > 0) {
+          const profiles = studentUsers.map((user) =>
+            manager.create(StudentProfile, {
+              user,
+              totalXp: 0,
+              level: 1,
+              levelTitle: 'Beginner',
+              currentStreak: 0,
+              longestStreak: 0,
+            }),
           );
-          return null;
+          await manager.save(StudentProfile, profiles);
         }
-      }),
-    );
-
-    // ── 5. Filter out rows that failed preparation ─────────────────────────
-    const validUsers = usersToInsert.filter((u): u is User => u !== null);
-    if (validUsers.length === 0) return;
-
-    // ── 6. Attempt bulk insert inside a transaction ────────────────────────
-    try {
-      await this.dataSource.transaction(async (manager) => {
-        await manager.save(User, validUsers);
       });
-      result.created += validUsers.length;
+
+      result.created += validRows.length;
     } catch (bulkErr) {
-      // Bulk insert failed — fall back to row-by-row so one bad row
-      // doesn't silently discard the rest of the chunk
+      // ── 6. Fallback: row-by-row if batch fails ─────────────
+      // One bad row shouldn't discard the whole chunk
       this.logger.warn(
         `Chunk bulk insert failed — falling back to row-by-row: ${(bulkErr as Error).message}`,
       );
 
-      for (const user of validUsers) {
+      for (const { row, passwordHash } of validRows) {
         try {
-          await this.userRepository.save(user);
+          await this.dataSource.transaction(async (manager) => {
+            const user = await manager.save(
+              User,
+              manager.create(User, {
+                firstName: row.firstName.trim(),
+                lastName: row.lastName.trim(),
+                middleName: row.middleName?.trim() ?? null,
+                email: row.email?.toLowerCase().trim() ?? null,
+                phoneNumber: row.phoneNumber?.trim() ?? null,
+                passwordHash,
+                role: row.role ?? UserRole.STUDENT,
+                stateOfResidence: row.stateOfResidence ?? null,
+                lga: row.lga ?? null,
+                isActive: true,
+                isEmailVerified: true,
+                authProvider: AuthProvider.EMAIL,
+              }),
+            );
+
+            await manager.save(
+              UserSettings,
+              manager.create(UserSettings, { user }),
+            );
+            await manager.save(
+              UserNotificationPreferences,
+              manager.create(UserNotificationPreferences, { user }),
+            );
+            await manager.save(
+              Subscription,
+              manager.create(Subscription, {
+                user,
+                tier: SubscriptionTier.FREE,
+                status: SubscriptionStatus.ACTIVE,
+                startedAt: new Date(),
+                expiresAt: null,
+                autoRenew: false,
+              }),
+            );
+
+            if ((row.role ?? UserRole.STUDENT) === UserRole.STUDENT) {
+              await manager.save(
+                StudentProfile,
+                manager.create(StudentProfile, {
+                  user,
+                  totalXp: 0,
+                  level: 1,
+                  levelTitle: 'Beginner',
+                  currentStreak: 0,
+                  longestStreak: 0,
+                }),
+              );
+            }
+          });
+
           result.created++;
         } catch (rowErr) {
           result.failed++;
           result.errors.push(
-            `${user.email || user.phoneNumber || 'unknown'}: ${(rowErr as Error).message}`,
+            `${row.email || row.phoneNumber || 'unknown'}: ${(rowErr as Error).message}`,
           );
         }
       }
