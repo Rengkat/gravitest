@@ -12,10 +12,16 @@ import { Subscription } from './entities/subscription.entity';
 import { Notification } from './entities/notification.entity';
 import { LibraryAccess } from '../library/entities/library-content-access.entity';
 import { UserRegistrationProvider } from './providers/create-user.provider';
+import { UserSettingsProvider } from './providers/user-settings.provider';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService, BulkCreateUsersProvider, UserRegistrationProvider],
+  providers: [
+    UserService,
+    BulkCreateUsersProvider,
+    UserRegistrationProvider,
+    UserSettingsProvider,
+  ],
   exports: [UserService, TypeOrmModule, UserRegistrationProvider],
   imports: [
     TypeOrmModule.forFeature([
