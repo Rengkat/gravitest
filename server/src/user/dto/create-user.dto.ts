@@ -88,7 +88,7 @@ export class BulkCreateUserRowDto extends BaseUserDto {
   })
   @IsOptional()
   @IsEnum(UserRole)
-  role?: UserRole = UserRole.STUDENT;
+  role?: UserRole.STUDENT;
 
   @ApiPropertyOptional({
     enum: SubscriptionTier,

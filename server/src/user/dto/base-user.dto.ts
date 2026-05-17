@@ -55,12 +55,6 @@ export abstract class BaseUserDto {
   })
   phoneNumber?: string;
 
-  @ApiProperty({ enum: UserRole })
-  @IsString()
-  @IsEnum(UserRole)
-  @IsNotEmpty()
-  role!: UserRole;
-
   @ApiPropertyOptional({
     example: 'https://res.cloudinary.com/gravitest/avatar.jpg',
   })

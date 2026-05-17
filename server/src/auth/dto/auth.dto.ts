@@ -3,6 +3,7 @@ import { Expose, Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -10,6 +11,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { UserRole } from 'src/common/enums/enums';
 import { BaseUserDto } from 'src/user/dto';
 
 const PASSWORD_REGEX =
@@ -31,6 +33,12 @@ export class RegisterUserDto extends BaseUserDto {
       'Password must contain uppercase, lowercase, number, and special character',
   })
   password!: string;
+
+  @ApiProperty({ enum: UserRole })
+  @IsString()
+  @IsEnum(UserRole)
+  @IsNotEmpty()
+  role!: UserRole;
 }
 
 // ───────────────── RESPONSE DTOs ─────────────────

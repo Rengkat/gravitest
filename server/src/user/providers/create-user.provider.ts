@@ -3,7 +3,19 @@ import { HashProvider } from 'src/common/hash/providers/Hash.provider';
 import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { RegisterUserDto } from 'src/auth/dto/auth.dto';
-import { AuthProvider, UserRole } from 'src/common/enums/enums';
+import {
+  AuthProvider,
+  SubscriptionStatus,
+  SubscriptionTier,
+  TutorStatus,
+  UserRole,
+} from 'src/common/enums/enums';
+import { UserSettings } from '../entities/user-settings.entity';
+import { UserNotificationPreferences } from '../entities/user-notification-preferences.entity';
+import { Subscription } from '../entities/subscription.entity';
+import { StudentProfile } from 'src/students/entities/student-profile.entity';
+import { TutorProfile } from 'src/tutors/entities/tutor-profile.entity';
+import { SchoolAdmin } from 'src/schools/entities/school-admin.entity';
 
 @Injectable()
 export class UserRegistrationProvider {
@@ -21,7 +33,6 @@ export class UserRegistrationProvider {
       : null;
 
     // ── Uniqueness check BEFORE opening the transaction ──────────────────
-    // Cheaper to fail fast here than inside a transaction
     await this.assertUniqueEmailAndPhone(normalizedEmail, normalizedPhone);
 
     const passwordHash = await this.hashProvider.hashPassword(dto.password);
@@ -34,7 +45,7 @@ export class UserRegistrationProvider {
         email: normalizedEmail,
         phoneNumber: normalizedPhone,
         passwordHash,
-        role: UserRole.STUDENT,
+        role: dto.role,
         authProvider: AuthProvider.EMAIL,
         isActive: true,
         isEmailVerified: false,
@@ -42,9 +53,68 @@ export class UserRegistrationProvider {
       });
 
       await manager.save(User, user);
+      // ── 2. UserSettings (all roles) ──────────────────────────
+      const settings = manager.create(UserSettings, { user });
+      await manager.save(UserSettings, settings);
 
-      // ... rest of your entities (UserSettings, StudentProfile, etc.)
+      // ── 3. NotificationPreferences (all roles) ──────────────────────────
+      const notifPrefs = manager.create(UserNotificationPreferences, { user });
+      await manager.save(UserNotificationPreferences, notifPrefs);
+      // ── 4. Free Subscription (all roles) ────────────────────
 
+      const subscription = manager.create(Subscription, {
+        user,
+        tier: SubscriptionTier.FREE,
+        status: SubscriptionStatus.ACTIVE,
+        startedAt: new Date(),
+        expiresAt: null,
+        autoRenew: false,
+      });
+      await manager.save(Subscription, subscription);
+
+      // ── 5. Role-specific profile ─────────────────────────────
+      switch (user.role) {
+        case UserRole.STUDENT:
+          await manager.save(
+            StudentProfile,
+            manager.create(StudentProfile, {
+              user,
+              totalXp: 0,
+              level: 1,
+              levelTitle: 'Beginner',
+              currentStreak: 0,
+              longestStreak: 0,
+            }),
+          );
+          break;
+
+        case UserRole.TUTOR:
+          await manager.save(
+            TutorProfile,
+            manager.create(TutorProfile, {
+              user,
+              status: TutorStatus.PENDING,
+              subjects: [],
+              hourlyRateKobo: 0,
+              canTeachOnline: true,
+              canTeachInPerson: false,
+              escrowBalanceKobo: 0,
+              availableBalanceKobo: 0,
+              totalEarnedKobo: 0,
+            }),
+          );
+          break;
+
+        case UserRole.SCHOOL_ADMIN:
+          await manager.save(
+            SchoolAdmin,
+            manager.create(SchoolAdmin, {
+              user,
+              isActive: true,
+            }),
+          );
+          break;
+      }
       return user;
     });
   }
