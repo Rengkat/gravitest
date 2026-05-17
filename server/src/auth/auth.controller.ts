@@ -101,7 +101,6 @@ export class AuthController {
   getProfile(@UserId() userId: string) {
     return this.authService.getProfile(userId);
   }
-  s;
 
   /**
    * POST /auth/logout
