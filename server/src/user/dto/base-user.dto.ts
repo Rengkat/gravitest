@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { Gender, NigerianState } from 'src/common/enums/enums';
+import { Gender, NigerianState, UserRole } from 'src/common/enums/enums';
 import { normalizeEmail, trimString } from 'src/common/transforms/transforms';
 
 /**
@@ -54,6 +54,12 @@ export abstract class BaseUserDto {
     message: 'Phone must be a valid Nigerian number: +234XXXXXXXXXX',
   })
   phoneNumber?: string;
+
+  @ApiProperty({ enum: UserRole })
+  @IsString()
+  @IsEnum(UserRole)
+  @IsNotEmpty()
+  role!: UserRole;
 
   @ApiPropertyOptional({
     example: 'https://res.cloudinary.com/gravitest/avatar.jpg',

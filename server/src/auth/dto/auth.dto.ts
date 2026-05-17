@@ -50,6 +50,11 @@ export class UserResponseDto {
 
   @ApiProperty()
   @Expose()
+  @IsOptional()
+  middleName?: string;
+
+  @ApiProperty()
+  @Expose()
   lastName: string;
 
   @ApiProperty()
