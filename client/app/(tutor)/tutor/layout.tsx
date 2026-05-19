@@ -1,13 +1,11 @@
-// app/tutor/layout.tsx
 "use client";
 
 import { useState } from "react";
 import { Menu, X, Users, Calendar, Clock } from "lucide-react";
 import Footer from "@/Components/Footer";
-import TutorSideBar from "./components/TutorSideBar";
+import TutorSideBar from "../components/TutorSideBar";
 import Notifications from "@/Components/Notifications";
 import UserMenu from "@/Components/UserMenu";
-
 export default function TutorLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -41,12 +39,12 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
           style={{ borderColor: "rgba(30,80,50,0.1)" }}>
           <div className="flex items-center justify-end gap-4">
             {/* Tutor Badge */}
-            <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-purple-800/5">
-              <Users size={14} className="text-purple-800" />
-              <span className="text-[12px] font-semibold text-purple-900">Tutor</span>
+            <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-green-800/5">
+              <Users size={14} className="text-green-800" />
+              <span className="text-[12px] font-semibold text-green-900">Tutor</span>
               <div className="w-px h-4 bg-text-muted/20" />
-              <Calendar size={14} className="text-purple-600" />
-              <span className="text-[12px] font-semibold text-purple-900">5 Upcoming Sessions</span>
+              <Calendar size={14} className="text-green-600" />
+              <span className="text-[12px] font-semibold text-green-900">5 Upcoming Sessions</span>
             </div>
 
             {/* Notifications */}
