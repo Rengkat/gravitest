@@ -18,7 +18,7 @@ import {
   HelpCircle,
   Zap,
 } from "lucide-react";
-import StatCard from "@/components/StatCard";
+import StatCard from "../components/SatsCard";
 
 // Mock data
 const SCHOOL_STATS = {
