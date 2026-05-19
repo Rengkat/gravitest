@@ -79,7 +79,9 @@ export default function ClassesPage() {
               <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
                 <GraduationCap size={22} className="text-green-600" />
               </div>
-              <button className="p-1.5 rounded-lg hover:bg-cream transition-colors">
+              <button
+                title="vertical"
+                className="p-1.5 rounded-lg hover:bg-cream transition-colors">
                 <MoreVertical size={16} className="text-text-muted" />
               </button>
             </div>
