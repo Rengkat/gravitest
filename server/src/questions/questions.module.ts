@@ -18,5 +18,6 @@ import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
       QuestionExplanation,
     ]),
   ],
+  exports: [QuestionsService],
 })
 export class QuestionsModule {}
