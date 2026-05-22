@@ -20,6 +20,9 @@ export class Question {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  questionNumber: string | null; // for theory questions e.g Question 1a, 1b etc
+
   @Column({ type: 'enum', enum: ExamType })
   examType!: ExamType; // JAMB, WAEC, NECO etc
 
@@ -47,6 +50,12 @@ export class Question {
 
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
+
+  @Column({ type: 'uuid', nullable: true, name: 'school_id' })
+  schoolId: string | null;
+
+  @Column({ type: 'uuid', nullable: true, name: 'class_id' })
+  classId: string | null;
 
   // ── Relations ──────────────────────────────
   @OneToMany(() => QuestionOption, (o) => o.question, { cascade: true })

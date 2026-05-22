@@ -25,6 +25,10 @@ export class UpdateQuestionDto extends PartialType(CreateQuestionDto) {}
 // ─── Filter / query params for GET /questions ────────────────────────────────
 
 export class QuestionFiltersDto {
+  @IsString()
+  @IsOptional()
+  questionNumber: string; //for theory questions e.g Question 1a, 1b etc
+
   @IsOptional()
   @IsEnum(ExamType)
   examType?: ExamType;

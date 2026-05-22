@@ -71,6 +71,10 @@ export class CreateExplanationDto {
 // ─── Main DTO ─────────────────────────────────────────────────────────────────
 
 export class CreateQuestionDto {
+  @IsString()
+  @IsOptional()
+  questionNumber: string; //for theory questions e.g Question 1a, 1b etc
+
   @IsEnum(ExamType)
   examType!: ExamType;
 
@@ -129,4 +133,8 @@ export class CreateQuestionDto {
   @IsOptional()
   @IsUUID()
   schoolId?: string | null;
+
+  @IsOptional()
+  @IsUUID()
+  classId?: string | null;
 }
