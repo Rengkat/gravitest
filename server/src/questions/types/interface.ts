@@ -1,13 +1,5 @@
 import { Question } from '../entities/question.entity';
 
-export interface PaginatedQuestions {
-  data: Question[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
 export interface QuestionBankStats {
   total: number;
   active: number;

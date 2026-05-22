@@ -11,15 +11,17 @@ import {
   UpdateQuestionDto,
 } from './dto/update-question.dto';
 import { Question } from './entities/question.entity';
-import { Repository } from 'typeorm/browser/repository/Repository.js';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuestionAnswer } from './entities/question-answer.entity';
 import { QuestionOption } from './entities/question-option.entity';
 import { QuestionExplanation } from './entities/question-explanation.entity';
 import { DataSource } from 'typeorm';
 import { BulkImportDto, BulkImportResult } from './dto/BulkQuestionsImport.dto';
-import { PaginatedQuestions, QuestionBankStats } from './types/interface';
+import { QuestionBankStats } from './types/interface';
 import { QuestionType } from 'src/common/enums/enums';
+import { PaginationProvider } from 'src/common/pagination/pagination.provider';
+import { PaginatedResult } from 'src/common/pagination/pagination.interface';
 
 @Injectable()
 export class QuestionsService {
@@ -37,6 +39,8 @@ export class QuestionsService {
     private readonly questionExplanationRepository: Repository<QuestionExplanation>,
 
     private readonly dataSource: DataSource,
+
+    private readonly paginationProvider: PaginationProvider,
   ) {}
 
   // ─── CREATE ────────────────────────────────────────────────────────────────
@@ -46,6 +50,7 @@ export class QuestionsService {
     return this.dataSource.transaction(async (manager) => {
       // 1. Persist core question
       const question = manager.create(Question, {
+        questionNumber: dto.questionNumber ?? null,
         examType: dto.examType,
         subject: dto.subject,
         year: dto.year,
@@ -109,7 +114,9 @@ export class QuestionsService {
 
   // ─── LIST / SEARCH ─────────────────────────────────────────────────────────
 
-  async findAll(filters: QuestionFiltersDto): Promise<PaginatedQuestions> {
+  async findAll(
+    filters: QuestionFiltersDto,
+  ): Promise<PaginatedResult<Question>> {
     const {
       page = 1,
       limit = 50,
@@ -180,19 +187,7 @@ export class QuestionsService {
       subject: 'q.subject',
     };
     qb.orderBy(allowedSorts[sortBy] ?? 'q.createdAt', sortOrder);
-
-    const skip = (page - 1) * limit;
-    qb.skip(skip).take(limit);
-
-    const [data, total] = await qb.getManyAndCount();
-
-    return {
-      data,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return this.paginationProvider.paginateQueryBuilder(qb, { page, limit });
   }
 
   // ─── FIND ONE ──────────────────────────────────────────────────────────────
