@@ -9,6 +9,7 @@ import {
   Max,
   IsBoolean,
   IsIn,
+  IsUUID,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
@@ -17,6 +18,7 @@ import {
   QuestionType,
   Subject,
 } from 'src/common/enums/enums';
+import { PaginationDto } from 'src/common/pagination/pagination.dto';
 
 // ─── Update (all fields optional) ────────────────────────────────────────────
 
@@ -24,7 +26,7 @@ export class UpdateQuestionDto extends PartialType(CreateQuestionDto) {}
 
 // ─── Filter / query params for GET /questions ────────────────────────────────
 
-export class QuestionFiltersDto {
+export class QuestionFiltersDto extends PaginationDto {
   @IsString()
   @IsOptional()
   questionNumber: string; //for theory questions e.g Question 1a, 1b etc
@@ -66,19 +68,9 @@ export class QuestionFiltersDto {
   @IsString()
   schoolId?: string;
 
-  // Pagination
   @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Type(() => Number)
-  page?: number = 1;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(200)
-  @Type(() => Number)
-  limit?: number = 50;
+  @IsUUID()
+  classId?: string;
 
   // Search
   @IsOptional()

@@ -6,6 +6,7 @@ import { QuestionAnswer } from './entities/question-answer.entity';
 import { QuestionOption } from './entities/question-option.entity';
 import { Question } from './entities/question.entity';
 import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 
 @Module({
   controllers: [QuestionsController],
@@ -17,6 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm/dist/typeorm.module';
       QuestionAnswer,
       QuestionExplanation,
     ]),
+    PaginationModule,
   ],
   exports: [QuestionsService],
 })

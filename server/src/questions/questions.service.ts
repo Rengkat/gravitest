@@ -147,13 +147,21 @@ export class QuestionsService {
         isActive: fieldFilters.isActive,
       });
 
-    // ── School scope ──
-    if (fieldFilters.schoolId === 'null') {
-      qb.andWhere('q.schoolId IS NULL');
-    } else if (fieldFilters.schoolId) {
+    // ── Scope (mutually exclusive — only one block runs) ──
+    if (fieldFilters.classId && fieldFilters.schoolId) {
+      // Class-specific questions + school-wide questions for that school
+      qb.andWhere(
+        '(q.schoolId = :schoolId AND q.classId = :classId) OR (q.schoolId = :schoolId AND q.classId IS NULL)',
+        { schoolId: fieldFilters.schoolId, classId: fieldFilters.classId },
+      );
+    } else if (fieldFilters.schoolId && fieldFilters.schoolId !== 'null') {
+      // All questions for this school (class-specific + general)
       qb.andWhere('q.schoolId = :schoolId', {
         schoolId: fieldFilters.schoolId,
       });
+    } else {
+      // Platform bank only
+      qb.andWhere('q.schoolId IS NULL');
     }
 
     // ── Full-text search ──
@@ -386,12 +394,19 @@ export class QuestionsService {
 
   // ─── STATS ────────────────────────────────────────────────────────────────
 
-  async getBankStats(schoolId?: string): Promise<QuestionBankStats> {
+  async getBankStats(
+    schoolId?: string,
+    classId?: string,
+  ): Promise<QuestionBankStats> {
     const base = this.questionRepository.createQueryBuilder('q');
-    if (schoolId === 'null' || !schoolId) {
-      base.where('q.schoolId IS NULL');
-    } else {
+    if (classId && schoolId) {
+      base
+        .where('q.schoolId = :schoolId', { schoolId })
+        .andWhere('q.classId = :classId', { classId });
+    } else if (schoolId && schoolId !== 'null') {
       base.where('q.schoolId = :schoolId', { schoolId });
+    } else {
+      base.where('q.schoolId IS NULL');
     }
 
     const [
@@ -438,11 +453,7 @@ export class QuestionsService {
         .groupBy('q.year')
         .orderBy('q.year', 'DESC')
         .getRawMany<{ year: number; count: string }>(),
-      this.questionRepository
-        .createQueryBuilder('q')
-        .innerJoin('q.explanations', 'e')
-        .where('q.schoolId IS NULL')
-        .getCount(),
+      base.clone().innerJoin('q.explanations', 'e').getCount(),
       base.clone().andWhere('q.questionImageUrl IS NOT NULL').getCount(),
     ]);
 
@@ -477,6 +488,7 @@ export class QuestionsService {
     limit: number;
     shuffled?: boolean;
     schoolId?: string;
+    classId?: string;
   }): Promise<Question[]> {
     const qb = this.questionRepository
       .createQueryBuilder('q')
@@ -487,7 +499,9 @@ export class QuestionsService {
     if (params.examType)
       qb.andWhere('q.examType = :examType', { examType: params.examType });
     if (params.subjects?.length)
-      qb.andWhere('q.subject IN (:...subjects)', { subjects: params.subjects });
+      qb.andWhere('q.subject IN (:...subjects)', {
+        subjects: params.subjects,
+      });
     if (params.year) qb.andWhere('q.year = :year', { year: params.year });
     if (params.difficulty)
       qb.andWhere('q.difficulty = :difficulty', {
@@ -495,7 +509,13 @@ export class QuestionsService {
       });
     if (params.type) qb.andWhere('q.type = :type', { type: params.type });
 
-    if (params.schoolId) {
+    // ── Scope ──
+    if (params.classId && params.schoolId) {
+      qb.andWhere(
+        '(q.schoolId = :schoolId AND q.classId = :classId) OR (q.schoolId = :schoolId AND q.classId IS NULL)',
+        { schoolId: params.schoolId, classId: params.classId },
+      );
+    } else if (params.schoolId) {
       qb.andWhere('q.schoolId = :schoolId', { schoolId: params.schoolId });
     } else {
       qb.andWhere('q.schoolId IS NULL');
