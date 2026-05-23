@@ -29,14 +29,8 @@ export class QuestionsService {
     @InjectRepository(Question)
     private readonly questionRepository: Repository<Question>,
 
-    @InjectRepository(QuestionOption)
-    private readonly questionOptionRepository: Repository<QuestionOption>,
-
     @InjectRepository(QuestionAnswer)
     private readonly questionAnswerRepository: Repository<QuestionAnswer>,
-
-    @InjectRepository(QuestionExplanation)
-    private readonly questionExplanationRepository: Repository<QuestionExplanation>,
 
     private readonly dataSource: DataSource,
 
@@ -51,6 +45,8 @@ export class QuestionsService {
       // 1. Persist core question
       const question = manager.create(Question, {
         questionNumber: dto.questionNumber ?? null,
+        schoolId: dto.schoolId ?? null,
+        classId: dto.classId ?? null,
         examType: dto.examType,
         subject: dto.subject,
         year: dto.year,
@@ -199,7 +195,7 @@ export class QuestionsService {
   // ─── UPDATE ────────────────────────────────────────────────────────────────
 
   async update(id: string, dto: UpdateQuestionDto): Promise<Question> {
-    const question = await this.findOneOrThrow(id);
+    await this.findOneOrThrow(id);
     this.validateQuestionTypeConstraints(dto);
 
     return this.dataSource.transaction(async (manager) => {
@@ -216,6 +212,11 @@ export class QuestionsService {
       if (dto.type !== undefined) coreFields.type = dto.type;
       if (dto.topic !== undefined) coreFields.topic = dto.topic ?? null;
       if (dto.isActive !== undefined) coreFields.isActive = dto.isActive;
+      if (dto.questionNumber !== undefined)
+        coreFields.questionNumber = dto.questionNumber ?? null;
+      if (dto.schoolId !== undefined)
+        coreFields.schoolId = dto.schoolId ?? null;
+      if (dto.classId !== undefined) coreFields.classId = dto.classId ?? null;
 
       await manager.update(Question, id, coreFields);
 
@@ -330,6 +331,9 @@ export class QuestionsService {
     return this.dataSource.transaction(async (manager) => {
       const copy = manager.create(Question, {
         examType: original.examType,
+        questionNumber: original.questionNumber,
+        schoolId: original.schoolId,
+        classId: original.classId,
         subject: original.subject,
         year: original.year,
         questionText: `${original.questionText} (Copy)`,
@@ -548,7 +552,11 @@ export class QuestionsService {
     for (let i = 0; i < dto.questions.length; i++) {
       const row = dto.questions[i];
       try {
-        await this.create({ ...row, schoolId: dto.schoolId ?? null });
+        await this.create({
+          ...row,
+          schoolId: row.schoolId ?? dto.schoolId ?? null,
+          classId: row.classId ?? dto.classId ?? null,
+        });
         result.imported++;
       } catch (err: any) {
         result.failed++;
