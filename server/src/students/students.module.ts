@@ -28,5 +28,6 @@ import { TopicMasteryHistory } from './entities/topic-mastery-history.entity';
       TutorSession,
     ]),
   ],
+  exports: [StudentsService],
 })
 export class StudentsModule {}
