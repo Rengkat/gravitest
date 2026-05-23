@@ -11,6 +11,8 @@ import { StudyActivity } from './entities/study-activity.entity';
 import { StudyStreak } from './entities/study-streak.entity';
 import { WeakTopic } from './entities/weak-topic.entity';
 import { TopicMasteryHistory } from './entities/topic-mastery-history.entity';
+import { PaginationProvider } from 'src/common/pagination/pagination.provider';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 
 @Module({
   controllers: [StudentsController],
@@ -27,6 +29,7 @@ import { TopicMasteryHistory } from './entities/topic-mastery-history.entity';
       StudyActivity,
       TutorSession,
     ]),
+    PaginationModule,
   ],
   exports: [StudentsService],
 })
