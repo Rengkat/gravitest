@@ -6,10 +6,12 @@ import {
 } from 'src/common/enums/enums';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { QuestionOption } from './question-option.entity';
 import { QuestionAnswer } from './question-answer.entity';
@@ -56,6 +58,13 @@ export class Question {
 
   @Column({ type: 'uuid', nullable: true, name: 'class_id' })
   classId: string | null;
+
+  // ── Timestamps ─────────────────────────────────────────────
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 
   // ── Relations ──────────────────────────────
   @OneToMany(() => QuestionOption, (o) => o.question, { cascade: true })

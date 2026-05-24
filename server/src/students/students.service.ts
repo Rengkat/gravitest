@@ -29,7 +29,7 @@ import {
   LeaderboardResult,
   StudentOverview,
   StudentPerformance,
-} from './types/students.tyes';
+} from './types/students.types';
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
 import { PaginatedResult } from 'src/common/pagination/pagination.interface';
 import { StreakStatus, WeakTopicStatus } from 'src/common/enums/enums';

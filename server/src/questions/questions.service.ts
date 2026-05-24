@@ -70,11 +70,11 @@ export class QuestionsService {
             question: savedQuestion,
           }),
         );
-        await manager.save(options);
+        const saveOption = await manager.save(options);
 
         // 3. Answer — resolve the UUID of the correct option
         if (dto.answer) {
-          const correctOption = options.find(
+          const correctOption = saveOption.find(
             (o) => o.label === dto.answer!.correctLabel,
           );
           if (!correctOption) {
@@ -104,7 +104,11 @@ export class QuestionsService {
         await manager.save(explanations);
       }
 
-      return this.findOneOrThrow(savedQuestion.id);
+      return manager.findOne(Question, {
+        where: { id: savedQuestion.id },
+        relations: ['options', 'answer', 'explanations'],
+        order: { options: { order: 'ASC' } },
+      }) as Promise<Question>;
     });
   }
 
@@ -182,7 +186,10 @@ export class QuestionsService {
       examType: 'q.examType',
       subject: 'q.subject',
     };
-    qb.orderBy(allowedSorts[sortBy] ?? 'q.createdAt', sortOrder);
+    qb.orderBy(allowedSorts[sortBy] ?? 'q.createdAt', sortOrder).addOrderBy(
+      'options.order',
+      'ASC',
+    );
     return this.paginationProvider.paginateQueryBuilder(qb, { page, limit });
   }
 
@@ -273,7 +280,11 @@ export class QuestionsService {
         }
       }
 
-      return this.findOneOrThrow(id);
+      return manager.findOne(Question, {
+        where: { id },
+        relations: ['options', 'answer', 'explanations'],
+        order: { options: { order: 'ASC' } },
+      }) as Promise<Question>;
     });
   }
 
@@ -387,7 +398,11 @@ export class QuestionsService {
         );
       }
 
-      return this.findOneOrThrow(savedCopy.id);
+      return manager.findOne(Question, {
+        where: { id: savedCopy.id },
+        relations: ['options', 'answer', 'explanations'],
+        order: { options: { order: 'ASC' } },
+      }) as Promise<Question>;
     });
   }
 
@@ -489,43 +504,55 @@ export class QuestionsService {
     schoolId?: string;
     classId?: string;
   }): Promise<Question[]> {
-    const qb = this.questionRepository
+    // Step 1: fetch matching question IDs only (no joins = no DISTINCT problem)
+    const idQb = this.questionRepository
       .createQueryBuilder('q')
-      .leftJoinAndSelect('q.options', 'options')
-      .leftJoinAndSelect('q.answer', 'answer')
+      .select('q.id')
       .where('q.isActive = true');
 
     if (params.examType)
-      qb.andWhere('q.examType = :examType', { examType: params.examType });
+      idQb.andWhere('q.examType = :examType', { examType: params.examType });
     if (params.subjects?.length)
-      qb.andWhere('q.subject IN (:...subjects)', {
+      idQb.andWhere('q.subject IN (:...subjects)', {
         subjects: params.subjects,
       });
-    if (params.year) qb.andWhere('q.year = :year', { year: params.year });
+    if (params.year) idQb.andWhere('q.year = :year', { year: params.year });
     if (params.difficulty)
-      qb.andWhere('q.difficulty = :difficulty', {
+      idQb.andWhere('q.difficulty = :difficulty', {
         difficulty: params.difficulty,
       });
-    if (params.type) qb.andWhere('q.type = :type', { type: params.type });
+    if (params.type) idQb.andWhere('q.type = :type', { type: params.type });
 
-    // ── Scope ──
     if (params.classId && params.schoolId) {
-      qb.andWhere(
+      idQb.andWhere(
         '(q.schoolId = :schoolId AND q.classId = :classId) OR (q.schoolId = :schoolId AND q.classId IS NULL)',
         { schoolId: params.schoolId, classId: params.classId },
       );
     } else if (params.schoolId) {
-      qb.andWhere('q.schoolId = :schoolId', { schoolId: params.schoolId });
+      idQb.andWhere('q.schoolId = :schoolId', { schoolId: params.schoolId });
     } else {
-      qb.andWhere('q.schoolId IS NULL');
+      idQb.andWhere('q.schoolId IS NULL');
     }
 
+    const allIds = await idQb.getMany();
+
+    if (!allIds.length) return [];
+
+    // Step 2: shuffle in memory and pick limit
+    let ids = allIds.map((q) => q.id);
     if (params.shuffled) {
-      qb.orderBy('RANDOM()');
+      ids = ids.sort(() => Math.random() - 0.5);
     }
+    ids = ids.slice(0, params.limit);
 
-    qb.take(params.limit);
-    return qb.getMany();
+    // Step 3: fetch full question data with relations for the selected IDs
+    return this.questionRepository
+      .createQueryBuilder('q')
+      .leftJoinAndSelect('q.options', 'options')
+      .leftJoinAndSelect('q.answer', 'answer')
+      .whereInIds(ids)
+      .orderBy('options.order', 'ASC')
+      .getMany();
   }
 
   // ─── ANSWER VERIFICATION ───────────────────────────────────────────────────

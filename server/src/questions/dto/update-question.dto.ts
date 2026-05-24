@@ -10,6 +10,7 @@ import {
   IsBoolean,
   IsIn,
   IsUUID,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
@@ -89,12 +90,18 @@ export class QuestionFiltersDto extends PaginationDto {
 // ─── Bulk toggle active status ────────────────────────────────────────────────
 
 export class BulkToggleDto {
+  @IsArray()
+  @IsUUID('4', { each: true })
   ids!: string[];
+
+  @IsBoolean()
   isActive!: boolean;
 }
 
 // ─── Bulk delete ──────────────────────────────────────────────────────────────
 
 export class BulkDeleteDto {
+  @IsArray()
+  @IsUUID('4', { each: true })
   ids!: string[];
 }
