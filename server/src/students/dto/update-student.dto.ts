@@ -158,7 +158,7 @@ export class StudentFiltersDto extends PaginationDto {
   @IsOptional()
   @IsBoolean()
   @Type(() => Boolean)
-  hasSchool?: boolean; // true = enrolled, false = self-registered only
+  hasSchool?: boolean;
 
   @IsOptional()
   @IsIn([

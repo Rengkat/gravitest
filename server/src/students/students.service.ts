@@ -87,6 +87,7 @@ export class StudentsService {
   async findAll(
     filters: StudentFiltersDto,
   ): Promise<PaginatedResult<StudentProfile>> {
+    console.log('RAW filters:', JSON.stringify(filters));
     const {
       page,
       limit,
@@ -95,6 +96,11 @@ export class StudentsService {
       sortOrder = 'DESC',
       ...fieldFilters
     } = filters;
+    console.log(
+      'hasSchool:',
+      fieldFilters.hasSchool,
+      typeof fieldFilters.hasSchool,
+    );
 
     const qb = this.profileRepo
       .createQueryBuilder('p')
@@ -130,14 +136,19 @@ export class StudentsService {
         examTarget: fieldFilters.examTarget,
       });
 
-    if (fieldFilters.isActive !== undefined)
-      qb.andWhere('u.isActive = :isActive', {
-        isActive: fieldFilters.isActive,
-      });
+    const isActive = fieldFilters.isActive;
 
-    if (fieldFilters.hasSchool === true) qb.andWhere('p.school_id IS NOT NULL');
-    else if (fieldFilters.hasSchool === false)
+    if (isActive === true || (isActive as any) === 'true')
+      qb.andWhere('u.isActive = true');
+    else if (isActive === false || (isActive as any) === 'false')
+      qb.andWhere('u.isActive = false');
+    const hasSchool = fieldFilters.hasSchool;
+
+    if (hasSchool === true || (hasSchool as any) === 'true') {
+      qb.andWhere('p.school_id IS NOT NULL');
+    } else if (hasSchool === false || (hasSchool as any) === 'false') {
       qb.andWhere('p.school_id IS NULL');
+    }
 
     const sortMap: Record<string, string> = {
       createdAt: 'p.createdAt',
