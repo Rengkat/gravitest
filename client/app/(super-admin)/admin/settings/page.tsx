@@ -2,11 +2,18 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { SettingsSection, AllSettings } from "@/types/settings";
-import { DEFAULT_SETTINGS } from "@/lib/constants/settings";
+import { SettingsSection, AllSettings } from "./types";
+import { DEFAULT_SETTINGS } from "./types";
 
 import AdminSettingsSidebar from "./components/AdminSettingsSidebar";
 import AdminAppearanceSection from "./components/AdminAppearanceSection";
+import PlatformSection from "./components/PlatformSection";
+// import PlatformSection from "./components/PlatformSection";
+// import SecuritySection from "./components/SecuritySection";
+// import NotificationsSection from "./components/NotificationsSection";
+// import IntegrationsSection from "./components/IntegrationsSection";
+// import BackupSection from "./components/BackupSection";
+// import AdvancedSection from "./components/AdvancedSection";
 
 export default function AdminSettingsPage() {
   const [activeSection, setActiveSection] = useState<SettingsSection>("appearance");
@@ -34,14 +41,12 @@ export default function AdminSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
         <AdminSettingsSidebar
           activeSection={activeSection}
           onSectionChange={setActiveSection}
           hasUnsavedChanges={dirtySection !== null}
         />
 
-        {/* Content */}
         <div className="lg:col-span-3">
           {activeSection === "appearance" && (
             <AdminAppearanceSection
@@ -49,37 +54,31 @@ export default function AdminSettingsPage() {
               onChange={(v) => updateSection("appearance", v)}
             />
           )}
-
-          {/* {activeSection === "platform" && (
+          {activeSection === "platform" && (
             <PlatformSection
               settings={settings.platform}
               onChange={(v) => updateSection("platform", v)}
             />
           )}
-
-          {activeSection === "security" && (
+          {/* {activeSection === "security" && (
             <SecuritySection
               settings={settings.security}
               onChange={(v) => updateSection("security", v)}
             />
           )}
-
           {activeSection === "notifications" && (
             <NotificationsSection
               settings={settings.notifications}
               onChange={(v) => updateSection("notifications", v)}
             />
           )}
-
           {activeSection === "integrations" && (
             <IntegrationsSection
               settings={settings.integrations}
               onChange={(v) => updateSection("integrations", v)}
             />
           )}
-
           {activeSection === "backup" && <BackupSection />}
-
           {activeSection === "danger" && <AdvancedSection onResetSettings={handleResetAll} />} */}
         </div>
       </div>

@@ -1,9 +1,8 @@
-// app/admin/settings/components/AdminAppearanceSection.tsx
 "use client";
 
 import { useState } from "react";
 import { Sun, Moon, Monitor, Check } from "lucide-react";
-import { AppearanceSettings, ThemeMode, FontSize, DashboardLayout } from "@/types/settings";
+import { AppearanceSettings, ThemeMode, FontSize, DashboardLayout } from "../types";
 import { ACCENT_COLORS } from "@/lib/constants/settings";
 import { SettingsCard, ToggleRow, ChipGroup, SaveBar } from "./ui";
 
@@ -60,7 +59,7 @@ export default function AdminAppearanceSection({
 
   return (
     <div className="space-y-5">
-      {/* Admin Theme - Red accent */}
+      {/* Theme */}
       <SettingsCard title="Admin Theme" description="Choose how the admin dashboard looks">
         <div className="grid grid-cols-3 gap-3">
           {THEME_OPTIONS.map(({ id, label, icon: Icon, desc }) => {
@@ -71,21 +70,21 @@ export default function AdminAppearanceSection({
                 onClick={() => update("theme", id)}
                 className={`relative flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 transition-all ${
                   active
-                    ? "border-red-500 bg-red-50"
+                    ? "border-green-500 bg-green-50"
                     : "border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white"
                 }`}>
                 {active && (
-                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
                     <Check size={11} className="text-white" />
                   </div>
                 )}
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${active ? "bg-red-100" : "bg-gray-200"}`}>
-                  <Icon size={22} className={active ? "text-red-700" : "text-gray-500"} />
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${active ? "bg-green-100" : "bg-gray-200"}`}>
+                  <Icon size={22} className={active ? "text-green-700" : "text-gray-500"} />
                 </div>
                 <div className="text-center">
                   <p
-                    className={`text-[13px] font-bold ${active ? "text-red-800" : "text-gray-700"}`}>
+                    className={`text-[13px] font-bold ${active ? "text-green-800" : "text-gray-700"}`}>
                     {label}
                   </p>
                   <p className="text-[11px] text-gray-400">{desc}</p>
@@ -96,7 +95,7 @@ export default function AdminAppearanceSection({
         </div>
       </SettingsCard>
 
-      {/* Accent color - Admin red theme */}
+      {/* Accent color */}
       <SettingsCard
         title="Admin Accent Colour"
         description="Personalise the admin dashboard highlight colour">
@@ -148,18 +147,18 @@ export default function AdminAppearanceSection({
                 onClick={() => update("dashboardLayout", id)}
                 className={`relative flex flex-col gap-2.5 p-4 rounded-2xl border-2 text-left transition-all ${
                   active
-                    ? "border-red-500 bg-red-50"
+                    ? "border-green-500 bg-green-50"
                     : "border-gray-100 bg-gray-50 hover:border-gray-200 hover:bg-white"
                 }`}>
                 {active && (
-                  <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                  <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
                     <Check size={9} className="text-white" />
                   </div>
                 )}
                 <div className="font-mono text-[18px] text-gray-400 tracking-widest">{preview}</div>
                 <div>
                   <p
-                    className={`text-[13px] font-bold ${active ? "text-red-800" : "text-gray-700"}`}>
+                    className={`text-[13px] font-bold ${active ? "text-green-800" : "text-gray-700"}`}>
                     {label}
                   </p>
                   <p className="text-[11px] text-gray-400 leading-tight">{desc}</p>
