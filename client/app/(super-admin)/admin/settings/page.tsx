@@ -9,6 +9,7 @@ import AdminSettingsSidebar from "./components/AdminSettingsSidebar";
 import AdminAppearanceSection from "./components/AdminAppearanceSection";
 import PlatformSection from "./components/PlatformSection";
 import AdvancedSection from "./components/AdvancedSection";
+import BackupSection from "./components/BackupSection";
 // import PlatformSection from "./components/PlatformSection";
 // import SecuritySection from "./components/SecuritySection";
 // import NotificationsSection from "./components/NotificationsSection";
@@ -78,8 +79,8 @@ export default function AdminSettingsPage() {
               settings={settings.integrations}
               onChange={(v) => updateSection("integrations", v)}
             />
-          )}
-          {activeSection === "backup" && <BackupSection />}*/}
+          )}*/}
+          {activeSection === "backup" && <BackupSection />}
           {activeSection === "danger" && <AdvancedSection onResetSettings={handleResetAll} />}
         </div>
       </div>
