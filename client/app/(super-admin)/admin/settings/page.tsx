@@ -12,12 +12,7 @@ import AdvancedSection from "./components/AdvancedSection";
 import BackupSection from "./components/BackupSection";
 import IntegrationsSection from "./components/IntegrationsSection";
 import NotificationsSection from "./components/NotificationsSection";
-// import PlatformSection from "./components/PlatformSection";
-// import SecuritySection from "./components/SecuritySection";
-// import NotificationsSection from "./components/NotificationsSection";
-// import IntegrationsSection from "./components/IntegrationsSection";
-// import BackupSection from "./components/BackupSection";
-// import AdvancedSection from "./components/AdvancedSection";
+import SecuritySection from "./components/SecuritySection";
 
 export default function AdminSettingsPage() {
   const [activeSection, setActiveSection] = useState<SettingsSection>("appearance");
@@ -64,12 +59,12 @@ export default function AdminSettingsPage() {
               onChange={(v) => updateSection("platform", v)}
             />
           )}
-          {/* {activeSection === "security" && (
+          {activeSection === "security" && (
             <SecuritySection
               settings={settings.security}
               onChange={(v) => updateSection("security", v)}
             />
-          )}*/}
+          )}
           {activeSection === "notifications" && (
             <NotificationsSection
               settings={settings.notifications}
