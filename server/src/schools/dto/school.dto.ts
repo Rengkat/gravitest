@@ -87,7 +87,7 @@ export class CreateSchoolDto {
   // ── First admin user to assign ──
   @IsOptional()
   @IsUUID()
-  adminUserId?: string; // assign an existing user as school admin on creation
+  adminUserId?: string;
 }
 
 // ─── Update School ────────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MaxLength,
   MinLength,
@@ -33,6 +34,18 @@ export class RegisterUserDto extends BaseUserDto {
       'Password must contain uppercase, lowercase, number, and special character',
   })
   password!: string;
+
+  @ApiPropertyOptional({ example: '5456-3ff344-34r32' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  schoolClassId?: string;
+
+  @ApiPropertyOptional({ example: '5456-3ff344-34r32' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  schoolId?: string;
 
   @ApiProperty({ enum: UserRole })
   @IsString()

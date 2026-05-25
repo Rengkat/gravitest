@@ -79,6 +79,8 @@ export class UserRegistrationProvider {
             StudentProfile,
             manager.create(StudentProfile, {
               user,
+              schoolId: dto.schoolId ?? null,
+              schoolClassId: dto.schoolClassId ?? null,
               totalXp: 0,
               level: 1,
               levelTitle: 'Beginner',

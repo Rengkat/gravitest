@@ -597,6 +597,92 @@ export class SchoolsService {
     return { enrolled: dto.studentProfileIds.length };
   }
 
+  async findStudentsToEnroll(
+    query: string,
+    schoolId?: string,
+  ): Promise<
+    {
+      id: string;
+      name: string;
+      email: string;
+      admissionNo: string | null;
+      currentSchool: string | null;
+    }[]
+  > {
+    // Search users not yet enrolled in this school
+    const results = await this.dataSource.query(
+      `SELECT sp.id, 
+              u."firstName" || ' ' || u."lastName" AS name,
+              u.email,
+              sp."admissionNo",
+              sp."currentSchool",
+              sp."schoolId"
+       FROM student_profiles sp
+       LEFT JOIN users u ON u.id = sp.user_id
+       WHERE (
+         LOWER(u.email) ILIKE $1
+         OR sp."admissionNo" ILIKE $1
+         OR u."firstName" ILIKE $1
+         OR u."lastName" ILIKE $1
+       )
+       AND u.role = 'student'
+       AND (sp.school_id IS NULL OR sp.school_id != $2)
+       LIMIT 20`,
+      [`%${query.toLowerCase()}%`, schoolId ?? null],
+    );
+
+    return results;
+  }
+
+  async enrollByIdentifier(
+    schoolId: string,
+    dto: { identifier: string; schoolClassId?: string },
+  ): Promise<{ enrolled: number; studentProfileId: string }> {
+    await this.findOneOrThrow(schoolId);
+
+    // Find student by email or admissionNo
+    const result = await this.dataSource.query(
+      `SELECT sp.id FROM student_profiles sp
+       LEFT JOIN users u ON u.id = sp.user_id
+       WHERE LOWER(u.email) = LOWER($1) OR sp."admissionNo" = $1
+       LIMIT 1`,
+      [dto.identifier],
+    );
+
+    if (!result.length) {
+      throw new NotFoundException(
+        `No student found with email or admission number "${dto.identifier}".`,
+      );
+    }
+
+    const studentProfileId = result[0].id;
+
+    await this.dataSource.query(
+      `UPDATE student_profiles
+       SET school_id = $1, school_class_id = $2
+       WHERE id = $3`,
+      [schoolId, dto.schoolClassId ?? null, studentProfileId],
+    );
+
+    // Update cache
+    await this.dataSource.query(
+      `UPDATE schools SET "totalStudents" = (
+         SELECT COUNT(*) FROM student_profiles WHERE school_id = $1
+       ) WHERE id = $1`,
+      [schoolId],
+    );
+
+    if (dto.schoolClassId) {
+      await this.dataSource.query(
+        `UPDATE school_classes SET "totalStudents" = (
+           SELECT COUNT(*) FROM student_profiles WHERE school_class_id = $1
+         ) WHERE id = $1`,
+        [dto.schoolClassId],
+      );
+    }
+
+    return { enrolled: 1, studentProfileId };
+  }
   // ─── GET STUDENTS IN SCHOOL ───────────────────────────────────────────────
   // Returns student profiles belonging to this school.
   // Delegates to StudentProfileRepo since StudentProfile owns the FK.

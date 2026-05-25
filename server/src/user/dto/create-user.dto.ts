@@ -145,6 +145,18 @@ export class BulkCreateUsersDto {
   @Type(() => BulkCreateUserRowDto)
   users!: BulkCreateUserRowDto[];
 
+  @ApiPropertyOptional({ example: '5456-3ff344-34r32' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  schoolClassId?: string;
+
+  @ApiPropertyOptional({ example: '5456-3ff344-34r32' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  schoolId?: string;
+
   /**
    * Silently skip rows where the email already exists.
    * If false, duplicate emails cause the entire batch to fail.

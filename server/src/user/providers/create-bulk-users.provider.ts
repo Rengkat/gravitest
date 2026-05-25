@@ -216,6 +216,8 @@ export class BulkCreateUsersProvider {
           const profiles = studentUsers.map((user) =>
             manager.create(StudentProfile, {
               user,
+              schoolId: dto.schoolId ?? null,
+              schoolClassId: dto.schoolClassId ?? null,
               totalXp: 0,
               level: 1,
               levelTitle: 'Beginner',
@@ -281,6 +283,8 @@ export class BulkCreateUsersProvider {
                 StudentProfile,
                 manager.create(StudentProfile, {
                   user,
+                  schoolId: dto.schoolId ?? null,
+                  schoolClassId: dto.schoolClassId ?? null,
                   totalXp: 0,
                   level: 1,
                   levelTitle: 'Beginner',

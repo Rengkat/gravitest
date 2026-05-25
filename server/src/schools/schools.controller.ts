@@ -58,6 +58,7 @@ export class SchoolsController {
   // GET /schools/by-subdomain/:subdomain
   // Used for school portal login page to identify the school.
   @Get('by-subdomain/:subdomain')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   findBySubdomain(@Param('subdomain') subdomain: string) {
     return this.schoolsService.findBySubdomain(subdomain);
   }
@@ -89,7 +90,7 @@ export class SchoolsController {
 
   // ─── UPDATE ──────────────────────────────────────────────────────────────
   // PATCH /schools/:id
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.CLASS_ADMIN)
   @Patch(':id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateSchoolDto) {
     return this.schoolsService.update(id, dto);
@@ -145,7 +146,7 @@ export class SchoolsController {
 
   // ─── REMOVE ADMIN ────────────────────────────────────────────────────────
   // DELETE /schools/:id/admins/:adminId
-  @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @Delete(':id/admins/:adminId')
   @HttpCode(HttpStatus.OK)
   removeAdmin(
@@ -162,7 +163,7 @@ export class SchoolsController {
   // ─── GET SCHOOL STUDENTS ─────────────────────────────────────────────────
   // GET /schools/:id/students
   // GET /schools/:id/students?classId=<uuid>&page=1&limit=20
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.CLASS_ADMIN)
   @Get(':id/students')
   getStudents(
     @Param('id', ParseUUIDPipe) id: string,
@@ -176,7 +177,7 @@ export class SchoolsController {
   // ─── BULK ENROLL STUDENTS ─────────────────────────────────────────────────
   // POST /schools/:id/students/bulk-enroll
   // Body: { studentProfileIds: string[], schoolClassId?: string }
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.CLASS_ADMIN)
   @Post(':id/students/bulk-enroll')
   @HttpCode(HttpStatus.OK)
   bulkEnroll(
@@ -184,6 +185,28 @@ export class SchoolsController {
     @Body() dto: BulkEnrollDto,
   ) {
     return this.schoolsService.bulkEnroll(id, dto);
+  }
+
+  // Search students available to enroll
+  // GET /schools/:id/students/search?q=emeka
+  @Get(':id/students/search')
+  searchStudentsToEnroll(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('q') query: string,
+  ) {
+    return this.schoolsService.findStudentsToEnroll(query, id);
+  }
+
+  // Enroll single student by email or admissionNo
+  // POST /schools/:id/students/enroll
+  // Body: { identifier: 'emeka@gmail.com', schoolClassId?: uuid }
+  @Post(':id/students/enroll')
+  @HttpCode(HttpStatus.OK)
+  enrollByIdentifier(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: { identifier: string; schoolClassId?: string },
+  ) {
+    return this.schoolsService.enrollByIdentifier(id, dto);
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -225,7 +248,7 @@ export class SchoolsController {
 
   // ─── UPDATE CLASS ────────────────────────────────────────────────────────
   // PATCH /schools/:id/classes/:classId
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.CLASS_ADMIN)
   @Patch(':id/classes/:classId')
   updateClass(
     @Param('id', ParseUUIDPipe) id: string,

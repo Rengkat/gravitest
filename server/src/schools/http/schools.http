@@ -1,0 +1,607 @@
+@baseUrl = http://localhost:5000/api/v1
+@contentType = application/json
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhMTdjMWU5Zi1mMjI3LTQ1MTEtYTc2Mi00MDlmMzAwMDU0N2YiLCJyb2xlIjoic3VwZXJfYWRtaW4iLCJqdGkiOiIzZjllNzNjNTlkYjBiZmQzZTRlODI4Y2Y5Y2UwZGIwNzUzZmMzOTQ1ZjU4Zjg2MmIxMGEyMjE0OTMzMWVkNzE2IiwiaWF0IjoxNzc5NzE3ODQxLCJleHAiOjE3Nzk3MjE0NDEsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCJ9.5ceTzG1g0HOjcGMqJ3Vq_St8FT4eB9-1gt5ykxP9Egk
+
+### ── AUTH TOKEN ─────────────────────────────────────────────
+### Get a fresh token first if yours has expired
+@token = REPLACE_WITH_YOUR_JWT_TOKEN
+
+### ── COPY THESE AS YOU GO ───────────────────────────────────
+@schoolId = REPLACE_AFTER_CREATE_SCHOOL
+@classId = REPLACE_AFTER_CREATE_CLASS
+@adminId = REPLACE_AFTER_ASSIGN_ADMIN
+@adminUserId = REPLACE_WITH_EXISTING_USER_UUID
+@studentProfileId = REPLACE_WITH_EXISTING_STUDENT_PROFILE_UUID
+@classCode = REPLACE_AFTER_CREATE_CLASS
+
+
+# =============================================================
+# SECTION 1 — SCHOOLS CRUD
+# =============================================================
+
+### 1. CREATE SCHOOL
+POST {{baseUrl}}/schools
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "Federal Government College Lagos",
+  "subdomain": "fgc-lagos",
+  "type": "secondary",
+  "address": "1 FGC Road, Ijanikin, Lagos",
+  "lga": "Ojo",
+  "state": "Lagos",
+  "phone": "08012345678",
+  "email": "info@fgclagos.edu.ng",
+  "website": "https://fgclagos.edu.ng",
+  "maxStudents": 1200,
+  "brandColor": "#2e8b57"
+}
+
+###
+
+### 2. CREATE SECOND SCHOOL (for list testing)
+POST {{baseUrl}}/schools
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "Kings College Lagos",
+  "subdomain": "kings-college-lagos",
+  "type": "secondary",
+  "address": "Lagos Island, Lagos",
+  "lga": "Lagos Island",
+  "state": "Lagos",
+  "phone": "08023456789",
+  "email": "admin@kingscollege.edu.ng",
+  "maxStudents": 800
+}
+
+###
+
+### 3. CREATE SCHOOL WITH ADMIN ASSIGNED AT CREATION
+### Replace adminUserId with a real user UUID who has school_admin role
+POST {{baseUrl}}/schools
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "Lagos Preparatory School",
+  "subdomain": "lagos-prep",
+  "type": "secondary",
+  "state": "Lagos",
+  "lga": "Ikeja",
+  "address": "15 Allen Avenue, Ikeja, Lagos",
+  "phone": "08034567890",
+  "email": "info@lagosprep.edu.ng",
+  "maxStudents": 600,
+  "adminUserId": "{{adminUserId}}"
+}
+
+###
+
+### 4. LIST ALL SCHOOLS
+GET {{baseUrl}}/schools
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 5. LIST WITH FILTERS — by state
+GET {{baseUrl}}/schools?state=Lagos&isActive=true&page=1&limit=10
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 6. LIST WITH FILTERS — search by name
+GET {{baseUrl}}/schools?search=federal&sortBy=name&sortOrder=ASC
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 7. LIST BY TYPE
+GET {{baseUrl}}/schools?type=secondary&sortBy=totalStudents&sortOrder=DESC
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 8. GET ONE SCHOOL
+GET {{baseUrl}}/schools/{{schoolId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 9. FIND BY SUBDOMAIN
+### Used for school portal login — frontend sends subdomain from URL
+GET {{baseUrl}}/schools/by-subdomain/fgc-lagos
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 10. GET SCHOOL STATS
+GET {{baseUrl}}/schools/{{schoolId}}/stats
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 11. GET SCHOOL OVERVIEW (dashboard)
+### Returns stats, top performers, weak subjects, recent activity
+GET {{baseUrl}}/schools/{{schoolId}}/overview
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 12. UPDATE SCHOOL
+PATCH {{baseUrl}}/schools/{{schoolId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "phone": "08099887766",
+  "email": "updated@fgclagos.edu.ng",
+  "maxStudents": 1500,
+  "brandColor": "#1e5032"
+}
+
+###
+
+### 13. DEACTIVATE SCHOOL
+PATCH {{baseUrl}}/schools/{{schoolId}}/deactivate
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 14. ACTIVATE SCHOOL
+PATCH {{baseUrl}}/schools/{{schoolId}}/activate
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+
+# =============================================================
+# SECTION 2 — SCHOOL ADMINS
+# =============================================================
+
+### 15. GET SCHOOL ADMINS
+GET {{baseUrl}}/schools/{{schoolId}}/admins
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 16. ASSIGN ADMIN TO SCHOOL
+### adminUserId must be an existing user with school_admin role
+POST {{baseUrl}}/schools/{{schoolId}}/admins
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "userId": "{{adminUserId}}"
+}
+
+###
+
+### 17. REMOVE ADMIN FROM SCHOOL
+### Replace adminId with the SchoolAdmin record UUID (not the user UUID)
+DELETE {{baseUrl}}/schools/{{schoolId}}/admins/{{adminId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+
+# =============================================================
+# SECTION 3 — CLASSES
+# =============================================================
+
+### 18. CREATE CLASS — SS3 Science
+POST {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "SS3 Science",
+  "arm": "Science",
+  "year": 2025,
+  "description": "Senior Secondary 3 Science Set",
+  "defaultExamDurationMinutes": 90,
+  "defaultQuestionCount": 50,
+  "pin": "1234"
+}
+
+###
+
+### 19. CREATE CLASS — SS3 Arts
+POST {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "SS3 Arts",
+  "arm": "Arts",
+  "year": 2025,
+  "description": "Senior Secondary 3 Arts Set",
+  "defaultExamDurationMinutes": 60,
+  "defaultQuestionCount": 40,
+  "pin": "5678"
+}
+
+###
+
+### 20. CREATE CLASS — SS2 Commercial
+POST {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "SS2 Commercial",
+  "arm": "Commercial",
+  "year": 2025,
+  "description": "Senior Secondary 2 Commercial Set",
+  "defaultExamDurationMinutes": 60,
+  "defaultQuestionCount": 40,
+  "pin": "9012"
+}
+
+###
+
+### 21. CREATE CLASS — JSS1A
+POST {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "JSS1A",
+  "arm": "A",
+  "year": 2025,
+  "defaultExamDurationMinutes": 45,
+  "defaultQuestionCount": 30,
+  "pin": "3456"
+}
+
+###
+
+### 22. LIST ALL CLASSES IN SCHOOL
+GET {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 23. LIST CLASSES — FILTER ACTIVE ONLY
+GET {{baseUrl}}/schools/{{schoolId}}/classes?isActive=true&sortBy=name&sortOrder=ASC
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 24. LIST CLASSES — SEARCH
+GET {{baseUrl}}/schools/{{schoolId}}/classes?search=SS3
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 25. LIST CLASSES — FILTER BY YEAR
+GET {{baseUrl}}/schools/{{schoolId}}/classes?year=2025
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 26. GET ONE CLASS
+GET {{baseUrl}}/schools/{{schoolId}}/classes/{{classId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 27. UPDATE CLASS
+PATCH {{baseUrl}}/schools/{{schoolId}}/classes/{{classId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "description": "Updated SS3 Science class description",
+  "defaultExamDurationMinutes": 120,
+  "defaultQuestionCount": 60
+}
+
+###
+
+### 28. UPDATE CLASS — CHANGE PIN AT SAME TIME
+PATCH {{baseUrl}}/schools/{{schoolId}}/classes/{{classId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "description": "Updated with new PIN",
+  "pin": "9999"
+}
+
+###
+
+### 29. ROTATE CLASS PIN (dedicated endpoint)
+### Returns classCode + pinLastChangedAt, never the plain PIN
+PATCH {{baseUrl}}/schools/{{schoolId}}/classes/{{classId}}/rotate-pin
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "newPin": "4321"
+}
+
+
+# =============================================================
+# SECTION 4 — PIN VERIFICATION (teacher access)
+# =============================================================
+
+### 30. VERIFY CLASS PIN — VALID
+### classCode is returned when you create/update the class
+### Teacher enters classCode + PIN to access exam tools
+POST {{baseUrl}}/schools/classes/verify-pin
+Content-Type: {{contentType}}
+
+{
+  "classCode": "{{classCode}}",
+  "pin": "4321"
+}
+
+###
+
+### 31. VERIFY CLASS PIN — WRONG PIN
+POST {{baseUrl}}/schools/classes/verify-pin
+Content-Type: {{contentType}}
+
+{
+  "classCode": "{{classCode}}",
+  "pin": "0000"
+}
+
+###
+
+### 32. VERIFY CLASS PIN — WRONG CLASS CODE
+POST {{baseUrl}}/schools/classes/verify-pin
+Content-Type: {{contentType}}
+
+{
+  "classCode": "INVALID-CODE-2025",
+  "pin": "1234"
+}
+
+
+# =============================================================
+# SECTION 5 — STUDENTS
+# =============================================================
+
+### 33. GET ALL STUDENTS IN SCHOOL
+GET {{baseUrl}}/schools/{{schoolId}}/students
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 34. GET STUDENTS FILTERED BY CLASS
+GET {{baseUrl}}/schools/{{schoolId}}/students?classId={{classId}}&page=1&limit=20
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 35. SEARCH STUDENTS TO ENROLL
+### Search by name, email, or admissionNo
+### Returns students not yet in this school
+GET {{baseUrl}}/schools/{{schoolId}}/students/search?q=Emeka
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 36. SEARCH BY EMAIL
+GET {{baseUrl}}/schools/{{schoolId}}/students/search?q=chukwuemeka.okonkwo@gmail.com
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 37. ENROLL SINGLE STUDENT BY EMAIL
+POST {{baseUrl}}/schools/{{schoolId}}/students/enroll
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "identifier": "chukwuemeka.okonkwo@gmail.com",
+  "schoolClassId": "{{classId}}"
+}
+
+###
+
+### 38. ENROLL SINGLE STUDENT BY ADMISSION NUMBER
+POST {{baseUrl}}/schools/{{schoolId}}/students/enroll
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "identifier": "FGC/2025/001",
+  "schoolClassId": "{{classId}}"
+}
+
+###
+
+### 39. BULK ENROLL STUDENTS
+### Replace UUIDs with real student profile IDs from GET /students
+POST {{baseUrl}}/schools/{{schoolId}}/students/bulk-enroll
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "studentProfileIds": [
+    "4e496adf-d66e-40f7-b20c-979ab67d945b",
+    "a6b8d9bd-0cd2-4c71-ba83-ecf557085e91",
+    "608631f7-0b39-40e3-8235-97f26c903b92"
+  ],
+  "schoolClassId": "{{classId}}"
+}
+
+###
+
+### 40. BULK ENROLL WITHOUT CLASS (school only, no class)
+POST {{baseUrl}}/schools/{{schoolId}}/students/bulk-enroll
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "studentProfileIds": [
+    "5d3d8e84-c87c-41ea-863b-eecc4b02884d",
+    "a720112d-096a-4dd2-9dea-4bee7b716649"
+  ]
+}
+
+###
+
+### 41. VERIFY STUDENTS ENROLLED — check via students module
+GET {{baseUrl}}/students?schoolId={{schoolId}}&hasSchool=true
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 42. VERIFY CLASS STUDENT COUNT UPDATED
+GET {{baseUrl}}/schools/{{schoolId}}/classes/{{classId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+
+# =============================================================
+# SECTION 6 — MOVE STUDENT BETWEEN CLASSES
+# =============================================================
+
+### 43. MOVE STUDENT TO DIFFERENT CLASS
+### Uses the students admin update endpoint
+PATCH {{baseUrl}}/students/{{studentProfileId}}/admin
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "schoolClassId": "{{classId}}"
+}
+
+###
+
+### 44. REMOVE STUDENT FROM SCHOOL ENTIRELY
+DELETE {{baseUrl}}/students/{{studentProfileId}}/school
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+
+# =============================================================
+# SECTION 7 — DELETE CLASS (must have no students)
+# =============================================================
+
+### 45. TRY DELETE CLASS WITH STUDENTS — should return 400
+DELETE {{baseUrl}}/schools/{{schoolId}}/classes/{{classId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 46. REMOVE ALL STUDENTS FROM CLASS FIRST
+### Then retry delete
+PATCH {{baseUrl}}/students/{{studentProfileId}}/admin
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "schoolClassId": null
+}
+
+###
+
+### 47. DELETE CLASS — should succeed now
+DELETE {{baseUrl}}/schools/{{schoolId}}/classes/{{classId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+
+# =============================================================
+# SECTION 8 — DELETE SCHOOL
+# =============================================================
+
+### 48. DELETE SCHOOL
+### Hard delete — removes school record
+### Students will still exist but schoolId will become orphaned
+### Consider deactivating instead of deleting in production
+DELETE {{baseUrl}}/schools/{{schoolId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+
+# =============================================================
+# SECTION 9 — VALIDATION ERRORS (confirm guards work)
+# =============================================================
+
+### 49. CREATE SCHOOL — duplicate subdomain
+POST {{baseUrl}}/schools
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "Another FGC",
+  "subdomain": "fgc-lagos",
+  "type": "secondary"
+}
+
+###
+
+### 50. CREATE CLASS — invalid PIN (not numeric)
+POST {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "SS1 Science",
+  "pin": "abcd"
+}
+
+###
+
+### 51. CREATE CLASS — PIN too short
+POST {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "SS1 Arts",
+  "pin": "12"
+}
+
+###
+
+### 52. CREATE CLASS — duplicate name in same school
+POST {{baseUrl}}/schools/{{schoolId}}/classes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+  "name": "SS3 Science",
+  "pin": "1111"
+}
+
+###
+
+### 53. GET NON-EXISTENT SCHOOL — should 404
+GET {{baseUrl}}/schools/00000000-0000-0000-0000-000000000000
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+###
+
+### 54. SUBDOMAIN NOT FOUND — should 404
+GET {{baseUrl}}/schools/by-subdomain/does-not-exist
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
