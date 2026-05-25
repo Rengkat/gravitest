@@ -11,6 +11,7 @@ import PlatformSection from "./components/PlatformSection";
 import AdvancedSection from "./components/AdvancedSection";
 import BackupSection from "./components/BackupSection";
 import IntegrationsSection from "./components/IntegrationsSection";
+import NotificationsSection from "./components/NotificationsSection";
 // import PlatformSection from "./components/PlatformSection";
 // import SecuritySection from "./components/SecuritySection";
 // import NotificationsSection from "./components/NotificationsSection";
@@ -68,13 +69,13 @@ export default function AdminSettingsPage() {
               settings={settings.security}
               onChange={(v) => updateSection("security", v)}
             />
-          )}
+          )}*/}
           {activeSection === "notifications" && (
             <NotificationsSection
               settings={settings.notifications}
               onChange={(v) => updateSection("notifications", v)}
             />
-          )}*/}
+          )}
           {activeSection === "integrations" && (
             <IntegrationsSection
               settings={settings.integrations}
