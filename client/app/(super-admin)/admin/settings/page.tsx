@@ -6,6 +6,7 @@ import { SettingsSection, AllSettings } from "@/types/settings";
 import { DEFAULT_SETTINGS } from "@/lib/constants/settings";
 
 import AdminSettingsSidebar from "./components/AdminSettingsSidebar";
+import AdminAppearanceSection from "./components/AdminAppearanceSection";
 
 export default function AdminSettingsPage() {
   const [activeSection, setActiveSection] = useState<SettingsSection>("appearance");
@@ -41,7 +42,7 @@ export default function AdminSettingsPage() {
         />
 
         {/* Content */}
-        {/* <div className="lg:col-span-3">
+        <div className="lg:col-span-3">
           {activeSection === "appearance" && (
             <AdminAppearanceSection
               settings={settings.appearance}
@@ -49,7 +50,7 @@ export default function AdminSettingsPage() {
             />
           )}
 
-          {activeSection === "platform" && (
+          {/* {activeSection === "platform" && (
             <PlatformSection
               settings={settings.platform}
               onChange={(v) => updateSection("platform", v)}
@@ -79,8 +80,8 @@ export default function AdminSettingsPage() {
 
           {activeSection === "backup" && <BackupSection />}
 
-          {activeSection === "danger" && <AdvancedSection onResetSettings={handleResetAll} />}
-        </div> */}
+          {activeSection === "danger" && <AdvancedSection onResetSettings={handleResetAll} />} */}
+        </div>
       </div>
     </div>
   );
