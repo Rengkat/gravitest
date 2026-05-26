@@ -15,6 +15,7 @@ import { Step3ExamGoals } from "./components/Step3examgoals";
 import { Step2AcademicInfo } from "./components/Step2academicinfo";
 import { Step1PersonalInfo } from "./components/Step1personalinfo";
 import { SuccessState } from "./components/Successstate";
+import { StepProgress } from "./components/Stepprogress";
 
 export default function CompleteRegistrationPage() {
   const router = useRouter();
