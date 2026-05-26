@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { User, MapPin, Phone, Calendar } from "lucide-react";
 import { personalInfoSchema, type PersonalInfoData } from "../schemas";
 import { NIGERIAN_STATES } from "../constants";
-import { FieldWrapper, SectionHeader, inputCls } from "./FormPrimitives";
+import { FieldWrapper, SectionHeader, inputCls } from "./Formprimitives";
 
 interface Props {
   defaultValues?: Partial<PersonalInfoData>;
