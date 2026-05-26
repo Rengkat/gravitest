@@ -34,8 +34,11 @@ export default function StatsBar() {
         }}
       />
 
-      {STATS.map(({ num, suffix, label, delay, border }) => (
-        <div key={label} className={`reveal ${delay} ${border} text-center py-2 px-6`}>
+      {STATS.map(({ num, suffix, label, delay }, index) => (
+        <div
+          key={label}
+          className={`reveal ${delay} border-1 border-white/10 text-center py-2 px-6 relative
+        `}>
           <div className="font-serif text-[36px] text-white leading-none mb-1.5 flex items-baseline justify-center gap-0.5">
             {num}
             <span className="font-sans text-lg font-bold text-gold">{suffix}</span>

@@ -84,19 +84,24 @@ export default function Hero() {
         </div>
 
         {/* Headline */}
-        <h1
-          className="font-serif font-bold leading-[1.08] tracking-[-1.5px] text-green-900 mb-6 [animation:fadeUp_0.6s_0.1s_ease_both] "
-          style={{ fontSize: "clamp(42px,5.5vw,72px)" }}>
-          Pass JAMB.
-          <br />
-          <span className="relative inline-block">
-            Conquer
-            <span className="absolute bottom-1 left-0 right-0 h-2 bg-gold opacity-40 -z-[1] rounded-sm" />
-          </span>{" "}
-          WAEC.
-          <br />
-          <em className="italic text-green-600">Own your future.</em>
-        </h1>
+        <div className="[animation:fadeUp_0.6s_0.1s_ease_both]">
+          <h1
+            className="font-serif font-bold leading-[1.08] tracking-[-1.5px] text-green-900 mb-4"
+            style={{ fontSize: "clamp(42px,5.5vw,72px)" }}>
+            Pass.
+            <br />
+            <span className="relative inline-block">
+              Conquer.
+              <span className="absolute bottom-1 left-0 right-0 h-2 bg-gold opacity-40 -z-[1] rounded-sm" />
+            </span>
+            <br />
+            <em className="italic text-green-600">Own your future.</em>
+          </h1>
+
+          <p className="text-lg md:text-xl text-green-800/70 font-medium max-w-xl">
+            JAMB • WAEC • ICAN • Nursing • and more.
+          </p>
+        </div>
 
         {/* Sub */}
         <p className="text-[17px] text-text-muted leading-[1.7] max-w-[500px] mb-10 font-normal [animation:fadeUp_0.6s_0.2s_ease_both]">
