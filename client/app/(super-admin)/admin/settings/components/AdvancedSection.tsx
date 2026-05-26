@@ -8,7 +8,6 @@ import {
   X,
   CheckCircle,
   Trash2,
-  Database,
   RefreshCw,
   Server,
 } from "lucide-react";

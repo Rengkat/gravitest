@@ -1,11 +1,16 @@
 export type SettingsSection =
   | "appearance"
+  | "study"
+  | "accessibility"
+  | "language"
+  | "privacy"
+  | "data"
+  | "integrations"
+  | "danger"
   | "platform"
   | "security"
   | "notifications"
-  | "integrations"
-  | "backup"
-  | "danger";
+  | "backup";
 
 export type ThemeMode = "light" | "dark" | "system";
 export type FontSize = "small" | "medium" | "large";
