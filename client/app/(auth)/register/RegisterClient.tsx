@@ -9,6 +9,7 @@ import StepSuccess from "./StepSuccess";
 import { RoleId } from "@/types/registerType";
 import Step1RoleSelect from "./Step1RoleSelect";
 import Link from "next/link";
+import Image from "next/image";
 
 type Step = 1 | 2 | 3 | "success";
 
@@ -53,19 +54,19 @@ export default function RegisterPage() {
       {/* ── Right: form panel ── */}
       <div className="flex-1 flex flex-col min-h-screen overflow-y-auto bg-cream">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-5 lg:px-10 border-b border-green-900/[0.08]">
-          <Link href="/" className="flex items-center gap-2 lg:hidden no-underline">
-            <div className="w-8 h-8 bg-green-800 rounded-lg flex items-center justify-center font-serif text-lg text-gold">
-              G
-            </div>
-            <span className="font-serif text-xl text-green-800">Gravitest</span>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-5 lg:px-10 border-b border-green-900/[0.08]">
+          <Link href="/" className="flex items-center gap-2 lg:hidden no-underline shrink-0">
+            <Image src="/logo.svg" alt="Gravitest Logo" width={32} height={32} />
+            <span className="font-serif text-lg sm:text-xl text-green-800">Gravitest</span>
           </Link>
-          <div className="ml-auto flex items-center gap-2 text-sm text-green-700/70">
-            Already have an account?
+
+          <div className="ml-auto flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-green-700/60 whitespace-nowrap">
+            <span className="hidden sm:inline">Already have an account?</span>
+
             <Link
               href="/login"
-              className="font-semibold text-green-800 hover:text-green-600 transition-colors underline underline-offset-2">
-              Log in →
+              className="font-semibold text-green-800 hover:text-green-600 transition-colors">
+              Login <span className="hidden sm:inline">→</span>
             </Link>
           </div>
         </div>

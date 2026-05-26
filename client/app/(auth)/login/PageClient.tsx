@@ -9,6 +9,7 @@ import ForgotPassword from "./ForgotPassword";
 import EmailLoginForm from "./EmailLoginForm";
 import PhoneLoginForm from "./PhoneLoginForm";
 import Link from "next/link";
+import Image from "next/image";
 
 type View = "login" | "forgot" | "success";
 type Tab = "email" | "phone";
@@ -63,19 +64,19 @@ export default function LoginPage() {
       {/* ── Right: form panel ── */}
       <div className="flex-1 flex flex-col min-h-screen overflow-y-auto bg-cream">
         {/* Topbar */}
-        <div className="flex items-center justify-between px-6 py-5 lg:px-10 border-b border-green-900/[0.08]">
-          <Link href="/" className="flex items-center gap-2 lg:hidden no-underline">
-            <div className="w-8 h-8 bg-green-800 rounded-lg flex items-center justify-center font-serif text-xl text-gold">
-              G
-            </div>
-            <span className="font-serif text-xl text-green-800">Gravitest</span>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-5 lg:px-10 border-b border-green-900/[0.08]">
+          <Link href="/" className="flex items-center gap-2 lg:hidden no-underline shrink-0">
+            <Image src="/logo.svg" alt="Gravitest Logo" width={32} height={32} />
+            <span className="font-serif text-lg sm:text-xl text-green-800">Gravitest</span>
           </Link>
-          <div className="ml-auto flex items-center gap-2 text-sm text-green-700/60">
-            Don&apos;t have an account?{" "}
+
+          <div className="ml-auto flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-green-700/60 whitespace-nowrap">
+            <span className="hidden sm:inline">Don&apos;t have an account?</span>
+            <span className="sm:hidden">New?</span>
             <Link
               href="/register"
-              className="font-semibold text-green-800 hover:text-green-600 transition-colors underline underline-offset-2">
-              Sign up free →
+              className="font-semibold text-green-800 hover:text-green-600 transition-colors">
+              Sign up <span className="hidden sm:inline">free →</span>
             </Link>
           </div>
         </div>
