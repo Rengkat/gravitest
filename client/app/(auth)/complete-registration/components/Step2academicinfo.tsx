@@ -2,7 +2,7 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GraduationCap, School, BookOpen } from "lucide-react";
+import { School, BookOpen } from "lucide-react";
 import { academicInfoSchema, type AcademicInfoData } from "../schemas";
 import { CLASSES, GRADUATION_YEARS, SUBJECTS } from "../constants";
 import { FieldWrapper, SectionHeader, SubjectChipGrid, inputCls } from "./Formprimitives";

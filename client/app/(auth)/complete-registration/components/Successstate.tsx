@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle, Sparkles, BookOpen, Target, Users } from "lucide-react";
+import { CheckCircle, Sparkles, BookOpen, Target } from "lucide-react";
 import type { FullRegistration } from "../schemas";
 
 export function SuccessState({ data }: { data: Partial<FullRegistration> }) {

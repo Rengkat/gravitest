@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Target, Trophy, BookOpen, Loader2, CheckCircle } from "lucide-react";
 import { examGoalsSchema, type ExamGoalsData } from "../schemas";
 import { EXAM_TYPES, SCORE_PRESETS, POPULAR_COURSES } from "../constants";
-import { FieldWrapper, SectionHeader, ChipGroup, ErrorMessage, inputCls } from "./Formprimitives";
+import { FieldWrapper, SectionHeader, ChipGroup, inputCls } from "./Formprimitives";
 
 interface Props {
   defaultValues?: Partial<ExamGoalsData>;
