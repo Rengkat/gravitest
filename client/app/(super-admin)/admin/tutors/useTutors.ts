@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { generateMockTutors, generateTutorStats } from "./mockData";
+import { generateMockTutors, generateTutorStats } from "./mockdata";
 import { DEFAULT_FILTERS, SPECIALIZATIONS } from "./constants";
 import type {
   Tutor,
@@ -69,12 +69,18 @@ export function useTutors() {
         }
         if (filters.status && tutor.status !== filters.status) return false;
         if (filters.verification && tutor.verificationLevel !== filters.verification) return false;
-        if (filters.specialization && !tutor.specialization.includes(filters.specialization as TutorSpecialization)) return false;
+        if (
+          filters.specialization &&
+          !tutor.specialization.includes(filters.specialization as TutorSpecialization)
+        )
+          return false;
         if (filters.state && tutor.state !== filters.state) return false;
         if (filters.teachingMode && tutor.teachingMode !== filters.teachingMode) return false;
         if (filters.minRating && tutor.rating < parseFloat(filters.minRating)) return false;
-        if (filters.minExperience && tutor.experience < parseInt(filters.minExperience)) return false;
-        if (filters.maxExperience && tutor.experience > parseInt(filters.maxExperience)) return false;
+        if (filters.minExperience && tutor.experience < parseInt(filters.minExperience))
+          return false;
+        if (filters.maxExperience && tutor.experience > parseInt(filters.maxExperience))
+          return false;
         if (filters.minRate && tutor.hourlyRate < parseInt(filters.minRate)) return false;
         if (filters.maxRate && tutor.hourlyRate > parseInt(filters.maxRate)) return false;
         if (filters.isOnline === "true" && !tutor.isOnline) return false;
@@ -84,13 +90,27 @@ export function useTutors() {
       .sort((a, b) => {
         let cmp = 0;
         switch (sortField) {
-          case "name":       cmp = a.name.localeCompare(b.name);           break;
-          case "rating":     cmp = a.rating - b.rating;                    break;
-          case "students":   cmp = a.totalStudents - b.totalStudents;      break;
-          case "sessions":   cmp = a.totalSessions - b.totalSessions;      break;
-          case "earnings":   cmp = a.totalEarnings - b.totalEarnings;      break;
-          case "experience": cmp = a.experience - b.experience;            break;
-          case "hourlyRate": cmp = a.hourlyRate - b.hourlyRate;            break;
+          case "name":
+            cmp = a.name.localeCompare(b.name);
+            break;
+          case "rating":
+            cmp = a.rating - b.rating;
+            break;
+          case "students":
+            cmp = a.totalStudents - b.totalStudents;
+            break;
+          case "sessions":
+            cmp = a.totalSessions - b.totalSessions;
+            break;
+          case "earnings":
+            cmp = a.totalEarnings - b.totalEarnings;
+            break;
+          case "experience":
+            cmp = a.experience - b.experience;
+            break;
+          case "hourlyRate":
+            cmp = a.hourlyRate - b.hourlyRate;
+            break;
         }
         return sortDirection === "asc" ? cmp : -cmp;
       });
@@ -135,8 +155,9 @@ export function useTutors() {
       prev.map((t) => {
         if (!selectedTutors.has(t.id)) return t;
         if (action === "activate") return { ...t, status: "active" as TutorStatus };
-        if (action === "suspend")  return { ...t, status: "suspended" as TutorStatus };
-        if (action === "verify")   return { ...t, verificationLevel: "verified" as VerificationLevel };
+        if (action === "suspend") return { ...t, status: "suspended" as TutorStatus };
+        if (action === "verify")
+          return { ...t, verificationLevel: "verified" as VerificationLevel };
         return t;
       }),
     );
@@ -145,13 +166,32 @@ export function useTutors() {
 
   const exportCsv = () => {
     const csv = [
-      ["Name","Email","Category","Specialization","Rating","Students","Sessions","Hourly Rate","Status","State","Total Earnings"].join(","),
+      [
+        "Name",
+        "Email",
+        "Category",
+        "Specialization",
+        "Rating",
+        "Students",
+        "Sessions",
+        "Hourly Rate",
+        "Status",
+        "State",
+        "Total Earnings",
+      ].join(","),
       ...filteredTutors.map((t) =>
         [
-          t.name, t.email, t.category,
+          t.name,
+          t.email,
+          t.category,
           t.specialization.map((s) => SPECIALIZATIONS[s]?.label).join("; "),
-          t.rating, t.totalStudents, t.totalSessions,
-          t.hourlyRate, t.status, t.state, t.totalEarnings,
+          t.rating,
+          t.totalStudents,
+          t.totalSessions,
+          t.hourlyRate,
+          t.status,
+          t.state,
+          t.totalEarnings,
         ].join(","),
       ),
     ].join("\n");
@@ -172,24 +212,32 @@ export function useTutors() {
     filteredTutors,
     paginatedTutors,
     // View
-    viewMode, setViewMode,
-    categoryFilter, setCategoryFilter,
+    viewMode,
+    setViewMode,
+    categoryFilter,
+    setCategoryFilter,
     // Search & filter
-    searchQuery, setSearchQuery,
-    showFilters, setShowFilters,
-    filters, setFilters,
+    searchQuery,
+    setSearchQuery,
+    showFilters,
+    setShowFilters,
+    filters,
+    setFilters,
     activeFilterCount,
     clearFilters,
     // Sort
-    sortField, setSortField,
-    sortDirection, setSortDirection,
+    sortField,
+    setSortField,
+    sortDirection,
+    setSortDirection,
     // Selection
     selectedTutors,
     toggleSelectTutor,
     selectAllOnPage,
     clearSelection,
     // Pagination
-    currentPage, setCurrentPage,
+    currentPage,
+    setCurrentPage,
     totalPages,
     itemsPerPage,
     // Actions
