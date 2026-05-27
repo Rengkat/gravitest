@@ -1,4 +1,3 @@
-// app/dashboard/notifications/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,13 +6,11 @@ import {
   Bell,
   CheckCircle,
   XCircle,
-  Clock,
   Calendar,
   MessageSquare,
   Video,
   CreditCard,
   Trophy,
-  Zap,
   Flame,
   BookOpen,
   AlertTriangle,
@@ -21,10 +18,8 @@ import {
   Mail,
   Smartphone,
   Globe,
-  Filter,
   Check,
   Archive,
-  Trash2,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -549,6 +544,7 @@ export default function NotificationsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">
           <button
+            title="page"
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
             className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition">
@@ -558,6 +554,7 @@ export default function NotificationsPage() {
             Page {currentPage} of {totalPages}
           </span>
           <button
+            title="page"
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
             className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition">
