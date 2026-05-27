@@ -19,12 +19,12 @@ const UserMenu = ({ userMenuOpen, setUserMenuOpen }: UserMenuProps) => {
       {userMenuOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border p-2 z-50">
           <Link
-            href="/dashboard/settings"
+            href="/dashboard/profile"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] hover:bg-cream transition-colors">
             <UserCircle size={14} /> Profile
           </Link>
           <Link
-            href="/dashboard/settings/billing"
+            href="/dashboard/billing"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] hover:bg-cream transition-colors">
             <CreditCard size={14} /> Billing
           </Link>

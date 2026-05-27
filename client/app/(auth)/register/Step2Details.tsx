@@ -297,7 +297,7 @@ export default function Step2Details({ role, onBack, onSubmit }: Props) {
         )}
 
         {/* Exam target (student/professional) */}
-        {cfg.showExamTarget && (
+        {/* {cfg.showExamTarget && (
           <div className="mb-4">
             <FieldLabel text="Primary Exam Target" />
             <Controller
@@ -330,7 +330,7 @@ export default function Step2Details({ role, onBack, onSubmit }: Props) {
             />
             <FieldError msg={errors.examTarget?.message} />
           </div>
-        )}
+        )} */}
 
         {/* Password */}
         <div className="mb-2">
