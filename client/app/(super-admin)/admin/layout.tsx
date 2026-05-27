@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Menu, X, Shield, Activity } from "lucide-react";
 import Footer from "../components/Footer";
 import AdminSideBar from "../components/AdminSideBar";
-import Notifications from "@/Components/Notifications";
 import UserMenu from "@/Components/UserMenu";
+import AdminNotifications from "../components/Notifications";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
             {/* Notifications */}
-            <Notifications
+            <AdminNotifications
               notificationsOpen={notificationsOpen}
               setNotificationsOpen={setNotificationsOpen}
             />

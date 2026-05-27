@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Menu, X, Flame, Sparkles } from "lucide-react";
 import Footer from "./Footer";
 import SideBar from "@/Components/SideBar";
-import Notifications from "@/Components/Notifications";
 import UserMenu from "@/Components/UserMenu";
+import Notifications from "./components/Notifications";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

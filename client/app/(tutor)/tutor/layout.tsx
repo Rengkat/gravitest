@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Menu, X, Users, Calendar, Clock } from "lucide-react";
 import Footer from "@/Components/Footer";
 import TutorSideBar from "../components/TutorSideBar";
-import Notifications from "@/Components/Notifications";
+import Notifications from "@/app/(super-admin)/components/Notifications";
 import UserMenu from "@/Components/UserMenu";
 export default function TutorLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

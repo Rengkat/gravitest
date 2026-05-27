@@ -344,7 +344,7 @@ export default function MadamKarmenLandingPage() {
         {/* Footer */}
         <div className="mt-10 text-center">
           <p className="text-amber-200/30 text-[9px] tracking-wide">
-            A Gravitas Educational Game — Test your Nigerian geography knowledge and track down the
+            A Gravitest Educational Game — Test your Nigerian geography knowledge and track down the
             fugitive!
           </p>
         </div>

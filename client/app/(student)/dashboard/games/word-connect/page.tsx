@@ -282,7 +282,7 @@ export default function WordConnectLandingPage() {
         {/* Footer */}
         <div className="mt-10 text-center">
           <p className="text-amber-200/30 text-[10px] tracking-wide">
-            A Gravitas Educational Game — Test your vocabulary and win virtual prizes!
+            A Gravitest Educational Game — Test your vocabulary and win virtual prizes!
           </p>
         </div>
       </div>

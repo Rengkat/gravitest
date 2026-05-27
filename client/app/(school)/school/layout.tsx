@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Menu, X, School as SchoolIcon, Activity } from "lucide-react";
 import Footer from "@/Components/Footer";
 import SchoolSideBar from "../components/SchoolSideBar";
-import Notifications from "@/Components/Notifications";
+import Notifications from "@/app/(super-admin)/components/Notifications";
 import UserMenu from "@/Components/UserMenu";
 
 export default function SchoolLayout({ children }: { children: React.ReactNode }) {
