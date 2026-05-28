@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, CheckCircle, Archive } from "lucide-react";
-import type { NotificationCounts, NotificationFilter } from "../../types";
+import type { NotificationCounts, NotificationFilter } from "../types";
 
 interface Props {
   counts: NotificationCounts;
@@ -12,7 +12,7 @@ interface Props {
 export function NotificationStatsBar({ counts, activeFilter, onFilterChange }: Props) {
   const cards = [
     {
-      filter: "unread"   as NotificationFilter,
+      filter: "unread" as NotificationFilter,
       icon: Bell,
       label: "Unread",
       count: counts.unread,
@@ -20,7 +20,7 @@ export function NotificationStatsBar({ counts, activeFilter, onFilterChange }: P
       bg: "#dbeafe",
     },
     {
-      filter: "read"     as NotificationFilter,
+      filter: "read" as NotificationFilter,
       icon: CheckCircle,
       label: "Read",
       count: counts.read,
@@ -44,16 +44,13 @@ export function NotificationStatsBar({ counts, activeFilter, onFilterChange }: P
           key={filter}
           onClick={() => onFilterChange(filter)}
           className={`p-4 rounded-2xl border text-center transition-all hover:-translate-y-0.5 hover:shadow-md ${
-            activeFilter === filter
-              ? "ring-2 ring-offset-1"
-              : ""
+            activeFilter === filter ? "ring-2 ring-offset-1" : ""
           }`}
           style={{
             borderColor: activeFilter === filter ? color : "rgba(30,80,50,0.08)",
             background: activeFilter === filter ? bg : "#fff",
             ringColor: color,
-          }}
-        >
+          }}>
           <div className="flex items-center justify-center gap-2 mb-1">
             <Icon size={16} style={{ color }} />
             <span className="text-[12px] text-gray-500 font-medium">{label}</span>

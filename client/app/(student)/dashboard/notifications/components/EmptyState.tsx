@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, CheckCircle, Archive, Filter } from "lucide-react";
-import type { NotificationFilter } from "../../types";
+import type { NotificationFilter } from "../types";
 
 const EMPTY_STATE_COPY: Record<NotificationFilter, { icon: any; title: string; body: string }> = {
   all: {
@@ -39,8 +39,7 @@ export function EmptyState({
   return (
     <div
       className="text-center py-16 bg-white rounded-2xl border"
-      style={{ borderColor: "rgba(30,80,50,0.08)" }}
-    >
+      style={{ borderColor: "rgba(30,80,50,0.08)" }}>
       <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
         {hasChannelFilter ? (
           <Filter size={28} className="text-gray-300" />

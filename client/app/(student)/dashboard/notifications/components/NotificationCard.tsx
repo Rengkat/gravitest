@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Bell, RotateCcw } from "lucide-react";
-import type { Notification } from "../../types";
-import { NOTIFICATION_TYPE_CONFIG, CHANNEL_CONFIG } from "../../constants";
+import type { Notification } from "../types";
+import { NOTIFICATION_TYPE_CONFIG, CHANNEL_CONFIG } from "../constants";
 
 interface Props {
   notification: Notification;
@@ -14,7 +14,7 @@ interface Props {
 
 function timeAgo(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60)   return `${diff}s ago`;
+  if (diff < 60) return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
@@ -22,12 +22,12 @@ function timeAgo(dateStr: string): string {
 }
 
 export function NotificationCard({ notification, onMarkRead, onArchive, onUnarchive }: Props) {
-  const typeCfg    = NOTIFICATION_TYPE_CONFIG[notification.type];
+  const typeCfg = NOTIFICATION_TYPE_CONFIG[notification.type];
   const channelCfg = CHANNEL_CONFIG[notification.channel];
-  const Icon        = typeCfg?.icon ?? Bell;
-  const ChanIcon    = channelCfg?.icon ?? Bell;
-  const isUnread    = notification.status === "unread";
-  const isArchived  = notification.status === "archived";
+  const Icon = typeCfg?.icon ?? Bell;
+  const ChanIcon = channelCfg?.icon ?? Bell;
+  const isUnread = notification.status === "unread";
+  const isArchived = notification.status === "archived";
 
   return (
     <div
@@ -35,10 +35,9 @@ export function NotificationCard({ notification, onMarkRead, onArchive, onUnarch
         isUnread
           ? "bg-green-50/60 border-green-200"
           : isArchived
-          ? "bg-gray-50 border-gray-100 opacity-75"
-          : "bg-white border-gray-100 hover:border-gray-200"
-      }`}
-    >
+            ? "bg-gray-50 border-gray-100 opacity-75"
+            : "bg-white border-gray-100 hover:border-gray-200"
+      }`}>
       {/* Unread left accent */}
       {isUnread && (
         <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-green-600" />
@@ -48,8 +47,7 @@ export function NotificationCard({ notification, onMarkRead, onArchive, onUnarch
         {/* Type icon */}
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-          style={{ background: typeCfg?.bg ?? "#f3f4f6" }}
-        >
+          style={{ background: typeCfg?.bg ?? "#f3f4f6" }}>
           <Icon size={18} style={{ color: typeCfg?.color ?? "#6b7280" }} />
         </div>
 
@@ -57,15 +55,15 @@ export function NotificationCard({ notification, onMarkRead, onArchive, onUnarch
         <div className="flex-1 min-w-0">
           {/* Title + meta row */}
           <div className="flex items-start justify-between gap-2 mb-0.5 flex-wrap">
-            <h4 className={`text-[14px] font-semibold leading-snug ${isUnread ? "text-green-900" : "text-gray-800"}`}>
+            <h4
+              className={`text-[14px] font-semibold leading-snug ${isUnread ? "text-green-900" : "text-gray-800"}`}>
               {notification.title}
             </h4>
             <div className="flex items-center gap-2 shrink-0">
               {/* Channel badge */}
               <span
                 className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
-                style={{ background: `${channelCfg?.color}15`, color: channelCfg?.color }}
-              >
+                style={{ background: `${channelCfg?.color}15`, color: channelCfg?.color }}>
                 <ChanIcon size={9} />
                 {channelCfg?.label}
               </span>
@@ -74,7 +72,9 @@ export function NotificationCard({ notification, onMarkRead, onArchive, onUnarch
           </div>
 
           {/* Type label */}
-          <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: typeCfg?.color }}>
+          <span
+            className="text-[10px] font-semibold uppercase tracking-wide"
+            style={{ color: typeCfg?.color }}>
             {typeCfg?.label}
           </span>
 
@@ -87,31 +87,27 @@ export function NotificationCard({ notification, onMarkRead, onArchive, onUnarch
               <Link
                 href={notification.actionUrl}
                 onClick={() => isUnread && onMarkRead(notification.id)}
-                className="text-[12px] font-semibold text-green-700 hover:text-green-800 transition-colors"
-              >
+                className="text-[12px] font-semibold text-green-700 hover:text-green-800 transition-colors">
                 View Details →
               </Link>
             )}
             {isUnread && (
               <button
                 onClick={() => onMarkRead(notification.id)}
-                className="text-[12px] text-gray-500 hover:text-green-700 transition-colors"
-              >
+                className="text-[12px] text-gray-500 hover:text-green-700 transition-colors">
                 Mark as read
               </button>
             )}
             {!isArchived ? (
               <button
                 onClick={() => onArchive(notification.id)}
-                className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors ml-auto"
-              >
+                className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors ml-auto">
                 Archive
               </button>
             ) : onUnarchive ? (
               <button
                 onClick={() => onUnarchive(notification.id)}
-                className="text-[12px] text-gray-400 hover:text-green-700 transition-colors ml-auto flex items-center gap-1"
-              >
+                className="text-[12px] text-gray-400 hover:text-green-700 transition-colors ml-auto flex items-center gap-1">
                 <RotateCcw size={11} /> Restore
               </button>
             ) : null}
@@ -119,9 +115,7 @@ export function NotificationCard({ notification, onMarkRead, onArchive, onUnarch
         </div>
 
         {/* Unread dot */}
-        {isUnread && (
-          <div className="w-2.5 h-2.5 rounded-full bg-green-600 shrink-0 mt-1.5" />
-        )}
+        {isUnread && <div className="w-2.5 h-2.5 rounded-full bg-green-600 shrink-0 mt-1.5" />}
       </div>
     </div>
   );
