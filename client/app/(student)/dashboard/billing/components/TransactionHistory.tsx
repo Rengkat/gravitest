@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -108,9 +108,8 @@ export default function TransactionHistory() {
               const isExpanded = expanded === tx.id;
 
               return (
-                <>
+                <Fragment key={tx.id}>
                   <tr
-                    key={tx.id}
                     className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors cursor-pointer"
                     onClick={() => setExpanded(isExpanded ? null : tx.id)}>
                     <td className="px-6 py-4 text-[13px] text-gray-500 whitespace-nowrap">
@@ -221,7 +220,7 @@ export default function TransactionHistory() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               );
             })}
           </tbody>

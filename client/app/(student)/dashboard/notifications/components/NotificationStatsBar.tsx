@@ -49,7 +49,7 @@ export function NotificationStatsBar({ counts, activeFilter, onFilterChange }: P
           style={{
             borderColor: activeFilter === filter ? color : "rgba(30,80,50,0.08)",
             background: activeFilter === filter ? bg : "#fff",
-            ringColor: color,
+            // ringColor: color,
           }}>
           <div className="flex items-center justify-center gap-2 mb-1">
             <Icon size={16} style={{ color }} />
