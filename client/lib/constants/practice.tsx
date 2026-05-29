@@ -1,4 +1,5 @@
 import { QuestionType } from "@/types/practice";
+import { SUBJECT_LABEL_TO_ENUM } from "@/utils/subjectMapping";
 import {
   BarChart,
   BookOpen,
@@ -130,8 +131,20 @@ export const PROFESSIONAL_EXAMS = [
   },
 ];
 
+// Validates every label at module load — blows up loud in dev if a label drifts
+function validated(labels: string[]): string[] {
+  if (process.env.NODE_ENV === "development") {
+    labels.forEach((label) => {
+      if (!SUBJECT_LABEL_TO_ENUM[label]) {
+        console.warn(`[SUBJECTS] No enum mapping for label: "${label}"`);
+      }
+    });
+  }
+  return labels;
+}
+
 export const SUBJECTS: Record<string, string[]> = {
-  JAMB: [
+  JAMB: validated([
     "Use of English",
     "Agricultural Science",
     "Arabic",
@@ -157,8 +170,8 @@ export const SUBJECTS: Record<string, string[]> = {
     "Physics",
     "Principles of Accounts",
     "Yoruba",
-  ],
-  WAEC: [
+  ]),
+  WAEC: validated([
     "English",
     "Mathematics",
     "Physics",
@@ -177,8 +190,8 @@ export const SUBJECTS: Record<string, string[]> = {
     "Technical Drawing",
     "Food & Nutrition",
     "Home Economics",
-  ],
-  NECO: [
+  ]),
+  NECO: validated([
     "English",
     "Mathematics",
     "Physics",
@@ -195,8 +208,8 @@ export const SUBJECTS: Record<string, string[]> = {
     "Agricultural Science",
     "Further Mathematics",
     "Home Economics",
-  ],
-  NABTEB: [
+  ]),
+  NABTEB: validated([
     "English",
     "Mathematics",
     "Physics",
@@ -210,8 +223,8 @@ export const SUBJECTS: Record<string, string[]> = {
     "Metalwork",
     "Auto Mechanics",
     "Computer Studies",
-  ],
-  BECE: [
+  ]),
+  BECE: validated([
     "English",
     "Mathematics",
     "Basic Science",
@@ -224,8 +237,8 @@ export const SUBJECTS: Record<string, string[]> = {
     "Business Studies",
     "French",
     "CCA",
-  ],
-  JUNIOR_NECO: [
+  ]),
+  JUNIOR_NECO: validated([
     "English",
     "Mathematics",
     "Basic Science",
@@ -236,7 +249,105 @@ export const SUBJECTS: Record<string, string[]> = {
     "French",
     "CCA",
     "Home Economics",
-  ],
+  ]),
+  ICAN_FOUNDATION: validated([
+    "Quantitative Techniques in Business",
+    "Business and Finance",
+    "Financial Accounting",
+    "Management Information",
+    "Business Law",
+  ]),
+  ICAN_SKILLS: validated([
+    "Audit and Assurance",
+    "Financial Reporting",
+    "Taxation",
+    "Management Accounting",
+    "Business Communication and Research Methodology",
+  ]),
+  ICAN_PROFESSIONAL: validated([
+    "Corporate Reporting",
+    "Advanced Audit and Assurance",
+    "Strategic Financial Management",
+    "Advanced Taxation",
+    "Ethics and Governance",
+  ]),
+  NMCN_BASIC: validated([
+    "Anatomy and Physiology",
+    "Microbiology and Parasitology",
+    "Nutrition and Dietetics",
+    "Pharmacology",
+    "Introduction to Nursing Practice",
+    "Community Health Nursing",
+  ]),
+  NMCN_POST_BASIC: validated([
+    "Medical-Surgical Nursing",
+    "Paediatric Nursing",
+    "Obstetric and Gynaecological Nursing",
+    "Mental Health and Psychiatric Nursing",
+    "Accident and Emergency Nursing",
+  ]),
+  NMCN_ADVANCED: validated([
+    "Advanced Clinical Nursing",
+    "Nursing Research and Education",
+    "Nursing Administration and Management",
+    "Nurse Prescribing and Pharmacotherapeutics",
+    "Midwifery",
+  ]),
+  CIPM_ASSOCIATE: validated([
+    "Organisational Behaviour",
+    "Human Resource Management",
+    "Employment Law",
+    "Learning and Development",
+    "Compensation and Benefits Management",
+  ]),
+  CIPM_CHARTERED: validated([
+    "Strategic Human Resource Management",
+    "Labour Relations and Collective Bargaining",
+    "HR Metrics and Analytics",
+    "Organisational Development and Change Management",
+    "Performance Management",
+  ]),
+  CIPM_FELLOW: validated([
+    "Leadership and Corporate Governance",
+    "Advanced Strategic HRM",
+    "HR Consulting and Advisory",
+  ]),
+  NIM_DIPLOMA: validated([
+    "Principles of Management",
+    "Business Communication",
+    "Economics for Managers",
+    "Accounting for Non-Accountants",
+    "Marketing Management",
+  ]),
+  NIM_GRADUATE: validated([
+    "Strategic Management",
+    "Operations Management",
+    "Human Resources Management",
+    "Financial Management",
+    "Business Law and Ethics",
+    "Entrepreneurship and Innovation",
+  ]),
+  NIM_FELLOW: validated([
+    "Corporate Governance",
+    "Advanced Strategic Management",
+    "Leadership and Executive Development",
+    "Research Methods and Project",
+  ]),
+  NIESV_FOUNDATION: validated([
+    "Land Law and Administration",
+    "Building Construction and Technology",
+    "Valuation Principles",
+    "Town Planning and Development Control",
+    "Economics of Property",
+  ]),
+  NIESV_PROFESSIONAL: validated([
+    "Advanced Valuation",
+    "Property Management",
+    "Estate Agency and Marketing",
+    "Facilities Management",
+    "Dispute Resolution and Arbitration",
+    "Real Estate Finance and Investment",
+  ]),
 };
 
 export const TOPICS: Record<string, string[]> = {
