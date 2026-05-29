@@ -1,13 +1,14 @@
 import type { Difficulty } from "../types";
-import { Label, DifficultyChip } from "./Primitives";
-
-interface DiffRowProps {
+import { DifficultyChip, Label } from "./Primitives";
+export function DiffRow({
+  value,
+  onChange,
+  levels,
+}: {
   value: Difficulty;
   onChange: (d: Difficulty) => void;
   levels: Difficulty[];
-}
-
-export function DiffRow({ value, onChange, levels }: DiffRowProps) {
+}) {
   return (
     <div>
       <Label>Difficulty</Label>

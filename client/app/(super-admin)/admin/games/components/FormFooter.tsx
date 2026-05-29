@@ -1,10 +1,13 @@
-interface FormFooterProps {
+// ─── SHARED FOOTER ────────────────────────────────────────────
+export function FormFooter({
+  onClose,
+  onSubmit,
+  disabled,
+}: {
   onClose: () => void;
   onSubmit: () => void;
   disabled?: boolean;
-}
-
-export function FormFooter({ onClose, onSubmit, disabled }: FormFooterProps) {
+}) {
   return (
     <div className="flex gap-3 pt-6 border-t mt-6" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
       <button
