@@ -398,7 +398,6 @@ export enum Subject {
   // ── Commerce & Business ──
   COMMERCE = 'commerce',
   ACCOUNTING = 'accounting',
-  FINANCIAL_ACCOUNTING = 'financial_accounting',
   BUSINESS_STUDIES = 'business_studies',
   BUSINESS_MANAGEMENT = 'business_management',
   MARKETING = 'marketing',
@@ -451,25 +450,100 @@ export enum Subject {
   HUMAN_KINETICS = 'human_kinetics',
   NUTRITION = 'nutrition',
   PUBLIC_HEALTH = 'public_health',
+  // ── Professional Exams: ICAN — Foundation ──
+  QUANTITATIVE_TECHNIQUES = 'quantitative_techniques',
+  BUSINESS_AND_FINANCE = 'business_and_finance',
+  FINANCIAL_ACCOUNTING = 'financial_accounting',
+  MANAGEMENT_INFORMATION = 'management_information',
+  BUSINESS_LAW = 'business_law',
 
-  // ── Professional Exams: ICAN ──
-  FINANCIAL_REPORTING = 'financial_reporting',
-  MANAGEMENT_ACCOUNTING = 'management_accounting',
-  TAXATION = 'taxation',
+  // ── Professional Exams: ICAN — Skills ──
   AUDIT = 'audit',
-  CORPORATE_LAW = 'corporate_law',
-  PERFORMANCE_MANAGEMENT = 'performance_management',
+  FINANCIAL_REPORTING = 'financial_reporting',
+  TAXATION = 'taxation',
+  MANAGEMENT_ACCOUNTING = 'management_accounting',
+  BUSINESS_COMMUNICATION = 'business_communication',
 
-  // ── Professional Exams: Medical/Nursing ──
+  // ── Professional Exams: ICAN — Professional ──
+  CORPORATE_REPORTING = 'corporate_reporting',
+  ADVANCED_AUDIT = 'advanced_audit',
+  STRATEGIC_FINANCIAL_MANAGEMENT = 'strategic_financial_management',
+  ADVANCED_TAXATION = 'advanced_taxation',
+  ETHICS_AND_GOVERNANCE = 'ethics_and_governance',
+
+  // ── Professional Exams: NMCN — Basic ──
   ANATOMY = 'anatomy',
   PHYSIOLOGY = 'physiology',
-  PHARMACOLOGY = 'pharmacology',
-  PATHOLOGY = 'pathology',
   MICROBIOLOGY = 'microbiology',
-  BIOCHEMISTRY = 'biochemistry',
+  NUTRITION_AND_DIETETICS = 'nutrition_and_dietetics',
+  PHARMACOLOGY = 'pharmacology',
   NURSING_FUNDAMENTALS = 'nursing_fundamentals',
-  MIDWIFERY = 'midwifery',
   COMMUNITY_HEALTH = 'community_health',
+
+  // ── Professional Exams: NMCN — Post-Basic ──
+  MEDICAL_SURGICAL_NURSING = 'medical_surgical_nursing',
+  PAEDIATRIC_NURSING = 'paediatric_nursing',
+  OBSTETRIC_NURSING = 'obstetric_nursing',
+  MENTAL_HEALTH_NURSING = 'mental_health_nursing',
+  ACCIDENT_EMERGENCY_NURSING = 'accident_emergency_nursing',
+
+  // ── Professional Exams: NMCN — Advanced ──
+  ADVANCED_CLINICAL_NURSING = 'advanced_clinical_nursing',
+  NURSING_RESEARCH_AND_EDUCATION = 'nursing_research_and_education',
+  NURSING_ADMINISTRATION = 'nursing_administration',
+  NURSE_PRESCRIBING = 'nurse_prescribing',
+  MIDWIFERY = 'midwifery', // retained
+
+  // ── Professional Exams: CIPM — Associate ──
+  ORGANISATIONAL_BEHAVIOUR = 'organisational_behaviour',
+  HUMAN_RESOURCE_MANAGEMENT = 'human_resource_management',
+  EMPLOYMENT_LAW = 'employment_law',
+  LEARNING_AND_DEVELOPMENT = 'learning_and_development',
+  COMPENSATION_AND_BENEFITS = 'compensation_and_benefits',
+
+  // ── Professional Exams: CIPM — Chartered ──
+  STRATEGIC_HRM = 'strategic_hrm',
+  LABOUR_RELATIONS = 'labour_relations',
+  HR_METRICS_AND_ANALYTICS = 'hr_metrics_and_analytics',
+  ORGANISATIONAL_DEVELOPMENT = 'organisational_development',
+  PERFORMANCE_MANAGEMENT = 'performance_management',
+
+  // ── Professional Exams: CIPM — Fellow ──
+  LEADERSHIP_AND_CORPORATE_GOVERNANCE = 'leadership_and_corporate_governance',
+  ADVANCED_STRATEGIC_HRM = 'advanced_strategic_hrm',
+  HR_CONSULTING = 'hr_consulting',
+
+  // ── Professional Exams: NIM — Diploma ──
+  PRINCIPLES_OF_MANAGEMENT = 'principles_of_management',
+  ECONOMICS_FOR_MANAGERS = 'economics_for_managers',
+  ACCOUNTING_FOR_NON_ACCOUNTANTS = 'accounting_for_non_accountants',
+  MARKETING_MANAGEMENT = 'marketing_management',
+
+  // ── Professional Exams: NIM — Graduate ──
+  STRATEGIC_MANAGEMENT = 'strategic_management',
+  OPERATIONS_MANAGEMENT = 'operations_management',
+  FINANCIAL_MANAGEMENT = 'financial_management',
+  ENTREPRENEURSHIP_AND_INNOVATION = 'entrepreneurship_and_innovation',
+
+  // ── Professional Exams: NIM — Fellow ──
+  CORPORATE_GOVERNANCE = 'corporate_governance',
+  ADVANCED_STRATEGIC_MANAGEMENT = 'advanced_strategic_management',
+  EXECUTIVE_LEADERSHIP = 'executive_leadership',
+
+  // ── Professional Exams: NIESV — Foundation ──
+  LAND_LAW_AND_ADMINISTRATION = 'land_law_and_administration',
+  BUILDING_CONSTRUCTION_AND_TECHNOLOGY = 'building_construction_and_technology',
+  VALUATION_PRINCIPLES = 'valuation_principles',
+  TOWN_PLANNING = 'town_planning',
+  ECONOMICS_OF_PROPERTY = 'economics_of_property',
+
+  // ── Professional Exams: NIESV — Professional ──
+  ADVANCED_VALUATION = 'advanced_valuation',
+  PROPERTY_MANAGEMENT = 'property_management',
+  ESTATE_AGENCY_AND_MARKETING = 'estate_agency_and_marketing',
+  FACILITIES_MANAGEMENT = 'facilities_management',
+  DISPUTE_RESOLUTION_AND_ARBITRATION = 'dispute_resolution_and_arbitration',
+  REAL_ESTATE_FINANCE = 'real_estate_finance',
 
   // ── Professional Exams: Engineering ──
   ENGINEERING_MATHEMATICS = 'engineering_mathematics',
@@ -490,6 +564,7 @@ export enum Subject {
   TORT_LAW = 'tort_law',
   PROPERTY_LAW = 'property_law',
   COMPANY_LAW = 'company_law',
+  CORPORATE_LAW = 'corporate_law',
   EVIDENCE_LAW = 'evidence_law',
 
   // ── Advanced & Specialized ──
@@ -500,7 +575,8 @@ export enum Subject {
   RESEARCH_METHODS = 'research_methods',
   LOGIC = 'logic',
   ETHICS = 'ethics',
-
+  BIOCHEMISTRY = 'biochemistry',
+  PATHOLOGY = 'pathology',
   // ── Test Prep ──
   VERBAL_REASONING = 'verbal_reasoning',
   QUANTITATIVE_REASONING = 'quantitative_reasoning',
