@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { SCHOLAR_SUBJECTS } from "../constants";
-import { AnyQuestion, Difficulty, Game, ScholarQuestion } from "../types";
-import { inputCls, Label } from "./Primitives";
-import { DiffRow } from "./DiffRow";
-import { FormFooter } from "./FormFooter";
+"use client";
 
-export function ScholarForm({
-  game,
-  onAdd,
-  onClose,
-}: {
+import { useState } from "react";
+import type { AnyQuestion, Difficulty, Game, ScholarQuestion } from "../types";
+import { SCHOLAR_SUBJECTS } from "../constants";
+import { Label, inputCls } from "./Primitives";
+import { FormFooter } from "./FormFooter";
+import { DiffRow } from "./DiffRow";
+
+interface ScholarFormProps {
   game: Game;
   onAdd: (q: AnyQuestion) => void;
   onClose: () => void;
-}) {
+}
+
+export function ScholarForm({ game, onAdd, onClose }: ScholarFormProps) {
   const [q, setQ] = useState("");
   const [opts, setOpts] = useState(["", "", "", ""]);
   const [correct, setCorrect] = useState<0 | 1 | 2 | 3>(0);
@@ -43,7 +43,7 @@ export function ScholarForm({
         <div>
           <Label>Subject *</Label>
           <select
-            title="select subject"
+            title="subject"
             value={subject}
             onChange={(e) => setSubject(e.target.value as any)}
             className={inputCls}>

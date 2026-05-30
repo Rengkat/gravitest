@@ -47,9 +47,9 @@ export enum DeactivationType {
 export enum SubscriptionTier {
   FREE = 'free',
   BASIC = 'basic',
-  PRO = 'pro',
+  STANDARD = 'standard',
   PREMIUM = 'premium',
-  SCHOOL = 'school',
+  ENTERPRISE = 'enterprise',
 }
 
 export enum SubscriptionStatus {
