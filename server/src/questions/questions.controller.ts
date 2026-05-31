@@ -23,12 +23,12 @@ import {
 import { BulkImportDto } from './dto/BulkQuestionsImport.dto';
 
 // Uncomment when auth guard is wired up:
-// import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-// import { RolesGuard } from 'src/auth/guards/roles.guard';
-// import { Roles } from 'src/auth/decorators/roles.decorator';
-// import { UserRole } from 'src/common/enums/enums';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from 'src/common/enums/enums';
 
-// @UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('questions')
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
@@ -52,7 +52,7 @@ export class QuestionsController {
   // Roles: Admin, SchoolAdmin (for school-scoped questions)
   //
   @Post()
-  // @Roles(UserRole.ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   create(@Body() dto: CreateQuestionDto) {
     return this.questionsService.create(dto);
   }
@@ -75,7 +75,7 @@ export class QuestionsController {
   // Returns a random subset of active questions matching the exam criteria.
   //
   @Post('session-pool')
-  // @Roles(UserRole.ADMIN, UserRole.STUDENT) — validated upstream by session logic
+  @Roles(UserRole.SUPER_ADMIN, UserRole.STUDENT, UserRole.PROFESSIONAL_STUDENT)
   getSessionPool(
     @Body()
     body: {
@@ -126,7 +126,7 @@ export class QuestionsController {
   // Supplying `explanations` replaces all explanations atomically.
   //
   @Patch(':id')
-  // @Roles(UserRole.ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateQuestionDto,
@@ -139,13 +139,13 @@ export class QuestionsController {
   // PATCH /questions/:id/unpublish  → isActive = false
   //
   @Patch(':id/publish')
-  // @Roles(UserRole.ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   publish(@Param('id', ParseUUIDPipe) id: string) {
     return this.questionsService.toggleActive(id, true);
   }
 
   @Patch(':id/unpublish')
-  // @Roles(UserRole.ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   unpublish(@Param('id', ParseUUIDPipe) id: string) {
     return this.questionsService.toggleActive(id, false);
   }
@@ -156,7 +156,7 @@ export class QuestionsController {
   // in draft state. Useful for tweaking a past question variant.
   //
   @Post(':id/duplicate')
-  // @Roles(UserRole.ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   duplicate(@Param('id', ParseUUIDPipe) id: string) {
     return this.questionsService.duplicate(id);
   }
@@ -166,7 +166,7 @@ export class QuestionsController {
   // Body: { ids: string[], isActive: boolean }
   //
   @Patch('bulk/active')
-  // @Roles(UserRole.ADMIN)
+  @Roles(UserRole.SUPER_ADMIN)
   bulkToggleActive(@Body() dto: BulkToggleDto) {
     return this.questionsService.bulkToggleActive(dto);
   }
@@ -176,7 +176,7 @@ export class QuestionsController {
   //
   @Delete('bulk')
   @HttpCode(HttpStatus.OK)
-  // @Roles(UserRole.ADMIN)
+  @Roles(UserRole.CLASS_ADMIN)
   bulkDelete(@Body() dto: BulkDeleteDto) {
     return this.questionsService.bulkDelete(dto);
   }
@@ -189,7 +189,7 @@ export class QuestionsController {
   // Returns { imported, failed, errors[] } — partial success is allowed.
   //
   @Post('bulk/import')
-  // @Roles(UserRole.ADMIN, UserRole.SCHOOL_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   bulkImport(@Body() dto: BulkImportDto) {
     return this.questionsService.bulkImport(dto);
   }
@@ -201,7 +201,7 @@ export class QuestionsController {
   //
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  // @Roles(UserRole.ADMIN)
+  @Roles(UserRole.SUPER_ADMIN)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.questionsService.remove(id);
   }
