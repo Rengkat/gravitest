@@ -1,13 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { User, UserStatus, SubscriptionTier } from "../../types";
-import type {
-  ActivityLogEntry,
-  PaymentRecord,
-  AdminActionType,
-  EditUserFormData,
-} from "./types";
+import type { User, UserStatus, SubscriptionTier } from "../types";
+import type { ActivityLogEntry, PaymentRecord, AdminActionType, EditUserFormData } from "./types";
 import { mockUserById, mockActivityLog, mockPayments } from "./mockData";
 
 export type DetailTab = "overview" | "activity" | "payments";
@@ -62,7 +57,7 @@ export function useUserDetail(userId: string): UseUserDetailReturn {
         setPendingTier(user.subscriptionTier);
       }
     },
-    [user]
+    [user],
   );
 
   const cancelAction = useCallback(() => {
@@ -80,20 +75,33 @@ export function useUserDetail(userId: string): UseUserDetailReturn {
     setUser((prev) => {
       if (!prev) return prev;
       switch (pendingAction) {
-        case "suspend":    return { ...prev, status: "suspended" as UserStatus };
-        case "activate":   return { ...prev, status: "active" as UserStatus };
-        case "deactivate": return { ...prev, status: "deactivated" as UserStatus };
-        case "delete":     return { ...prev, status: "deactivated" as UserStatus }; // soft-delete
-        case "verify_email": return { ...prev, verificationStatus: "verified" as const };
-        case "toggle_2fa": return { ...prev, twoFactorEnabled: !prev.twoFactorEnabled };
+        case "suspend":
+          return { ...prev, status: "suspended" as UserStatus };
+        case "activate":
+          return { ...prev, status: "active" as UserStatus };
+        case "deactivate":
+          return { ...prev, status: "deactivated" as UserStatus };
+        case "delete":
+          return { ...prev, status: "deactivated" as UserStatus }; // soft-delete
+        case "verify_email":
+          return { ...prev, verificationStatus: "verified" as const };
+        case "toggle_2fa":
+          return { ...prev, twoFactorEnabled: !prev.twoFactorEnabled };
         case "change_tier":
           return pendingTier ? { ...prev, subscriptionTier: pendingTier } : prev;
         case "edit":
           return editForm
-            ? { ...prev, firstName: editForm.firstName, lastName: editForm.lastName,
-                email: editForm.email, phone: editForm.phone, notes: editForm.notes }
+            ? {
+                ...prev,
+                firstName: editForm.firstName,
+                lastName: editForm.lastName,
+                email: editForm.email,
+                phone: editForm.phone,
+                notes: editForm.notes,
+              }
             : prev;
-        default: return prev;
+        default:
+          return prev;
       }
     });
 
@@ -105,9 +113,22 @@ export function useUserDetail(userId: string): UseUserDetailReturn {
   }, [user, pendingAction, editForm, pendingTier]);
 
   return {
-    user, activityLog, payments, loading, actionLoading,
-    activeTab, pendingAction, confirmInput, editForm, pendingTier,
-    setActiveTab, initiateAction, cancelAction, confirmAction,
-    setConfirmInput, setEditForm, setPendingTier,
+    user,
+    activityLog,
+    payments,
+    loading,
+    actionLoading,
+    activeTab,
+    pendingAction,
+    confirmInput,
+    editForm,
+    pendingTier,
+    setActiveTab,
+    initiateAction,
+    cancelAction,
+    confirmAction,
+    setConfirmInput,
+    setEditForm,
+    setPendingTier,
   };
 }
