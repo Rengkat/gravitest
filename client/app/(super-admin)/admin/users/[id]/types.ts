@@ -1,3 +1,15 @@
+// Re-exports from your users module — keep in sync with users/types.ts
+export type {
+  User,
+  UserRole,
+  UserStatus,
+  SubscriptionTier,
+  AccountType,
+  StudentProfile,
+  TutorProfile,
+  SchoolAdminProfile,
+} from "../types";
+
 // ─── Activity Log ─────────────────────────────────────────────────────────────
 
 export type ActivityAction =
@@ -13,9 +25,9 @@ export type ActivityAction =
   | "payment_failed"
   | "account_suspended"
   | "account_activated"
-  | "lesson_created"
-  | "school_linked"
-  | "two_factor_enabled";
+  | "account_deactivated"
+  | "two_factor_enabled"
+  | "password_reset";
 
 export interface ActivityLogEntry {
   id: string;
@@ -40,24 +52,27 @@ export interface PaymentRecord {
   date: string;
 }
 
-// ─── Admin Actions ────────────────────────────────────────────────────────────
+
 
 export type AdminActionType =
   | "suspend"
-  | "activate"
+  | "unsuspend"
   | "deactivate"
   | "delete"
-  | "reset_password"
   | "edit"
   | "change_tier"
-  | "verify_email"
-  | "toggle_2fa";
+  | "reset_password"
+  | "verify_email";
 
 export interface EditUserFormData {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
-  state: string;
-  notes: string;
+  phoneNumber: string;
+  stateOfResidence: string;
+  lga: string;
+  role: string;
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  isActive: boolean;
 }

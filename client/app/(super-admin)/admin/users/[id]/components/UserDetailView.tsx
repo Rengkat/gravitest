@@ -24,15 +24,19 @@ export function UserDetailView({ userId }: { userId: string }) {
     activeTab,
     pendingAction,
     confirmInput,
+    reasonInput,
     editForm,
     pendingTier,
+    resetForm,
     setActiveTab,
     initiateAction,
     cancelAction,
     confirmAction,
     setConfirmInput,
+    setReasonInput,
     setEditForm,
     setPendingTier,
+    setResetForm,
   } = useUserDetail(userId);
 
   if (loading) {
@@ -70,7 +74,6 @@ export function UserDetailView({ userId }: { userId: string }) {
               aria-label="User detail sections">
               {TABS.map((tab) => (
                 <button
-                  title="tab"
                   key={tab.id}
                   role="tab"
                   id={`tab-${tab.id}`}
@@ -87,7 +90,6 @@ export function UserDetailView({ userId }: { userId: string }) {
               ))}
             </div>
 
-            {/* Tab panels */}
             <div
               id="panel-overview"
               role="tabpanel"
@@ -113,23 +115,27 @@ export function UserDetailView({ userId }: { userId: string }) {
             </div>
           </main>
 
-          {/* Admin sidebar */}
+          {/* Sidebar */}
           <AdminActionsPanel user={user} onAction={initiateAction} />
         </div>
       </div>
 
-      {/* Action modal */}
+      {/* Modal */}
       {pendingAction && (
         <ActionModal
           actionType={pendingAction}
           user={user}
           confirmInput={confirmInput}
+          reasonInput={reasonInput}
           editForm={editForm}
           pendingTier={pendingTier}
+          resetForm={resetForm}
           loading={actionLoading}
           onConfirmInputChange={setConfirmInput}
+          onReasonInputChange={setReasonInput}
           onEditFormChange={setEditForm}
           onTierChange={setPendingTier}
+          onResetFormChange={setResetForm}
           onConfirm={confirmAction}
           onCancel={cancelAction}
         />
