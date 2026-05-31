@@ -1,10 +1,8 @@
 import type { User } from "../types";
 import type { ActivityLogEntry, PaymentRecord } from "./types";
 
-// ─── Seed a realistic User from an ID ────────────────────────────────────────
-
 export function mockUserById(userId: string): User {
-  const seed = userId?.charCodeAt(userId?.length - 1) % 4;
+  const seed = userId?.charCodeAt(userId.length - 1) % 4;
 
   const base = {
     id: userId,
@@ -66,7 +64,6 @@ export function mockUserById(userId: string): User {
       accountType: "individual",
       subscriptionTier: "enterprise",
       totalSpent: 0,
-      twoFactorEnabled: true,
       notes: "Top-rated Mathematics tutor. Contract renewal due Q3.",
       tutorProfile: {
         subjects: ["Mathematics", "Physics", "Further Mathematics"],
@@ -119,7 +116,7 @@ export function mockUserById(userId: string): User {
     email: `ngozi.eze.${userId}@gmail.com`,
     avatar: undefined,
     role: "student",
-    status: "pending",
+    status: "inactive",
     accountType: "individual",
     subscriptionTier: "basic",
     totalSpent: 7_500,
@@ -137,8 +134,6 @@ export function mockUserById(userId: string): User {
     },
   };
 }
-
-// ─── Activity Log ─────────────────────────────────────────────────────────────
 
 export function mockActivityLog(): ActivityLogEntry[] {
   return [
@@ -166,7 +161,7 @@ export function mockActivityLog(): ActivityLogEntry[] {
     {
       id: "a4",
       action: "subscription_upgraded",
-      description: "Upgraded Free → Premium via Paystack",
+      description: "Subscription upgraded: Free → Premium via Paystack",
       timestamp: "2025-05-20T10:00:00Z",
       ipAddress: "102.89.45.12",
     },
@@ -186,7 +181,7 @@ export function mockActivityLog(): ActivityLogEntry[] {
     {
       id: "a7",
       action: "profile_updated",
-      description: "Updated phone number and state",
+      description: "Profile updated — phone number and state changed",
       timestamp: "2025-04-28T16:10:00Z",
     },
     {
@@ -207,13 +202,11 @@ export function mockActivityLog(): ActivityLogEntry[] {
     {
       id: "a10",
       action: "payment_failed",
-      description: "Payment failed — Flutterwave timeout",
+      description: "Payment failed — Flutterwave timeout (₦15,000)",
       timestamp: "2025-03-20T10:05:00Z",
     },
   ];
 }
-
-// ─── Payments ─────────────────────────────────────────────────────────────────
 
 export function mockPayments(): PaymentRecord[] {
   return [
