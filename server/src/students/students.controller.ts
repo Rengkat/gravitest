@@ -38,11 +38,13 @@ import {
   ApiParam,
   ApiQuery,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard)
+@ApiTags('Students')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
