@@ -3,13 +3,12 @@
 import {
   ShieldOff,
   ShieldCheck,
-  Trash2,
-  KeyRound,
+  UserX,
   Pencil,
   Crown,
+  KeyRound,
   BadgeCheck,
-  Lock,
-  UserX,
+  Trash2,
 } from "lucide-react";
 import type { User } from "../../types";
 import type { AdminActionType } from "../types";
@@ -17,34 +16,32 @@ import type { AdminActionType } from "../types";
 interface ActionDef {
   type: AdminActionType;
   label: string;
-  description: string;
+  hint: string;
   icon: any;
-  className: string;
+  variant: "primary" | "warning" | "danger" | "ghost";
 }
 
-function getActions(user: User): ActionDef[] {
+function buildActions(user: User): ActionDef[] {
   const actions: ActionDef[] = [];
 
-  // Primary mutating action depends on status
+  // ── Status mutation — context-aware ──────────────────────────────────────
   if (user.status === "active") {
     actions.push({
       type: "suspend",
       label: "Suspend Account",
-      description: "Block access immediately. Reversible.",
+      hint: "Block access immediately. Reversible.",
       icon: ShieldOff,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all text-[13px] font-semibold",
+      variant: "warning",
     });
   }
 
-  if (user.status === "suspended" || user.status === "deactivated") {
+  if (user.status === "suspended") {
     actions.push({
-      type: "activate",
-      label: "Reactivate Account",
-      description: "Restore full platform access.",
+      type: "unsuspend",
+      label: "Lift Suspension",
+      hint: "Restore full platform access.",
       icon: ShieldCheck,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-green-800 text-white hover:bg-green-700 transition-all text-[13px] font-semibold shadow-sm",
+      variant: "primary",
     });
   }
 
@@ -52,74 +49,79 @@ function getActions(user: User): ActionDef[] {
     actions.push({
       type: "deactivate",
       label: "Deactivate Account",
-      description: "Soft-disable — keeps data intact.",
+      hint: "Soft-disable — data preserved.",
       icon: UserX,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-text-muted hover:bg-cream transition-all text-[13px] font-medium",
+      variant: "ghost",
     });
   }
 
+  if (user.status === "inactive") {
+    actions.push({
+      type: "unsuspend",
+      label: "Reactivate Account",
+      hint: "Restore the user's access.",
+      icon: ShieldCheck,
+      variant: "primary",
+    });
+  }
+
+  // ── Always-available actions ──────────────────────────────────────────────
   actions.push(
     {
       type: "edit",
       label: "Edit Profile",
-      description: "Update name, email, phone.",
+      hint: "Update name, email, role, phone.",
       icon: Pencil,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-green-900 hover:bg-cream transition-all text-[13px] font-medium",
+      variant: "ghost",
     },
     {
       type: "change_tier",
       label: "Change Subscription Tier",
-      description: "Override the user's access tier.",
+      hint: "Override the user's access plan.",
       icon: Crown,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-green-900 hover:bg-cream transition-all text-[13px] font-medium",
+      variant: "ghost",
     },
     {
       type: "reset_password",
-      label: "Send Password Reset",
-      description: "Email a reset link to the user.",
+      label: "Reset Password",
+      hint: "Generate a temp password or notify.",
       icon: KeyRound,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-green-900 hover:bg-cream transition-all text-[13px] font-medium",
+      variant: "ghost",
     },
   );
-
-  if (!user.twoFactorEnabled) {
-    actions.push({
-      type: "toggle_2fa",
-      label: "Force Enable 2FA",
-      description: "Enable two-factor auth for this account.",
-      icon: Lock,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-green-900 hover:bg-cream transition-all text-[13px] font-medium",
-    });
-  }
 
   if (user.verificationStatus !== "verified") {
     actions.push({
       type: "verify_email",
       label: "Force Verify Email",
-      description: "Mark email as verified without the link.",
+      hint: "Mark email verified without the link.",
       icon: BadgeCheck,
-      className:
-        "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-green-900 hover:bg-cream transition-all text-[13px] font-medium",
+      variant: "ghost",
     });
   }
 
-  // Danger last
+  // ── Danger — always last ──────────────────────────────────────────────────
   actions.push({
     type: "delete",
     label: "Delete Account",
-    description: "Permanent. Requires email confirmation.",
+    hint: "Permanent. Requires email confirmation.",
     icon: Trash2,
-    className:
-      "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all text-[13px] font-semibold",
+    variant: "danger",
   });
 
   return actions;
 }
+
+const VARIANT_CLS: Record<string, string> = {
+  primary:
+    "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-green-800 text-white hover:bg-green-700 transition-all text-[13px] font-semibold shadow-sm",
+  warning:
+    "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all text-[13px] font-semibold",
+  danger:
+    "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-all text-[13px] font-semibold",
+  ghost:
+    "w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-green-900 hover:bg-cream transition-all text-[13px] font-medium",
+};
 
 export function AdminActionsPanel({
   user,
@@ -128,7 +130,7 @@ export function AdminActionsPanel({
   user: User;
   onAction: (a: AdminActionType) => void;
 }) {
-  const actions = getActions(user);
+  const actions = buildActions(user);
 
   return (
     <aside aria-label="Admin Actions">
@@ -139,18 +141,18 @@ export function AdminActionsPanel({
           Admin Actions
         </h2>
 
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {actions.map((a) => (
             <li key={a.type}>
               <button
-                className={a.className}
+                className={VARIANT_CLS[a.variant]}
                 onClick={() => onAction(a.type)}
-                aria-describedby={`desc-${a.type}`}>
+                aria-describedby={`hint-${a.type}`}>
                 <a.icon size={14} className="shrink-0" />
                 {a.label}
               </button>
-              <p id={`desc-${a.type}`} className="text-[10px] text-text-muted mt-0.5 px-1">
-                {a.description}
+              <p id={`hint-${a.type}`} className="text-[10px] text-text-muted mt-0.5 pl-1">
+                {a.hint}
               </p>
             </li>
           ))}
