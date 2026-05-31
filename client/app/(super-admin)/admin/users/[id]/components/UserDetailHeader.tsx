@@ -1,7 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { BadgeCheck, MapPin, Smartphone, Calendar, Clock, Hash, ChevronRight } from "lucide-react";
+import {
+  BadgeCheck,
+  MapPin,
+  Smartphone,
+  Calendar,
+  Clock,
+  Hash,
+  ChevronRight,
+  Shield,
+  Tag,
+} from "lucide-react";
 import type { User } from "../../types";
 import {
   ROLE_CONFIG,
@@ -20,6 +30,7 @@ export function UserDetailHeader({ user }: { user: User }) {
   const verCfg = VERIFICATION_CONFIG[user.verificationStatus];
   const RoleIcon = roleCfg.icon;
   const SubIcon = subCfg.icon;
+  const StatusIcon = statusCfg.icon;
 
   return (
     <div className="mb-6">
@@ -38,22 +49,21 @@ export function UserDetailHeader({ user }: { user: User }) {
 
       {/* Header card */}
       <div
-        className="rounded-2xl bg-white border p-6 flex flex-col sm:flex-row gap-6"
+        className="rounded-2xl bg-white border p-6 flex flex-col lg:flex-row gap-6"
         style={{ borderColor: "rgba(30,80,50,0.08)" }}>
         {/* Left: avatar + identity */}
         <div className="flex items-start gap-4 flex-1 min-w-0">
           <div className="relative shrink-0">
             <Avatar user={user} size="lg" />
-            {/* Online dot based on status */}
             <span
               className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white"
               style={{ background: statusCfg.color }}
-              aria-hidden="true"
+              title={statusCfg.label}
             />
           </div>
 
-          <div className="min-w-0">
-            {/* Name row */}
+          <div className="min-w-0 flex-1">
+            {/* Name + trust signals */}
             <div className="flex items-center gap-2 flex-wrap mb-1.5">
               <h1 className="font-serif text-2xl text-green-900 leading-tight">
                 {user.firstName} {user.lastName}
@@ -62,13 +72,13 @@ export function UserDetailHeader({ user }: { user: User }) {
                 <BadgeCheck size={18} className="text-green-600 shrink-0" aria-label="Verified" />
               )}
               {user.twoFactorEnabled && (
-                <span className="px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[9px] font-bold">
-                  2FA
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[9px] font-bold">
+                  <Shield size={9} /> 2FA
                 </span>
               )}
             </div>
 
-            {/* Email + phone */}
+            {/* Email · phone */}
             <p className="text-[13px] text-text-muted mb-3">
               {user.email}
               <span className="mx-2 opacity-40">·</span>
@@ -78,21 +88,30 @@ export function UserDetailHeader({ user }: { user: User }) {
             {/* Badge row */}
             <div className="flex flex-wrap gap-1.5">
               <Badge label={roleCfg.label} color={roleCfg.color} bg={roleCfg.bg} icon={RoleIcon} />
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                style={{ background: statusCfg.bg, color: statusCfg.color }}>
-                {statusCfg.label}
-              </span>
+              <Badge
+                label={statusCfg.label}
+                color={statusCfg.color}
+                bg={statusCfg.bg}
+                icon={StatusIcon}
+              />
               <Badge label={subCfg.label} color={subCfg.color} bg={subCfg.bg} icon={SubIcon} />
               <Badge label={accCfg.label} color={accCfg.color} bg={accCfg.bg} />
               <Badge label={verCfg.label} color={verCfg.color} bg={verCfg.bg} />
+              {user.tags?.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-text-muted">
+                  <Tag size={9} />
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Right: meta grid */}
         <dl
-          className="grid grid-cols-2 gap-x-6 gap-y-3 shrink-0 text-right sm:text-left border-t sm:border-t-0 sm:border-l pt-4 sm:pt-0 sm:pl-6"
+          className="grid grid-cols-2 gap-x-8 gap-y-3 shrink-0 border-t lg:border-t-0 lg:border-l pt-5 lg:pt-0 lg:pl-6 text-left"
           style={{ borderColor: "rgba(30,80,50,0.08)" }}>
           {[
             { icon: Calendar, label: "Joined", value: user.joinDate },
@@ -107,7 +126,10 @@ export function UserDetailHeader({ user }: { user: User }) {
                 <Icon size={10} />
                 {label}
               </dt>
-              <dd className={`text-[12px] font-medium text-green-900 ${mono ? "font-mono" : ""}`}>
+              <dd
+                className={`text-[12px] font-medium text-green-900 break-all ${
+                  mono ? "font-mono" : ""
+                }`}>
                 {value}
               </dd>
             </div>
