@@ -79,46 +79,57 @@ export class LibraryService {
       examType,
       classLevel,
       isFree,
-      isPublished = true,
-      isActive = true,
+      isPublished = true, // ← public default: only show published
+      isActive = true, // ← public default: only show active
     } = query;
 
-    const where: FindOptionsWhere<LibraryContent> = { isActive, isPublished };
-
-    if (contentType) where.contentType = contentType;
-    if (subject) where.subject = subject;
-    if (isFree != null) where.isFree = isFree;
-
-    const qb = this.contentRepo.createQueryBuilder('c').where(where);
-
-    // Array column filters
-    if (examType) qb.andWhere(':examType = ANY(c.examTypes)', { examType });
-    if (classLevel)
-      qb.andWhere(':classLevel = ANY(c.classLevels)', { classLevel });
-
-    // Full-text search on title, description and topic
-    if (search) {
-      qb.andWhere(
-        '(c.title ILIKE :q OR c.description ILIKE :q OR c.topic ILIKE :q)',
-        { q: `%${search}%` },
-      );
-    }
-
-    qb.orderBy(`c.${sortBy}`, sortOrder);
-
-    // ── Delegate pagination entirely to PaginationProvider ──
-    return this.paginationProvider.paginateQueryBuilder(qb, { page, limit });
+    return this.buildQuery({
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      search,
+      contentType,
+      subject,
+      examType,
+      classLevel,
+      isFree,
+      isPublished,
+      isActive,
+    });
   }
-
   // ─── ADMIN: LIST ALL (incl. drafts & inactive) ────────────
   async findAllAdmin(
     query: QueryLibraryDto,
   ): Promise<PaginatedResult<LibraryContent>> {
-    // Strip public-only defaults so admins see everything
-    return this.findAll({
-      ...query,
-      isPublished: undefined,
-      isActive: undefined,
+    const {
+      page = 1,
+      limit = 20,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      search,
+      contentType,
+      subject,
+      examType,
+      classLevel,
+      isFree,
+      isPublished,
+      isActive,
+    } = query;
+
+    return this.buildQuery({
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      search,
+      contentType,
+      subject,
+      examType,
+      classLevel,
+      isFree,
+      isPublished,
+      isActive,
     });
   }
 
@@ -333,5 +344,64 @@ export class LibraryService {
     ]);
 
     return { total, published, free, paid, topViewed, topDownloaded };
+  }
+
+  private async buildQuery(params: {
+    page: number;
+    limit: number;
+    sortBy: string;
+    sortOrder: 'ASC' | 'DESC';
+    search?: string;
+    contentType?: string;
+    subject?: string;
+    examType?: string;
+    classLevel?: string;
+    isFree?: boolean;
+    isPublished?: boolean; // undefined = no filter
+    isActive?: boolean; // undefined = no filter
+  }): Promise<PaginatedResult<LibraryContent>> {
+    const {
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      search,
+      contentType,
+      subject,
+      examType,
+      classLevel,
+      isFree,
+      isPublished,
+      isActive,
+    } = params;
+
+    const qb = this.contentRepo.createQueryBuilder('c');
+
+    // Only add WHERE clauses when the value is explicitly set
+    if (isPublished !== undefined)
+      qb.andWhere('c.isPublished = :isPublished', { isPublished });
+    if (isActive !== undefined)
+      qb.andWhere('c.isActive = :isActive', { isActive });
+    if (contentType !== undefined)
+      qb.andWhere('c.contentType = :contentType', { contentType });
+    if (subject !== undefined) qb.andWhere('c.subject = :subject', { subject });
+    if (isFree !== undefined) qb.andWhere('c.isFree = :isFree', { isFree });
+
+    // Array column filters
+    if (examType) qb.andWhere(':examType = ANY(c.examTypes)', { examType });
+    if (classLevel)
+      qb.andWhere(':classLevel = ANY(c.classLevels)', { classLevel });
+
+    // Full-text search
+    if (search) {
+      qb.andWhere(
+        '(c.title ILIKE :q OR c.description ILIKE :q OR c.topic ILIKE :q)',
+        { q: `%${search}%` },
+      );
+    }
+
+    qb.orderBy(`c.${sortBy}`, sortOrder);
+
+    return this.paginationProvider.paginateQueryBuilder(qb, { page, limit });
   }
 }

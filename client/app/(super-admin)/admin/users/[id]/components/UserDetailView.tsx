@@ -74,6 +74,7 @@ export function UserDetailView({ userId }: { userId: string }) {
               aria-label="User detail sections">
               {TABS.map((tab) => (
                 <button
+                  title="tab"
                   key={tab.id}
                   role="tab"
                   id={`tab-${tab.id}`}

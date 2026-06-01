@@ -15,6 +15,7 @@ import {
   GraduationCap,
   CalendarCheck,
   Shield,
+  Gamepad2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -70,6 +71,11 @@ const ADMIN_NAV_ITEMS = [
     href: "/admin/ai-logs",
     label: "AI Usage Logs",
     icon: Bot,
+  },
+  {
+    href: "/admin/games",
+    label: "Game",
+    icon: Gamepad2,
   },
   {
     href: "/admin/settings",

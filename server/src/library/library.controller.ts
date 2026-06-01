@@ -19,15 +19,14 @@ import {
   ApiOperation,
   ApiBearerAuth,
   ApiParam,
-  ApiResponse,
-  ApiQuery,
   ApiBody,
+  ApiQuery,
+  ApiCreatedResponse,
+  ApiOkResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiUnauthorizedResponse,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiConflictResponse,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import { LibraryService } from './library.service';
 import { CreateLibraryDto } from './dto/create-library.dto';
@@ -35,12 +34,12 @@ import { UpdateLibraryDto } from './dto/update-library.dto';
 import { QueryLibraryDto } from './dto/query-library.dto';
 import { RecordAccessDto } from './dto/record-access.dto';
 import { AddBookmarkDto } from './dto/add-bookmark.dto';
+import { AccessCheckResult } from './types/library.interfaces';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { UserRole } from 'src/common/enums/enums';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { AccessCheckResult } from './types/library.interfaces';
 import { UserId } from 'src/auth/decorators/current-user.decorator';
+import { UserRole } from 'src/common/enums/enums';
 
 @ApiTags('Library')
 @ApiBearerAuth()
@@ -49,129 +48,31 @@ import { UserId } from 'src/auth/decorators/current-user.decorator';
 export class LibraryController {
   constructor(private readonly libraryService: LibraryService) {}
 
-  @Get()
-  @ApiOperation({
-    summary: 'Browse content catalogue',
-    description:
-      'Retrieve a paginated, filterable catalogue of published library content. Results are tailored based on user subscription tier.',
-  })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-    description: 'Search by title, description, or tags',
-  })
-  @ApiQuery({
-    name: 'type',
-    required: false,
-    description: 'Filter by content type (e.g., video, document, quiz)',
-    example: 'video',
-  })
-  @ApiQuery({
-    name: 'subject',
-    required: false,
-    description: 'Filter by subject',
-    example: 'mathematics',
-  })
-  @ApiQuery({
-    name: 'examType',
-    required: false,
-    description: 'Filter by exam type',
-    example: 'waec',
-  })
-  @ApiQuery({
-    name: 'access',
-    required: false,
-    description: 'Filter by access level (free, premium, subscribed)',
-    example: 'premium',
-  })
-  @ApiQuery({
-    name: 'sortBy',
-    required: false,
-    description: 'Sort field',
-    example: 'createdAt',
-  })
-  @ApiQuery({
-    name: 'sortOrder',
-    required: false,
-    description: 'Sort direction (ASC/DESC)',
-    example: 'DESC',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    description: 'Page number',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Items per page',
-    example: 20,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Content catalogue retrieved successfully',
-  })
-  findAll(@Query() query: QueryLibraryDto, @Request() req: any) {
-    return this.libraryService.findAll(query, req.user?.subscriptionTier);
-  }
-
-  @Get('me/library')
-  @ApiOperation({
-    summary: "Get current user's library",
-    description:
-      'Retrieve all content that the current user has purchased or has subscription access to. Includes progress and bookmark information.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User library retrieved successfully',
-  })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  getUserLibrary(@UserId() userId: string) {
-    return this.libraryService.getUserLibrary(userId);
-  }
+  // ════════════════════════════════════════════════════════════
+  //  BLOCK 1 — STATIC ADMIN ROUTES  (admin/*)
+  // ════════════════════════════════════════════════════════════
 
   @Get('admin/all')
   @Roles(UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary: '[Admin] List all content including drafts',
     description:
-      'Retrieve all library content including unpublished drafts. Only accessible by Super Admins.',
+      'Returns every content record regardless of isPublished or isActive status. ' +
+      'Supports all the same filters as the user-facing browse endpoint plus isPublished and isActive.',
   })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-    description: 'Search by title, description, or tags',
-  })
-  @ApiQuery({
-    name: 'type',
-    required: false,
-    description: 'Filter by content type',
-  })
-  @ApiQuery({
-    name: 'status',
-    required: false,
-    description: 'Filter by status (draft, published, archived)',
-    example: 'draft',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    description: 'Page number',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Items per page',
-    example: 20,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Admin content list retrieved successfully',
-  })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
+  @ApiQuery({ name: 'contentType', required: false, example: 'ebook' })
+  @ApiQuery({ name: 'subject', required: false, example: 'physics' })
+  @ApiQuery({ name: 'examType', required: false, example: 'waec' })
+  @ApiQuery({ name: 'isFree', required: false, example: false })
+  @ApiQuery({ name: 'isPublished', required: false, example: false })
+  @ApiQuery({ name: 'isActive', required: false, example: true })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'sortBy', required: false, example: 'createdAt' })
+  @ApiQuery({ name: 'sortOrder', required: false, example: 'DESC' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
+  @ApiOkResponse({ description: 'Paginated admin content list' })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
   findAllAdmin(@Query() query: QueryLibraryDto) {
     return this.libraryService.findAllAdmin(query);
   }
@@ -181,43 +82,124 @@ export class LibraryController {
   @ApiOperation({
     summary: '[Admin] Platform-wide library statistics',
     description:
-      'Get comprehensive statistics about library usage including total content, views, access patterns, and popular items.',
+      'Returns total counts, free vs paid split, top viewed and top downloaded items.',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Library statistics retrieved successfully',
+  @ApiOkResponse({
+    description: 'Library statistics',
     schema: {
       type: 'object',
       properties: {
-        totalContent: { type: 'number', example: 1250 },
-        publishedContent: { type: 'number', example: 1100 },
-        totalAccessGrants: { type: 'number', example: 5000 },
-        popularContent: { type: 'array', items: { type: 'object' } },
-        accessByType: { type: 'object' },
+        total: { type: 'number', example: 250 },
+        published: { type: 'number', example: 200 },
+        free: { type: 'number', example: 120 },
+        paid: { type: 'number', example: 130 },
+        topViewed: { type: 'array', items: { type: 'object' } },
+        topDownloaded: { type: 'array', items: { type: 'object' } },
       },
     },
   })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
   getStats() {
     return this.libraryService.getStats();
   }
+
+  // ════════════════════════════════════════════════════════════
+  //  BLOCK 2 — STATIC USER ROUTES  (me/*, access/*)
+  // ════════════════════════════════════════════════════════════
+
+  @Get('me/library')
+  @ApiOperation({
+    summary: "Get current user's library",
+    description:
+      'Returns all content the authenticated user has purchased or has subscription access to. ' +
+      'Includes reading progress and bookmarks. Ordered by last accessed.',
+  })
+  @ApiOkResponse({ description: "User's accessible content with progress" })
+  @ApiUnauthorizedResponse({ description: 'Not authenticated' })
+  getUserLibrary(@UserId() userId: string) {
+    return this.libraryService.getUserLibrary(userId);
+  }
+
+  @Post('access/record')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Record a content view and sync progress',
+    description:
+      'Increments the global view counter and updates personal progress. ' +
+      'Call whenever a user opens, resumes, or completes content.',
+  })
+  @ApiBody({ type: RecordAccessDto })
+  @ApiOkResponse({ description: 'Access recorded and progress updated' })
+  @ApiBadRequestResponse({
+    description: 'Invalid progress value (must be 0–100)',
+  })
+  @ApiForbiddenResponse({
+    description: 'User does not have access to this content',
+  })
+  @ApiNotFoundResponse({ description: 'Content not found' })
+  recordAccess(@Body() dto: RecordAccessDto, @Request() req: any) {
+    return this.libraryService.recordAccess(req.user.id, dto);
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  BLOCK 3 — COLLECTION ROUTES  (GET / and POST /)
+  // ════════════════════════════════════════════════════════════
+
+  @Get()
+  @ApiOperation({
+    summary: 'Browse content catalogue',
+    description:
+      'Returns published content the authenticated user can see. ' +
+      "Results are enriched based on the user's subscription tier.",
+  })
+  @ApiQuery({ name: 'contentType', required: false, example: 'ebook' })
+  @ApiQuery({ name: 'subject', required: false, example: 'mathematics' })
+  @ApiQuery({ name: 'examType', required: false, example: 'waec' })
+  @ApiQuery({ name: 'classLevel', required: false, example: 'ss3' })
+  @ApiQuery({ name: 'isFree', required: false, example: true })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'sortBy', required: false, example: 'totalViews' })
+  @ApiQuery({ name: 'sortOrder', required: false, example: 'DESC' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
+  @ApiOkResponse({ description: 'Paginated content catalogue' })
+  @ApiUnauthorizedResponse({ description: 'Not authenticated' })
+  findAll(@Query() query: QueryLibraryDto, @Request() req: any) {
+    return this.libraryService.findAll(query, req.user?.subscriptionTier);
+  }
+
+  @Post()
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: '[Admin] Create new library content',
+    description:
+      'Creates content as an unpublished draft. ' +
+      'Exactly one of isFree, requiredTier, or priceKobo must be set.',
+  })
+  @ApiBody({ type: CreateLibraryDto })
+  @ApiCreatedResponse({ description: 'Content created as draft' })
+  @ApiBadRequestResponse({
+    description: 'Invalid input or conflicting access model fields',
+  })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
+  create(@Body() dto: CreateLibraryDto) {
+    return this.libraryService.create(dto);
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  BLOCK 4 — PARAMETERISED GET ROUTES  (:id, :id/*)
+  //  All read-only. Any authenticated user can call these.
+  // ════════════════════════════════════════════════════════════
 
   @Get(':id')
   @ApiOperation({
     summary: 'Get single content item metadata',
     description:
-      'Retrieve metadata for a specific content item. File URLs are withheld if user does not have access.',
+      'Returns metadata for a content item. fileUrl is withheld for paid content ' +
+      'until the client confirms access via GET :id/access.',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Content metadata retrieved successfully',
-  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
+  @ApiOkResponse({ description: 'Content metadata' })
   @ApiNotFoundResponse({ description: 'Content not found' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.libraryService.findOne(id);
@@ -225,15 +207,19 @@ export class LibraryController {
 
   @Get(':id/access')
   @ApiOperation({
-    summary: 'Check access to content',
+    summary: 'Check if current user has access to content',
     description:
-      'Check if the current user has access to a specific content item. Returns access status and reason if denied.',
+      'Returns { hasAccess, reason }. The frontend uses this to decide what to render: ' +
+      'open the reader, show a purchase prompt, or show a subscription upgrade prompt. ' +
+      'This is a service call — it informs the client, it does not gate the request itself.\n\n' +
+      'reason values:\n' +
+      '  free         → content is free, always allowed\n' +
+      '  owned        → user has a purchased or manually granted access record\n' +
+      "  subscription → user's subscription tier meets the requiredTier\n" +
+      '  no_access    → must purchase or upgrade subscription\n' +
+      '  expired      → had access but it has expired',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
   @ApiOkResponse({
     description: 'Access check result',
     schema: {
@@ -242,14 +228,13 @@ export class LibraryController {
         hasAccess: { type: 'boolean', example: true },
         reason: {
           type: 'string',
-          description: 'Reason if access is denied',
-          example: 'Premium subscription required',
+          enum: ['free', 'owned', 'subscription', 'no_access', 'expired'],
+          example: 'owned',
         },
       },
     },
   })
   @ApiNotFoundResponse({ description: 'Content not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   checkAccess(
     @Param('id', ParseUUIDPipe) id: string,
     @Request() req: any,
@@ -263,31 +248,27 @@ export class LibraryController {
 
   @Get(':id/my-access')
   @ApiOperation({
-    summary: "Get user's access record for an item",
+    summary: "Get user's access record for a content item",
     description:
-      "Retrieve the current user's access record for a specific content item, including progress, bookmarks, and view history.",
+      'Returns personal engagement data: progress %, bookmarks, view count, last accessed. ' +
+      'Returns null if the user has never accessed this item.',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Access record retrieved successfully',
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
+  @ApiOkResponse({
+    description: 'Access record',
     schema: {
       type: 'object',
+      nullable: true,
       properties: {
-        progress: { type: 'number', example: 75.5 },
-        lastPosition: { type: 'number', example: 320 },
+        progressPercent: { type: 'number', example: 75 },
         bookmarks: { type: 'array', items: { type: 'object' } },
         viewCount: { type: 'number', example: 12 },
-        lastAccessed: { type: 'string', format: 'date-time' },
+        lastAccessedAt: { type: 'string', format: 'date-time' },
+        isCompleted: { type: 'boolean', example: false },
       },
     },
   })
-  @ApiNotFoundResponse({ description: 'Content or access record not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
+  @ApiNotFoundResponse({ description: 'Content not found' })
   getMyAccess(
     @Param('id', ParseUUIDPipe) id: string,
     @UserId() userId: string,
@@ -295,49 +276,25 @@ export class LibraryController {
     return this.libraryService.getUserAccessRecord(userId, id);
   }
 
-  @Post('access/record')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Record content view and sync progress',
-    description:
-      'Record a view event for content and synchronize reading/watch progress. Used to track user engagement and update last position.',
-  })
-  @ApiBody({ type: RecordAccessDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Access recorded successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input data or position values',
-  })
-  @ApiNotFoundResponse({ description: 'Content not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  recordAccess(@Body() dto: RecordAccessDto, @Request() req: any) {
-    return this.libraryService.recordAccess(req.user.id, dto);
-  }
+  // ════════════════════════════════════════════════════════════
+  //  BLOCK 5 — PARAMETERISED MUTATIONS  (POST, PATCH, DELETE on :id)
+  // ════════════════════════════════════════════════════════════
 
   @Post(':id/bookmarks')
   @ApiOperation({
     summary: 'Add a bookmark',
     description:
-      'Add a bookmark at a specific position in the content. Useful for saving important sections or study points.',
+      'Saves a bookmark at a given position. ' +
+      'position = page number for ebook/document/past_question. ' +
+      'position = seconds for video/audio.',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
   @ApiBody({ type: AddBookmarkDto })
-  @ApiCreatedResponse({
-    description: 'Bookmark added successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid position or bookmark already exists at position',
+  @ApiCreatedResponse({ description: 'Bookmark added' })
+  @ApiForbiddenResponse({
+    description: 'User does not have access to this content',
   })
   @ApiNotFoundResponse({ description: 'Content not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   addBookmark(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AddBookmarkDto,
@@ -346,194 +303,37 @@ export class LibraryController {
     return this.libraryService.addBookmark(req.user.id, id, dto);
   }
 
-  @Delete(':id/bookmarks/:position')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Remove a bookmark by position',
-    description:
-      'Remove a specific bookmark from content by its position value.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
-  @ApiParam({
-    name: 'position',
-    description: 'Bookmark position to remove',
-    type: Number,
-    example: 45,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Bookmark removed successfully',
-  })
-  @ApiNotFoundResponse({ description: 'Content or bookmark not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  removeBookmark(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Param('position', ParseIntPipe) position: number,
-    @UserId() userId: string,
-  ) {
-    return this.libraryService.removeBookmark(userId, id, position);
-  }
-
-  // ══════════════════════════════════════════════════════════
-  //  ADMIN ROUTES — SUPER_ADMIN role required
-  // ══════════════════════════════════════════════════════════
-
-  @Post()
-  @Roles(UserRole.SUPER_ADMIN)
-  @ApiOperation({
-    summary: '[Admin] Create new library content',
-    description:
-      'Create new library content with metadata, access settings, and file references. Only accessible by Super Admins.',
-  })
-  @ApiBody({ type: CreateLibraryDto })
-  @ApiCreatedResponse({
-    description: 'Content created successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input data or validation failed',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Content with same title already exists',
-  })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
-  create(@Body() dto: CreateLibraryDto) {
-    return this.libraryService.create(dto);
-  }
-
-  @Patch(':id')
-  @Roles(UserRole.SUPER_ADMIN)
-  @ApiOperation({
-    summary: '[Admin] Update content metadata',
-    description:
-      'Update metadata for existing library content including title, description, access settings, and file references.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
-  @ApiBody({ type: UpdateLibraryDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Content updated successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input data',
-  })
-  @ApiNotFoundResponse({ description: 'Content not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateLibraryDto,
-  ) {
-    return this.libraryService.update(id, dto);
-  }
-
-  @Patch(':id/publish')
-  @Roles(UserRole.SUPER_ADMIN)
-  @ApiOperation({
-    summary: '[Admin] Publish content',
-    description:
-      'Publish content making it visible in the public catalogue based on access settings.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Content published successfully',
-  })
-  @ApiNotFoundResponse({ description: 'Content not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
-  publish(@Param('id', ParseUUIDPipe) id: string) {
-    return this.libraryService.publish(id);
-  }
-
-  @Patch(':id/unpublish')
-  @Roles(UserRole.SUPER_ADMIN)
-  @ApiOperation({
-    summary: '[Admin] Unpublish content',
-    description:
-      'Unpublish content, hiding it from the public catalogue while maintaining existing access grants.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Content unpublished successfully',
-  })
-  @ApiNotFoundResponse({ description: 'Content not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
-  unpublish(@Param('id', ParseUUIDPipe) id: string) {
-    return this.libraryService.unpublish(id);
-  }
-
   @Post(':id/grant-access')
   @Roles(UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary: '[Admin] Manually grant access to a user',
     description:
-      'Manually grant a user access to specific content. Optionally link to a payment and set expiration date.',
+      'Creates a LibraryAccess record for any user. ' +
+      'Re-granting the same user + content pair refreshes expiresAt instead of creating a duplicate row.',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
   @ApiBody({
     schema: {
       type: 'object',
+      required: ['userId'],
       properties: {
         userId: {
           type: 'string',
-          description: 'User UUID to grant access to',
           format: 'uuid',
           example: '550e8400-e29b-41d4-a716-446655440000',
         },
-        paymentId: {
-          type: 'string',
-          description: 'Optional payment reference',
-          example: 'pay_abc123',
-        },
+        paymentId: { type: 'string', example: 'MANUAL-PAY-2024-001' },
         expiresAt: {
           type: 'string',
-          description: 'Optional access expiration date (ISO 8601)',
-          example: '2025-12-31T23:59:59Z',
+          format: 'date-time',
+          example: '2025-12-31T23:59:59.000Z',
         },
       },
-      required: ['userId'],
     },
   })
-  @ApiCreatedResponse({
-    description: 'Access granted successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid user ID or content ID',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'User already has access to this content',
-  })
+  @ApiCreatedResponse({ description: 'Access granted' })
   @ApiNotFoundResponse({ description: 'Content or user not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
   grantAccess(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() body: { userId: string; paymentId?: string; expiresAt?: string },
@@ -546,25 +346,96 @@ export class LibraryController {
     );
   }
 
+  @Patch(':id')
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: '[Admin] Update content metadata',
+    description:
+      'Partial update of any metadata field. ' +
+      'When changing the access model, set the new field only — server validates mutual exclusivity.',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
+  @ApiBody({ type: UpdateLibraryDto })
+  @ApiOkResponse({ description: 'Content updated' })
+  @ApiBadRequestResponse({ description: 'Conflicting access model fields' })
+  @ApiNotFoundResponse({ description: 'Content not found' })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateLibraryDto,
+  ) {
+    return this.libraryService.update(id, dto);
+  }
+
+  @Patch(':id/publish')
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: '[Admin] Publish content',
+    description:
+      'Sets isPublished = true. Content becomes visible in the authenticated catalogue.',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
+  @ApiOkResponse({ description: 'Content published' })
+  @ApiNotFoundResponse({ description: 'Content not found' })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
+  publish(@Param('id', ParseUUIDPipe) id: string) {
+    return this.libraryService.publish(id);
+  }
+
+  @Patch(':id/unpublish')
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: '[Admin] Unpublish content',
+    description:
+      'Sets isPublished = false. Item disappears from user browse. ' +
+      'Existing access grants and progress records are preserved.',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
+  @ApiOkResponse({ description: 'Content unpublished' })
+  @ApiNotFoundResponse({ description: 'Content not found' })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
+  unpublish(@Param('id', ParseUUIDPipe) id: string) {
+    return this.libraryService.unpublish(id);
+  }
+
+  @Delete(':id/bookmarks/:position')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Remove a bookmark by position',
+    description:
+      'Removes the bookmark at the given position. Silent no-op if position does not exist.',
+  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
+  @ApiParam({
+    name: 'position',
+    type: Number,
+    description: 'Bookmark position',
+    example: 47,
+  })
+  @ApiOkResponse({ description: 'Bookmark removed' })
+  @ApiForbiddenResponse({
+    description: 'User does not have access to this content',
+  })
+  removeBookmark(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('position', ParseIntPipe) position: number,
+    @UserId() userId: string,
+  ) {
+    return this.libraryService.removeBookmark(userId, id, position);
+  }
+
   @Delete(':id')
   @Roles(UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary: '[Admin] Soft-delete content',
     description:
-      'Soft-delete content. Content is archived but not permanently removed. Existing access grants remain valid.',
+      'Sets isActive = false. Data is preserved, access grants remain valid. ' +
+      'Item disappears from all user-facing endpoints.',
   })
-  @ApiParam({
-    name: 'id',
-    description: 'Content item UUID',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Content soft-deleted successfully',
-  })
+  @ApiParam({ name: 'id', type: String, description: 'Content UUID' })
+  @ApiOkResponse({ description: 'Content deactivated' })
   @ApiNotFoundResponse({ description: 'Content not found' })
-  @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
-  @ApiForbiddenResponse({ description: 'User does not have required role' })
+  @ApiForbiddenResponse({ description: 'Requires SUPER_ADMIN role' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.libraryService.remove(id);
   }

@@ -250,6 +250,7 @@ export enum ContentType {
   DOCUMENT = 'document',
   AUDIO = 'audio',
   QUIZ = 'quiz',
+  PAST_QUESTION = 'past_question',
   PRACTICE_SET = 'practice_set',
 }
 
