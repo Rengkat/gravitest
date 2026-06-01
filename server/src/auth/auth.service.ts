@@ -411,13 +411,12 @@ export class AuthService {
     const expiryMinutes = Math.round(
       (expiresAt.getTime() - Date.now()) / 1000 / 60,
     );
-    const formattedOtp = this.otpProvider.formatForDisplay(plainCode);
 
     switch (purpose) {
       case OtpPurpose.EMAIL_VERIFICATION:
         await this.mailService.sendEmailVerificationOtp(user.email, {
           firstName: user.firstName,
-          otpCode: formattedOtp,
+          otpCode: plainCode,
           expiryMinutes,
         });
         break;
@@ -425,7 +424,7 @@ export class AuthService {
       case OtpPurpose.PASSWORD_RESET:
         await this.mailService.sendPasswordResetOtp(user.email, {
           firstName: user.firstName,
-          otpCode: formattedOtp,
+          otpCode: plainCode,
           expiryMinutes,
         });
         break;
@@ -433,7 +432,7 @@ export class AuthService {
       case OtpPurpose.TWO_FACTOR_AUTH:
         await this.mailService.sendTwoFactorCode(user.email, {
           firstName: user.firstName,
-          otpCode: formattedOtp,
+          otpCode: plainCode,
           expiryMinutes,
         });
         break;

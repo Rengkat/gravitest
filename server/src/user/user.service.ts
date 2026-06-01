@@ -194,12 +194,6 @@ export class UserService {
       `SECURITY: Password changed for user ${user.id}. Sessions revoked.`,
     );
 
-    // Optional: emit event to NotificationsService
-    // await this.eventEmitter.emitAsync('user.password.changed', {
-    //   userId: user.id,
-    //   email: user.email,
-    // });
-
     return {
       message:
         'Password changed successfully. Please log in again on all devices.',

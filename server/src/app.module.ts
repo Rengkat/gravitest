@@ -24,6 +24,7 @@ import { TutorsModule } from './tutors/tutors.module';
 import { QuestionsModule } from './questions/questions.module';
 import { GamesModule } from './games/games.module';
 import { LibraryModule } from './library/library.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 const ENV = process.env.NODE_ENV;
 
@@ -95,6 +96,7 @@ const ENV = process.env.NODE_ENV;
     QuestionsModule,
     GamesModule,
     LibraryModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -72,11 +72,4 @@ export class OtpProvider {
 
     return secondsPassed >= RESEND_INTERVAL_SECONDS;
   }
-
-  /**
-   * Human readable display in email.
-   */
-  formatForDisplay(code: string): string {
-    return code.replace(/(\d{3})(\d{3})/, '$1 $2');
-  }
 }
