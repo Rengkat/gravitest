@@ -27,7 +27,8 @@ export default function LibraryRow({
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-4 flex items-center gap-4">
       {/* Icon block */}
-      <div className={`w-14 h-14 rounded-xl ${colors.bg} flex items-center justify-center shrink-0 relative`}>
+      <div
+        className={`w-14 h-14 rounded-xl ${colors.bg} flex items-center justify-center shrink-0 relative`}>
         <TypeIcon type={item.type} size={24} />
         {item.isPremium && (
           <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
@@ -97,16 +98,22 @@ export default function LibraryRow({
       {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
         <button
+          title="like"
           onClick={onLike}
-          className={`p-2 rounded-xl transition-all ${liked ? "text-red-500 bg-red-50" : "text-gray-400 hover:text-red-400 hover:bg-red-50"}`}
-        >
+          className={`p-2 rounded-xl transition-all ${liked ? "text-red-500 bg-red-50" : "text-gray-400 hover:text-red-400 hover:bg-red-50"}`}>
           <Heart size={16} fill={liked ? "currentColor" : "none"} />
         </button>
         <button
+          title="bookmark"
           onClick={onBookmark}
-          className={`p-2 rounded-xl transition-all ${bookmarked ? "text-blue-500 bg-blue-50" : "text-gray-400 hover:text-blue-400 hover:bg-blue-50"}`}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill={bookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+          className={`p-2 rounded-xl transition-all ${bookmarked ? "text-blue-500 bg-blue-50" : "text-gray-400 hover:text-blue-400 hover:bg-blue-50"}`}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill={bookmarked ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="2">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
           </svg>
         </button>
@@ -116,8 +123,7 @@ export default function LibraryRow({
             item.isPremium
               ? "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
               : "bg-green-50 text-green-700 hover:bg-green-100"
-          }`}
-        >
+          }`}>
           {item.isPremium && <Lock size={11} />}
           {accessLabel(item)}
         </button>

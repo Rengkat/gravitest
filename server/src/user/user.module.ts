@@ -9,7 +9,6 @@ import { HashModule } from 'src/common/hash/hash.module';
 import { UserSettings } from './entities/user-settings.entity';
 import { UserNotificationPreferences } from './entities/user-notification-preferences.entity';
 import { Subscription } from './entities/subscription.entity';
-import { Notification } from './entities/notification.entity';
 import { LibraryAccess } from '../library/entities/library-content-access.entity';
 import { UserRegistrationProvider } from './providers/create-user.provider';
 import { UserSettingsProvider } from './providers/user-settings.provider';
@@ -30,7 +29,6 @@ import { UserNotificationPreferencesProvider } from './providers/user-notificati
       User,
       UserSettings,
       UserNotificationPreferences,
-      Notification,
       Subscription,
       LibraryAccess,
     ]),

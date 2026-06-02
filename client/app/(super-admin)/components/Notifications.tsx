@@ -206,7 +206,7 @@ const AdminNotifications = ({
 
       {notificationsOpen && (
         <div
-          className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-lg border z-50 overflow-hidden"
+          className="absolute right-[-5rem] md:right-0 mt-2 w-96 bg-white rounded-xl shadow-lg border z-50 overflow-hidden"
           style={{ borderColor: "rgba(30,80,50,0.1)" }}>
           {/* Header */}
           <div

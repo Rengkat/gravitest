@@ -27,7 +27,7 @@ import { UserSettings } from './user-settings.entity';
 import { UserNotificationPreferences } from './user-notification-preferences.entity';
 import { Subscription } from './subscription.entity';
 import { Otp } from 'src/auth/entities/otp.entity';
-import { Notification } from './notification.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
 import { UserSession } from 'src/auth/entities/user-session.entity';
 
 @Entity('users')
@@ -186,6 +186,9 @@ export class User {
   @OneToOne('SchoolAdmin', (a: SchoolAdmin) => a.user, { nullable: true })
   schoolAdmin: SchoolAdmin | null;
 
+  @OneToMany('Notification', (n: Notification) => n.user)
+  notifications: Notification[];
+
   @OneToOne(() => UserSettings, (s) => s.user, { nullable: true })
   settings: UserSettings | null;
 
@@ -202,9 +205,6 @@ export class User {
 
   @OneToMany('Otp', (o: Otp) => o.user)
   otps: Otp[];
-
-  @OneToMany(() => Notification, (n) => n.user)
-  notifications: Notification[];
 
   // @OneToMany('AiChatSession', (s: AiChatSession) => s.user)
   // aiChatSessions: AiChatSession[];

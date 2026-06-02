@@ -48,9 +48,9 @@ export default function SearchBar({
           />
           {filters.searchQuery && (
             <button
+              title="clear search"
               onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               <X size={15} />
             </button>
           )}
@@ -66,8 +66,7 @@ export default function SearchBar({
                 filters.sortMode === s
                   ? "bg-white shadow-sm text-green-800"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
+              }`}>
               {s}
             </button>
           ))}
@@ -76,15 +75,15 @@ export default function SearchBar({
         {/* View mode */}
         <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
           <button
+            title="grid view"
             onClick={() => onViewModeChange("grid")}
-            className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-green-700" : "text-gray-500"}`}
-          >
+            className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-white shadow-sm text-green-700" : "text-gray-500"}`}>
             <Grid3x3 size={16} />
           </button>
           <button
+            title="list view"
             onClick={() => onViewModeChange("list")}
-            className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-white shadow-sm text-green-700" : "text-gray-500"}`}
-          >
+            className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-white shadow-sm text-green-700" : "text-gray-500"}`}>
             <List size={16} />
           </button>
         </div>
@@ -96,8 +95,7 @@ export default function SearchBar({
             showFilters || activeFilterCount > 0
               ? "border-green-500 bg-green-50 text-green-700"
               : "border-gray-200 text-gray-600 hover:bg-gray-50"
-          }`}
-        >
+          }`}>
           <SlidersHorizontal size={15} />
           Filters
           {activeFilterCount > 0 && (
@@ -121,12 +119,14 @@ export default function SearchBar({
                 Subject
               </label>
               <select
+                title="filter by subject"
                 value={filters.subject}
                 onChange={(e) => onSubjectChange(e.target.value as Subject)}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400"
-              >
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400">
                 {SUBJECTS.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -135,12 +135,14 @@ export default function SearchBar({
                 Level
               </label>
               <select
+                title="filter by level"
                 value={filters.level}
                 onChange={(e) => onLevelChange(e.target.value as Level)}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400"
-              >
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400">
                 {LEVELS.map((l) => (
-                  <option key={l.id} value={l.id}>{l.name}</option>
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -149,12 +151,14 @@ export default function SearchBar({
                 Exam Type
               </label>
               <select
+                title="filter by exam type"
                 value={filters.examType}
                 onChange={(e) => onExamChange(e.target.value as ExamType)}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400"
-              >
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-400">
                 {EXAM_TYPES.map((e) => (
-                  <option key={e.id} value={e.id}>{e.name}</option>
+                  <option key={e.id} value={e.id}>
+                    {e.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -185,8 +189,7 @@ export default function SearchBar({
           {activeFilterCount > 0 && (
             <button
               onClick={onClearFilters}
-              className="mt-3 text-[12px] text-red-500 hover:text-red-600 font-semibold flex items-center gap-1.5 transition-colors"
-            >
+              className="mt-3 text-[12px] text-red-500 hover:text-red-600 font-semibold flex items-center gap-1.5 transition-colors">
               <X size={13} /> Clear all filters
             </button>
           )}
