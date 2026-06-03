@@ -189,13 +189,13 @@ export class User {
   @OneToMany('Notification', (n: Notification) => n.user)
   notifications: Notification[];
 
+  @OneToOne(
+    'UserNotificationPreferences',
+    (n: UserNotificationPreferences) => n.user,
+  )
+  notificationPreferences: UserNotificationPreferences | null;
   @OneToOne(() => UserSettings, (s) => s.user, { nullable: true })
   settings: UserSettings | null;
-
-  @OneToOne(() => UserNotificationPreferences, (n) => n.user, {
-    nullable: true,
-  })
-  notificationPreferences: UserNotificationPreferences | null;
 
   @OneToMany(() => Subscription, (s) => s.user)
   subscriptions: Subscription[];
