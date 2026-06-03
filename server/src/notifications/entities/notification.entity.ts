@@ -21,7 +21,7 @@ export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ name: 'user_id', type: 'uuid' })
   userId!: string;
 
   @Column({ type: 'enum', enum: NotificationType })
@@ -48,7 +48,7 @@ export class Notification {
   body!: string;
 
   /** Deep-link or action URL */
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   actionUrl: string | null;
 
   /** Extra context: e.g. examId, tutorId, paymentRef */
