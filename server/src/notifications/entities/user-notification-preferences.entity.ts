@@ -1,8 +1,3 @@
-// ============================================================
-// 3. USER NOTIFICATION PREFERENCES  (user_notification_preferences)
-//    Created immediately after User on registration (all roles).
-//    Separate from UserSettings to keep the table focused.
-// ============================================================
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -12,7 +7,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity('user_notification_preferences')
 export class UserNotificationPreferences {

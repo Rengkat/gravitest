@@ -24,7 +24,7 @@ import {
   UserRole,
 } from 'src/common/enums/enums';
 import { UserSettings } from './user-settings.entity';
-import { UserNotificationPreferences } from './user-notification-preferences.entity';
+import { UserNotificationPreferences } from '../../notifications/entities/user-notification-preferences.entity';
 import { Subscription } from './subscription.entity';
 import { Otp } from 'src/auth/entities/otp.entity';
 import { Notification } from '../../notifications/entities/notification.entity';

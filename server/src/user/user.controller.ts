@@ -33,7 +33,6 @@ import {
   AdminResetPasswordDto,
 } from './dto/update-user.dto';
 import { UpdateUserSettingsDto } from './dto/update-user-settings.dto';
-import { UpdateNotificationPreferencesDto } from './dto/update-notification-preferences.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import {
   UserResponseDto,
@@ -41,7 +40,6 @@ import {
 } from './dto/user-response.dto';
 import { UserService } from './user.service';
 import { UserSettingsProvider } from './providers/user-settings.provider';
-import { UserNotificationPreferencesProvider } from './providers/user-notification-preferences.provider';
 import { DeactivateUserDto } from './dto/admin.dto';
 import { DeactivationType, UserRole } from 'src/common/enums/enums';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -55,7 +53,6 @@ export class UserController {
   constructor(
     private readonly usersService: UserService,
     private readonly userSettingsProvider: UserSettingsProvider,
-    private readonly userNotificationPreferencesProvider: UserNotificationPreferencesProvider,
   ) {}
 
   // ══════════════════════════════════════════
@@ -121,23 +118,23 @@ export class UserController {
 
   // ── Notification Preferences ───────────────────────────────
 
-  @Get('me/notification-preferences')
-  @ApiOperation({ summary: 'Get my notification preferences' })
-  getNotificationPreferences(@UserId() userId: string) {
-    return this.userNotificationPreferencesProvider.getPreferences(userId);
-  }
+  // @Get('me/notification-preferences')
+  // @ApiOperation({ summary: 'Get my notification preferences' })
+  // getNotificationPreferences(@UserId() userId: string) {
+  //   return this.userNotificationPreferencesProvider.getPreferences(userId);
+  // }
 
-  @Patch('me/notification-preferences')
-  @ApiOperation({ summary: 'Update my notification preferences' })
-  updateNotificationPreferences(
-    @UserId() userId: string,
-    @Body() dto: UpdateNotificationPreferencesDto,
-  ) {
-    return this.userNotificationPreferencesProvider.updatePreferences(
-      userId,
-      dto,
-    );
-  }
+  // @Patch('me/notification-preferences')
+  // @ApiOperation({ summary: 'Update my notification preferences' })
+  // updateNotificationPreferences(
+  //   @UserId() userId: string,
+  //   @Body() dto: UpdateNotificationPreferencesDto,
+  // ) {
+  //   return this.userNotificationPreferencesProvider.updatePreferences(
+  //     userId,
+  //     dto,
+  //   );
+  // }
 
   // ══════════════════════════════════════════
   // SUPER ADMIN ONLY

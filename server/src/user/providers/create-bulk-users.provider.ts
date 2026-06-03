@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UserSettings } from '../entities/user-settings.entity';
-import { UserNotificationPreferences } from '../entities/user-notification-preferences.entity';
+import { UserNotificationPreferences } from '../../notifications/entities/user-notification-preferences.entity';
 
 import {
   BulkCreateUsersDto,

@@ -11,7 +11,7 @@ import {
   UserRole,
 } from 'src/common/enums/enums';
 import { UserSettings } from '../entities/user-settings.entity';
-import { UserNotificationPreferences } from '../entities/user-notification-preferences.entity';
+import { UserNotificationPreferences } from '../../notifications/entities/user-notification-preferences.entity';
 import { Subscription } from '../entities/subscription.entity';
 import { StudentProfile } from 'src/students/entities/student-profile.entity';
 import { TutorProfile } from 'src/tutors/entities/tutor-profile.entity';
