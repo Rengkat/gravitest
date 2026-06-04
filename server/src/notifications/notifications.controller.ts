@@ -56,7 +56,7 @@ export class NotificationsController {
    * events the moment they are saved — no polling needed.
    *
    * Frontend usage:
-   *   const source = new EventSource('/api/v1/notifications/stream/{userId}');
+   *   const source = new EventSource('/api/v1/notifications/stream);
    *   source.onmessage = (e) => {
    *     const notification = JSON.parse(e.data);
    *     // update bell icon, show toast, etc.
@@ -88,50 +88,50 @@ export class NotificationsController {
   // USER INBOX
   // ═══════════════════════════════════════════════════════════════
 
-  // GET /notifications/inbox/:userId
-  // GET /notifications/inbox/:userId?status=unread&type=exam_reminder&page=1
-  @Get('inbox/:userId')
+  // GET /notifications/inbox
+  // GET /notifications/inbox?status=unread&type=exam_reminder&page=1
+  @Get('inbox')
   getInbox(@UserId() userId: string, @Query() filters: NotificationFiltersDto) {
     return this.notificationsService.getInbox(userId, filters);
   }
 
-  // GET /notifications/inbox/:userId/summary
+  // GET /notifications/inbox/summary
   // Unread count per type — feeds the navbar bell badge
-  @Get('inbox/:userId/summary')
+  @Get('inbox/summary')
   getInboxSummary(@UserId() userId: string) {
     return this.notificationsService.getInboxSummary(userId);
   }
 
-  // GET /notifications/inbox/:userId/:id
-  @Get('inbox/:userId/:id')
+  // GET /notifications/inbox/:id
+  @Get('inbox/:id')
   getOne(@UserId() userId: string, @Param('id', ParseUUIDPipe) id: string) {
     return this.notificationsService.getOne(userId, id);
   }
 
-  // PATCH /notifications/inbox/:userId/mark-read
+  // PATCH /notifications/inbox/mark-read
   // Body: { ids: [uuid] } — omit ids to mark ALL unread
-  @Patch('inbox/:userId/mark-read')
+  @Patch('inbox/mark-read')
   @HttpCode(HttpStatus.OK)
   markRead(@UserId() userId: string, @Body() dto: MarkReadDto) {
     return this.notificationsService.markRead(userId, dto);
   }
 
-  // PATCH /notifications/inbox/:userId/mark-all-read
-  @Patch('inbox/:userId/mark-all-read')
+  // PATCH /notifications/inbox/mark-all-read
+  @Patch('inbox/mark-all-read')
   @HttpCode(HttpStatus.OK)
   markAllRead(@UserId() userId: string) {
     return this.notificationsService.markAllRead(userId);
   }
 
-  // PATCH /notifications/inbox/:userId/:id/archive
-  @Patch('inbox/:userId/:id/archive')
+  // PATCH /notifications/inbox/:id/archive
+  @Patch('inbox/:id/archive')
   @HttpCode(HttpStatus.OK)
   archiveOne(@UserId() userId: string, @Param('id', ParseUUIDPipe) id: string) {
     return this.notificationsService.archiveOne(userId, id);
   }
 
   // DELETE /notifications/inbox/:userId/:id
-  @Delete('inbox/:userId/:id')
+  @Delete('inbox/:id')
   @HttpCode(HttpStatus.OK)
   deleteOne(@UserId() userId: string, @Param('id', ParseUUIDPipe) id: string) {
     return this.notificationsService.deleteOne(userId, id);
@@ -139,7 +139,7 @@ export class NotificationsController {
 
   // DELETE /notifications/inbox/:userId/clear
   // Clears all read + archived notifications
-  @Delete('inbox/:userId/clear')
+  @Delete('inbox/clear')
   @HttpCode(HttpStatus.OK)
   clearAll(@UserId() userId: string) {
     return this.notificationsService.clearAll(userId);
@@ -150,15 +150,15 @@ export class NotificationsController {
   // ═══════════════════════════════════════════════════════════════
 
   // GET /notifications/preferences/:userId
-  @Get('preferences/:userId')
-  getPreferences(@Param('userId', ParseUUIDPipe) userId: string) {
+  @Get('preferences')
+  getPreferences(@UserId() userId: string) {
     return this.notificationsService.getPreferences(userId);
   }
 
-  // PATCH /notifications/preferences/:userId
-  @Patch('preferences/:userId')
+  // PATCH /notifications/preferences
+  @Patch('preferences')
   updatePreferences(
-    @Param('userId', ParseUUIDPipe) userId: string,
+    @UserId() userId: string,
     @Body() dto: UpdateNotificationPreferencesDto,
   ) {
     return this.notificationsService.updatePreferences(userId, dto as any);
@@ -169,21 +169,21 @@ export class NotificationsController {
   // ═══════════════════════════════════════════════════════════════
 
   // GET /notifications/admin
-  // @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN)
   @Get('admin')
   adminFindAll(@Query() filters: AdminNotificationFiltersDto) {
     return this.notificationsService.adminFindAll(filters);
   }
 
   // GET /notifications/admin/stats
-  // @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN)
   @Get('admin/stats')
   adminGetStats() {
     return this.notificationsService.adminGetStats();
   }
 
   // POST /notifications/admin/send
-  // @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN)
   @Post('admin/send')
   @HttpCode(HttpStatus.OK)
   adminSend(@Body() dto: SendNotificationDto) {
@@ -191,7 +191,7 @@ export class NotificationsController {
   }
 
   // POST /notifications/admin/broadcast
-  // @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN)
   @Post('admin/broadcast')
   @HttpCode(HttpStatus.OK)
   adminBroadcast(@Body() dto: BroadcastNotificationDto) {
