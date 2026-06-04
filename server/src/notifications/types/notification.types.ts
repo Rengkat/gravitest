@@ -37,3 +37,15 @@ export interface NotificationTemplate {
 export type NotificationTemplateMap = {
   [K in NotificationType]?: (ctx: Record<string, any>) => NotificationTemplate;
 };
+
+export interface NotificationEvent {
+  userId: string;
+  notificationId: string;
+  type: NotificationType;
+  channel: NotificationChannel;
+  title: string;
+  body: string;
+  actionUrl: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}

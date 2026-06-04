@@ -1,42 +1,33 @@
 import { Injectable } from '@nestjs/common';
-import { Subject, Observable, filter } from 'rxjs';
-import { NotificationType, NotificationChannel } from 'src/common/enums/enums';
-
-// ─── SSE Event shape ──────────────────────────────────────────────────────────
-
-export interface NotificationEvent {
-  userId: string;
-  notificationId: string;
-  type: NotificationType;
-  channel: NotificationChannel;
-  title: string;
-  body: string;
-  actionUrl: string | null;
-  metadata: Record<string, unknown> | null;
-  createdAt: string;
-}
+import { Subject, Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { NotificationEvent } from '../types/notification.types';
 
 @Injectable()
 export class NotificationEventsEmitter {
-  /**
-   * Single shared Subject — all notification events flow through here.
-   * Each SSE connection filters by userId.
-   */
-  private readonly events$ = new Subject<NotificationEvent>();
+  private readonly streams = new Map<string, Subject<NotificationEvent>>();
 
-  /**
-   * Called by NotificationsService after every successful persist.
-   * Other modules never call this directly — they call notify() on the service.
-   */
   emit(event: NotificationEvent): void {
-    this.events$.next(event);
+    // Delivers instantly only to this specific user's connected tabs
+    this.streams.get(event.userId)?.next(event);
   }
 
-  /**
-   * Returns an Observable filtered to a specific user.
-   * Each SSE controller subscription calls this.
-   */
   streamFor(userId: string): Observable<NotificationEvent> {
-    return this.events$.pipe(filter((event) => event.userId === userId));
+    if (!this.streams.has(userId)) {
+      this.streams.set(userId, new Subject<NotificationEvent>());
+    }
+
+    const subject = this.streams.get(userId)!;
+
+    // Return the stream wrapped in a self-cleaning lifecycle handler
+    return subject.asObservable().pipe(
+      finalize(() => {
+        // finalize() runs automatically whenever ANY tab unsubscribes/disconnects
+        // ONLY delete the stream if NO other tabs/devices are listening
+        if (subject && !subject.observed) {
+          this.streams.delete(userId);
+        }
+      }),
+    );
   }
 }
