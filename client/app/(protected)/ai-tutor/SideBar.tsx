@@ -1,4 +1,3 @@
-import React from "react";
 import { RefreshCw, X } from "lucide-react";
 import { SUBJECTS } from "@/lib/constants/ai-tutor";
 import { Conversation, Subject } from "@/types/ai-tutor";

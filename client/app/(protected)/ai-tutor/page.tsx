@@ -106,7 +106,6 @@ export default function AITutorPage() {
 
   /* Voice input */
   const toggleRecording = useCallback(() => {
-    // ✅ reads from window directly — no typeof SpeechRecognition needed
     const SR: ISpeechRecognitionConstructor | undefined =
       window.SpeechRecognition ?? window.webkitSpeechRecognition;
 
