@@ -539,9 +539,12 @@ export class NotificationsService {
       return 'WhatsApp notifications disabled';
 
     if (prefs.quietHoursEnabled && channel === NotificationChannel.IN_APP) {
+      if (!prefs.quietHoursStart || !prefs.quietHoursEnd) return null;
       const now = new Date();
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
-      const [sh, sm] = prefs.quietHoursStart.split(':').map(Number);
+      const [sh, sm] = (prefs.quietHoursStart || '22:00')
+        .split(':')
+        .map(Number);
       const [eh, em] = prefs.quietHoursEnd.split(':').map(Number);
       const startMinutes = sh * 60 + sm;
       const endMinutes = eh * 60 + em;
