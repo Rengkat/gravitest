@@ -2,7 +2,13 @@
 
 import { useState, useCallback } from "react";
 import type { SchoolData, SchoolClass, SubscriptionPlan, SchoolStatus } from "@/types/schoolsTypes";
-import { generateMockSchoolById } from "@/lib/mock/schoolsMockData";
+import { generateMockSchools } from "@/lib/mock/schoolsMockData";
+
+// Derive a single school from the mock list, falling back to the first entry
+function generateMockSchoolById(id: string): SchoolData | null {
+  const schools = generateMockSchools(50);
+  return schools.find((s) => s.id === id) ?? schools[0] ?? null;
+}
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -93,18 +99,23 @@ interface UseSchoolDetailReturn {
 }
 
 const BLANK_CLASS: AddClassFormData = {
-  name: "", level: "", capacity: 40,
-  adminName: "", adminEmail: "", adminPhone: "",
+  name: "",
+  level: "",
+  capacity: 40,
+  adminName: "",
+  adminEmail: "",
+  adminPhone: "",
 };
 
 const BLANK_ADMIN: AddAdminFormData = {
-  name: "", email: "", phone: "", role: "admin",
+  name: "",
+  email: "",
+  phone: "",
+  role: "admin",
 };
 
 export function useSchoolDetail(schoolId: string): UseSchoolDetailReturn {
-  const [school, setSchool] = useState<SchoolData | null>(() =>
-    generateMockSchoolById(schoolId)
-  );
+  const [school, setSchool] = useState<SchoolData | null>(() => generateMockSchoolById(schoolId));
   const [loading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
@@ -155,7 +166,7 @@ export function useSchoolDetail(schoolId: string): UseSchoolDetailReturn {
         setAddAdminForm(BLANK_ADMIN);
       }
     },
-    [school]
+    [school],
   );
 
   const cancelAction = useCallback(() => {
@@ -275,14 +286,43 @@ export function useSchoolDetail(schoolId: string): UseSchoolDetailReturn {
 
     setActionLoading(false);
     cancelAction();
-  }, [school, pendingAction, editForm, pendingPlan, addClassForm, addAdminForm, targetClassId, targetAdminId, cancelAction]);
+  }, [
+    school,
+    pendingAction,
+    editForm,
+    pendingPlan,
+    addClassForm,
+    addAdminForm,
+    targetClassId,
+    targetAdminId,
+    cancelAction,
+  ]);
 
   return {
-    school, loading, actionLoading, activeTab, expandedClass,
-    pendingAction, confirmInput, reasonInput, editForm,
-    addClassForm, addAdminForm, pendingPlan, targetClassId, targetAdminId,
-    setActiveTab, toggleClass, initiateAction, cancelAction, confirmAction,
-    setConfirmInput, setReasonInput, setEditForm,
-    setAddClassForm, setAddAdminForm, setPendingPlan,
+    school,
+    loading,
+    actionLoading,
+    activeTab,
+    expandedClass,
+    pendingAction,
+    confirmInput,
+    reasonInput,
+    editForm,
+    addClassForm,
+    addAdminForm,
+    pendingPlan,
+    targetClassId,
+    targetAdminId,
+    setActiveTab,
+    toggleClass,
+    initiateAction,
+    cancelAction,
+    confirmAction,
+    setConfirmInput,
+    setReasonInput,
+    setEditForm,
+    setAddClassForm,
+    setAddAdminForm,
+    setPendingPlan,
   };
 }

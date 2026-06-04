@@ -14,6 +14,7 @@ import {
   Wifi,
   CheckCircle2,
   AlertCircle,
+  Plane,
 } from "lucide-react";
 import type { SchoolData } from "@/types/schoolsTypes";
 import { SUBSCRIPTION_PLANS } from "@/lib/constants/schools";
@@ -112,7 +113,7 @@ export function OverviewTab({ school }: { school: SchoolData }) {
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: planCfg.bg }}>
-              <PlanIcon size={18} style={{ color: planCfg.color }} />
+              <Plane size={18} style={{ color: planCfg.color }} />
             </div>
             <div>
               <div className="text-[15px] font-bold text-green-900">{planCfg.label}</div>
@@ -229,8 +230,8 @@ export function OverviewTab({ school }: { school: SchoolData }) {
               {school.location.city}, {school.location.state}
             </p>
             <p>{school.location.country}</p>
-            {school.location.lga && (
-              <p className="text-text-muted text-[11px]">LGA: {school.location.lga}</p>
+            {school.location?.lga && (
+              <p className="text-text-muted text-[11px]">LGA: {school.location?.lga}</p>
             )}
           </address>
         </div>
