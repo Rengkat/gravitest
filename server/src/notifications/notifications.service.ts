@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 
 import { User } from 'src/user/entities/user.entity';
 
@@ -166,13 +166,7 @@ export class NotificationsService {
    * Send to multiple users at once.
    */
   async broadcast(dto: BroadcastNotificationDto): Promise<BroadcastResult> {
-    const result: BroadcastResult = {
-      sent: 0,
-      skipped: 0,
-      failed: 0,
-      errors: [],
-    };
-
+    // 1. Resolve userIds
     let userIds: string[] = dto.userIds ?? [];
 
     if (!userIds.length) {
@@ -197,36 +191,109 @@ export class NotificationsService {
       throw new BadRequestException('No target users resolved for broadcast.');
     }
 
-    const CHUNK = 100;
-    for (let i = 0; i < userIds.length; i += CHUNK) {
-      const chunk = userIds.slice(i, i + CHUNK);
-      await Promise.all(
-        chunk.map(async (userId) => {
-          try {
-            const res = await this.notify({
-              userId,
-              type: dto.type,
-              channel: dto.channel,
-              context: {},
-              actionUrl: dto.actionUrl ?? undefined,
-              metadata: dto.metadata ?? undefined,
-            });
-            if (res.delivered) {
-              result.sent++;
-            } else {
-              result.skipped++;
-            }
-          } catch (err: any) {
-            result.failed++;
-            result.errors.push({ userId, reason: err.message });
-          }
-        }),
-      );
+    const result: BroadcastResult = {
+      sent: 0,
+      skipped: 0,
+      failed: 0,
+      errors: [],
+    };
+    const template = resolveTemplate(dto.type, {});
+
+    // 2. Set a safe batch chunk boundary size
+    const CHUNK_SIZE = 500;
+
+    for (let i = 0; i < userIds.length; i += CHUNK_SIZE) {
+      const chunkUserIds = userIds.slice(i, i + CHUNK_SIZE);
+
+      try {
+        // 3. Batch find preferences only for this chunk
+        const chunkPrefs = await this.prefsRepo.find({
+          where: { user: { id: In(chunkUserIds) } },
+        });
+
+        const prefsMap = new Map(chunkPrefs.map((p) => [p.userId, p]));
+
+        // 4. Identify filtered target group
+        const allowedChunkUserIds = chunkUserIds.filter((userId) => {
+          const prefs = prefsMap.get(userId);
+          return !prefs || !this.shouldSkip(dto.type, dto.channel, prefs);
+        });
+
+        const skippedCount = chunkUserIds.length - allowedChunkUserIds.length;
+        result.skipped += skippedCount;
+
+        if (!allowedChunkUserIds.length) continue;
+
+        // 5. Instantly map allocations to memory
+        const notificationsToCreate = allowedChunkUserIds.map((userId) =>
+          this.notificationRepo.create({
+            userId,
+            type: dto.type,
+            channel: dto.channel,
+            status: NotificationStatus.UNREAD,
+            title: dto.title ?? template.title,
+            body: dto.body ?? template.body,
+            actionUrl: dto.actionUrl ?? template.actionUrl ?? null,
+            metadata: dto.metadata ?? null,
+          }),
+        );
+
+        // 6. Safe batch database insert
+        const savedNotifications = await this.notificationRepo.save(
+          notificationsToCreate,
+        );
+        result.sent += savedNotifications.length;
+
+        // 7. Fire Live SSE Stream Events & Handle External Dispatch Routing
+        savedNotifications.forEach((n) => {
+          // SSE Real-time execution
+          this.eventsEmitter.emit({
+            userId: n.userId,
+            notificationId: n.id,
+            type: n.type,
+            channel: n.channel,
+            title: n.title,
+            body: n.body,
+            actionUrl: n.actionUrl,
+            metadata: n.metadata,
+            createdAt: n.createdAt.toISOString(),
+          });
+
+          // 8. Restored External Processing Engine (Fire-and-forget fallback)
+          const userPrefs = prefsMap.get(n.userId) ?? null;
+
+          // Pass to standard sender wrapper matching individual properties
+          const sendDto: SendNotificationDto = {
+            userId: n.userId,
+            type: n.type,
+            channel: n.channel,
+            title: n.title,
+            body: n.body,
+            actionUrl: n.actionUrl,
+            metadata: n.metadata,
+          };
+
+          this.dispatchExternal(n, sendDto, userPrefs).catch((err) =>
+            this.logger.error(
+              `Broadcast external channel routing failed for user ${n.userId}: ${err.message}`,
+            ),
+          );
+        });
+      } catch (chunkError: any) {
+        // Prevent one broken block from causing an overall application transaction crash
+        this.logger.error(
+          `Failed to process broadcast chunk slice indices ${i} to ${i + CHUNK_SIZE}: ${chunkError.message}`,
+        );
+        result.failed += chunkUserIds.length;
+        result.errors.push({
+          userId: `Chunk execution block range: ${i}`,
+          reason: chunkError.message,
+        });
+      }
     }
 
     return result;
   }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // USER INBOX
   // ═══════════════════════════════════════════════════════════════════════════

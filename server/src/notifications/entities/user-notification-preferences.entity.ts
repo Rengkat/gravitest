@@ -14,6 +14,9 @@ export class UserNotificationPreferences {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  @Column({ type: 'uuid', name: 'user_id' })
+  userId!: string;
+
   // ── Channel Toggles ────────────────────────────────────────
   @Column({ type: 'boolean', default: true })
   inAppEnabled!: boolean;
