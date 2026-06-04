@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
-import { UserNotificationPreferences } from './entities/user-notification-preferences.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserNotificationPreferences } from './entities/user-notification-preferences.entity';
 
 @Module({
   controllers: [NotificationsController],

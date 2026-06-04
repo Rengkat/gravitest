@@ -116,26 +116,6 @@ export class UserController {
     return this.userSettingsProvider.updateSettings(userId, dto);
   }
 
-  // ── Notification Preferences ───────────────────────────────
-
-  // @Get('me/notification-preferences')
-  // @ApiOperation({ summary: 'Get my notification preferences' })
-  // getNotificationPreferences(@UserId() userId: string) {
-  //   return this.userNotificationPreferencesProvider.getPreferences(userId);
-  // }
-
-  // @Patch('me/notification-preferences')
-  // @ApiOperation({ summary: 'Update my notification preferences' })
-  // updateNotificationPreferences(
-  //   @UserId() userId: string,
-  //   @Body() dto: UpdateNotificationPreferencesDto,
-  // ) {
-  //   return this.userNotificationPreferencesProvider.updatePreferences(
-  //     userId,
-  //     dto,
-  //   );
-  // }
-
   // ══════════════════════════════════════════
   // SUPER ADMIN ONLY
   // ══════════════════════════════════════════

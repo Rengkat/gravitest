@@ -10,7 +10,6 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   Res,
   Sse,
   MessageEvent,
@@ -29,7 +28,7 @@ import {
   SendNotificationDto,
 } from './dto/notification.dto';
 import { UpdateNotificationPreferencesDto } from 'src/user/dto/update-notification-preferences.dto';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
