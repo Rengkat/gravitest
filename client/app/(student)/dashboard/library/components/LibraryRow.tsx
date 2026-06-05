@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Heart, Eye, Download, BookOpen, Clock, Users, Crown, Lock } from "lucide-react";
 import { LibraryItem } from "@/types/library";
 import { typeColor, formatNumber, formatPrice, accessLabel } from "@/lib/constants/helpers";
@@ -22,10 +23,17 @@ export default function LibraryRow({
   onBookmark,
   onAccess,
 }: LibraryRowProps) {
+  const router = useRouter();
   const colors = typeColor(item.type);
 
+  const handleRowClick = () => {
+    router.push(`/library/${item.id}?preview=${item.isPremium}`);
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-4 flex items-center gap-4">
+    <div
+      onClick={handleRowClick}
+      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-4 flex items-center gap-4 cursor-pointer">
       {/* Icon block */}
       <div
         className={`w-14 h-14 rounded-xl ${colors.bg} flex items-center justify-center shrink-0 relative`}>
@@ -99,13 +107,19 @@ export default function LibraryRow({
       <div className="flex items-center gap-2 shrink-0">
         <button
           title="like"
-          onClick={onLike}
+          onClick={(e) => {
+            e.stopPropagation();
+            onLike();
+          }}
           className={`p-2 rounded-xl transition-all ${liked ? "text-red-500 bg-red-50" : "text-gray-400 hover:text-red-400 hover:bg-red-50"}`}>
           <Heart size={16} fill={liked ? "currentColor" : "none"} />
         </button>
         <button
           title="bookmark"
-          onClick={onBookmark}
+          onClick={(e) => {
+            e.stopPropagation();
+            onBookmark();
+          }}
           className={`p-2 rounded-xl transition-all ${bookmarked ? "text-blue-500 bg-blue-50" : "text-gray-400 hover:text-blue-400 hover:bg-blue-50"}`}>
           <svg
             width="16"
@@ -118,7 +132,10 @@ export default function LibraryRow({
           </svg>
         </button>
         <button
-          onClick={onAccess}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAccess();
+          }}
           className={`px-4 py-2 rounded-xl text-[12px] font-semibold transition-all flex items-center gap-1.5 ${
             item.isPremium
               ? "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
