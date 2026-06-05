@@ -84,6 +84,7 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
             aria-label="Content sections">
             {TABS.map((tab) => (
               <button
+                title="tab"
                 key={tab.id}
                 role="tab"
                 id={`tab-${tab.id}`}

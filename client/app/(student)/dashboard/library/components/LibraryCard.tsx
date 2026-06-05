@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   Heart,
   Share2,
@@ -42,10 +43,17 @@ export default function LibraryCard({
   onShare,
   onAccess,
 }: LibraryCardProps) {
+  const router = useRouter();
   const colors = typeColor(item.type);
 
+  const handleCardClick = () => {
+    router.push(`/library/${item.id}?preview=${item.isPremium}`);
+  };
+
   return (
-    <div className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col">
+    <div
+      onClick={handleCardClick}
+      className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex flex-col cursor-pointer">
       {/* Illustration / thumbnail area */}
       <div
         className={`relative h-40 bg-gradient-to-br ${SUBJECT_GRADIENTS[item.subject] ?? SUBJECT_GRADIENTS.all} flex items-center justify-center`}>
@@ -163,13 +171,19 @@ export default function LibraryCard({
         <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
           <div className="flex gap-1">
             <button
-              onClick={onLike}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLike();
+              }}
               className={`p-1.5 rounded-lg transition-all ${liked ? "text-red-500 bg-red-50" : "text-gray-400 hover:text-red-400 hover:bg-red-50"}`}
               aria-label="Like">
               <Heart size={14} fill={liked ? "currentColor" : "none"} />
             </button>
             <button
-              onClick={onBookmark}
+              onClick={(e) => {
+                e.stopPropagation();
+                onBookmark();
+              }}
               className={`p-1.5 rounded-lg transition-all ${bookmarked ? "text-blue-500 bg-blue-50" : "text-gray-400 hover:text-blue-400 hover:bg-blue-50"}`}
               aria-label="Bookmark">
               {/* Bookmark icon inline to avoid import issues */}
@@ -184,7 +198,10 @@ export default function LibraryCard({
               </svg>
             </button>
             <button
-              onClick={onShare}
+              onClick={(e) => {
+                e.stopPropagation();
+                onShare();
+              }}
               className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-all"
               aria-label="Share">
               <Share2 size={14} />
@@ -192,7 +209,10 @@ export default function LibraryCard({
           </div>
 
           <button
-            onClick={onAccess}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAccess();
+            }}
             className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all flex items-center gap-1.5 ${
               item.isPremium
                 ? "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200"
