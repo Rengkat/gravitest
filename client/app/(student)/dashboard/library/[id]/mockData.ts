@@ -1,193 +1,194 @@
 import type {
   LibraryContent,
   AccessCheckResult,
-  LibraryAccessRecord,
+  LibraryAccess,
   RatingEntry,
-  RelatedContent,
+  RelatedItem,
 } from "./types";
 
-export function mockContent(id: string): LibraryContent {
-  const seed = id?.charCodeAt(id?.length - 1) % 7;
+export function getMockContent(id: string): LibraryContent {
+  const n = id.charCodeAt(id.length - 1) % 7;
 
-  const base = {
+  const shared = {
     id,
     isActive: true,
     isPublished: true,
-    totalViews: 4_820,
-    totalDownloads: 1_240,
+    totalViews: 5_840,
+    totalDownloads: 1_620,
     averageRating: 4.6,
     ratingCount: 312,
     createdAt: "2024-09-01T00:00:00Z",
     updatedAt: "2025-03-15T00:00:00Z",
-    examTypes: ["waec", "neco"] as any,
-    classLevels: ["ss2", "ss3"] as any,
-    tags: ["exam prep", "past questions", "2024"],
+    examTypes: ["WAEC", "NECO"] as any,
+    classLevels: ["SS2", "SS3"] as any,
     author: "Gravitas Academic Team",
+    tags: ["exam prep", "2024"],
   };
 
-  const contents: LibraryContent[] = [
-    // 0 – Free Video
+  const items: LibraryContent[] = [
+    // 0 — Free video
     {
-      ...base,
-      contentType: "video",
+      ...shared,
+      contentType: "VIDEO",
+      isFree: true,
+      requiredTier: null,
+      priceKobo: null,
       title: "Complete WAEC Mathematics: Algebra & Calculus Masterclass",
       description:
-        "A full walkthrough of WAEC Mathematics covering Algebra, Calculus, Trigonometry and Statistics. Taught by experienced examiners with real past question references.",
-      subject: "mathematics",
+        "A full walkthrough of WAEC Mathematics covering Algebra, Calculus, Trigonometry and Statistics. Taught by experienced examiners with real past question references throughout.",
+      subject: "MATHEMATICS",
       topic: "Algebra, Calculus, Trigonometry",
-      fileUrl: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
+      fileUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       thumbnailUrl: "https://picsum.photos/seed/mathvid/800/450",
       durationSeconds: 5_400,
       totalPages: null,
       fileSizeBytes: 420_000_000,
-      isFree: true,
-      requiredTier: null,
-      priceKobo: null,
       previewSeconds: 90,
       author: "Mr. Adewale Obi (MSc, UNILAG)",
     },
-    // 1 – Premium Video (tier-gated)
+
+    // 1 — Premium video
     {
-      ...base,
-      contentType: "video",
-      title: "JAMB Biology: Genetics, Evolution & Ecology Deep Dive",
+      ...shared,
+      contentType: "VIDEO",
+      isFree: false,
+      requiredTier: "PREMIUM",
+      priceKobo: null,
+      title: "JAMB Biology: Genetics, Evolution & Ecology — Full Series",
       description:
-        "Comprehensive video series covering all JAMB Biology topics including detailed genetics problems, evolutionary theory and ecosystem analysis with 2024 syllabus updates.",
-      subject: "biology",
+        "Comprehensive video series covering all JAMB Biology topics. Detailed genetics problems, evolutionary theory and ecosystem analysis with 2024 syllabus updates.",
+      subject: "BIOLOGY",
       topic: "Genetics, Evolution, Ecology",
-      fileUrl: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
+      fileUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       thumbnailUrl: "https://picsum.photos/seed/biovid/800/450",
       durationSeconds: 7_200,
       totalPages: null,
       fileSizeBytes: 680_000_000,
-      isFree: false,
-      requiredTier: "premium",
-      priceKobo: null,
       previewSeconds: 90,
       author: "Dr. Ngozi Eze (PhD, UNIPORT)",
     },
-    // 2 – Free Ebook
+
+    // 2 — Free ebook
     {
-      ...base,
-      contentType: "ebook",
+      ...shared,
+      contentType: "EBOOK",
+      isFree: true,
+      requiredTier: null,
+      priceKobo: null,
       title: "NECO Chemistry: Comprehensive Theory & Practicals Guide",
       description:
         "400-page ebook covering every NECO Chemistry topic. Includes lab safety, organic chemistry, electrochemistry and titration calculations with worked examples.",
-      subject: "chemistry",
+      subject: "CHEMISTRY",
       topic: "Organic Chemistry, Electrochemistry",
       fileUrl: "https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf",
       thumbnailUrl: "https://picsum.photos/seed/chemebook/800/450",
       durationSeconds: null,
       totalPages: 400,
       fileSizeBytes: 12_500_000,
-      isFree: true,
-      requiredTier: null,
-      priceKobo: null,
       previewPages: 5,
-      author: "Gravitas Academic Team",
     },
-    // 3 – Paid Document
+
+    // 3 — Paid document
     {
-      ...base,
-      contentType: "document",
+      ...shared,
+      contentType: "DOCUMENT",
+      isFree: false,
+      requiredTier: null,
+      priceKobo: 150_000,
       title: "WAEC Economics: 20 Years of Past Questions with Model Answers",
       description:
         "Complete WAEC Economics past questions from 2003–2023 with full model answers, examiner comments and topic-by-topic breakdown.",
-      subject: "economics",
+      subject: "ECONOMICS",
       topic: "Macroeconomics, Microeconomics",
       fileUrl: "https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf",
       thumbnailUrl: "https://picsum.photos/seed/ecodoc/800/450",
       durationSeconds: null,
       totalPages: 280,
       fileSizeBytes: 8_200_000,
-      isFree: false,
-      requiredTier: null,
-      priceKobo: 150_000,
       previewPages: 2,
-      author: "Examcraft Nigeria",
     },
-    // 4 – Free Audio
+
+    // 4 — Free audio
     {
-      ...base,
-      contentType: "audio",
+      ...shared,
+      contentType: "AUDIO",
+      isFree: true,
+      requiredTier: null,
+      priceKobo: null,
       title: "English Language: Oral English & Comprehension Revision",
       description:
         "Audio series covering WAEC Oral English pronunciation, vowels, consonants, syllable stress and comprehension exercises narrated by a professional linguist.",
-      subject: "english",
+      subject: "ENGLISH",
       topic: "Oral English, Comprehension",
       fileUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
       thumbnailUrl: "https://picsum.photos/seed/engaudio/800/450",
       durationSeconds: 3_600,
       totalPages: null,
       fileSizeBytes: 52_000_000,
-      isFree: true,
-      requiredTier: null,
-      priceKobo: null,
       previewSeconds: 60,
       author: "Mrs. Funke Adeyemi (Linguistics, LASU)",
     },
-    // 5 – Lesson Note
+
+    // 5 — Standard-gated lesson note
     {
-      ...base,
-      contentType: "lesson_note",
+      ...shared,
+      contentType: "LESSON_NOTE",
+      isFree: false,
+      requiredTier: "STANDARD",
+      priceKobo: null,
       title: "SS2 Physics: Mechanics & Thermodynamics — Complete Lesson Notes",
       description:
-        "Structured lesson notes for SS2 Physics covering Newtonian mechanics, heat transfer, thermodynamic laws and wave motion. Ideal for classroom use and self-study.",
-      subject: "physics",
+        "Structured lesson notes for SS2 Physics covering Newtonian mechanics, heat transfer, thermodynamic laws and wave motion. Ideal for classroom and self-study use.",
+      subject: "PHYSICS",
       topic: "Mechanics, Thermodynamics, Waves",
       fileUrl: "https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf",
       thumbnailUrl: "https://picsum.photos/seed/physnote/800/450",
       durationSeconds: null,
       totalPages: 85,
       fileSizeBytes: 3_400_000,
-      isFree: false,
-      requiredTier: "standard",
-      priceKobo: null,
       previewPages: 2,
-      author: "Gravitas Academic Team",
-      classLevels: ["ss2"] as any,
-      examTypes: ["waec", "neco"] as any,
+      classLevels: ["SS2"] as any,
     },
-    // 6 – Past Questions paid
+
+    // 6 — Paid past questions
     {
-      ...base,
-      contentType: "past_question",
+      ...shared,
+      contentType: "PAST_QUESTION",
+      isFree: false,
+      requiredTier: null,
+      priceKobo: 200_000,
       title: "JAMB Mathematics: 10 Years CBT Past Questions (2014–2024)",
       description:
         "Complete JAMB Mathematics CBT past questions with full solutions and time-attack practice mode. Includes topic tagging and performance analytics.",
-      subject: "mathematics",
+      subject: "MATHEMATICS",
       topic: "All JAMB Topics",
       fileUrl: "https://www.w3.org/WAI/WCAG21/Techniques/pdf/PDF2.pdf",
       thumbnailUrl: "https://picsum.photos/seed/jambmaths/800/450",
       durationSeconds: null,
       totalPages: 320,
       fileSizeBytes: 9_800_000,
-      isFree: false,
-      requiredTier: null,
-      priceKobo: 200_000,
       previewPages: 2,
-      author: "Gravitas Academic Team",
-      examTypes: ["jamb"] as any,
-      classLevels: ["ss3"] as any,
+      examTypes: ["JAMB"] as any,
+      classLevels: ["SS3"] as any,
     },
   ];
 
-  return contents[seed] ?? contents[0];
+  return items[n] ?? items[0];
 }
 
-export function mockAccessCheck(id: string): AccessCheckResult {
-  const seed = id?.charCodeAt(id?.length - 1) % 7;
-  // Seeds 0, 2, 4 = free; 1 = premium-gated; 3, 6 = paid no_access; 5 = standard-gated
-  if ([0, 2, 4].includes(seed)) return { hasAccess: true, reason: "free" };
+export function getMockAccess(id: string): AccessCheckResult {
+  const n = id.charCodeAt(id.length - 1) % 7;
+  // 0, 2, 4 = free (full access); rest = no access
+  if ([0, 2, 4].includes(n)) return { hasAccess: true, reason: "free" };
   return { hasAccess: false, reason: "no_access" };
 }
 
-export function mockAccessRecord(): LibraryAccessRecord {
+export function getMockAccessRecord(): LibraryAccess {
   return {
-    id: "access-001",
+    id: "acc-001",
     userId: "user-001",
-    contentId: "content-001",
-    contentType: "video",
+    contentId: "c-001",
+    contentType: "VIDEO",
     expiresAt: null,
     viewCount: 7,
     downloadCount: 1,
@@ -195,7 +196,7 @@ export function mockAccessRecord(): LibraryAccessRecord {
     lastAccessedAt: "2025-05-20T10:00:00Z",
     bookmarks: [
       { position: 120, note: "Important formula", createdAt: "2025-05-10T09:00:00Z" },
-      { position: 900, note: "Worked example", createdAt: "2025-05-12T11:00:00Z" },
+      { position: 900, note: "Key worked example", createdAt: "2025-05-12T11:00:00Z" },
     ],
     highlights: null,
     paymentId: null,
@@ -203,16 +204,16 @@ export function mockAccessRecord(): LibraryAccessRecord {
   };
 }
 
-export function mockRatings(): RatingEntry[] {
+export function getMockRatings(): RatingEntry[] {
   return [
     {
       id: "r1",
       userId: "u1",
       userName: "Adewale O.",
-      avatarInitials: "AO",
+      initials: "AO",
       rating: 5,
       review:
-        "Absolutely brilliant content. The explanations are clear and the worked examples match exactly what comes up in WAEC. Highly recommended for SS3 students.",
+        "Absolutely brilliant. The explanations are clear and the worked examples match exactly what comes up in WAEC. Highly recommended for SS3 students.",
       createdAt: "2025-05-01T10:00:00Z",
       helpful: 34,
     },
@@ -220,10 +221,10 @@ export function mockRatings(): RatingEntry[] {
       id: "r2",
       userId: "u2",
       userName: "Chidinma E.",
-      avatarInitials: "CE",
+      initials: "CE",
       rating: 5,
       review:
-        "I used this to revise two weeks before my exam and my score improved significantly. The instructor breaks everything down very well.",
+        "I revised for two weeks before my exam using this and my score improved significantly. The instructor breaks everything down very well.",
       createdAt: "2025-04-28T14:00:00Z",
       helpful: 28,
     },
@@ -231,7 +232,7 @@ export function mockRatings(): RatingEntry[] {
       id: "r3",
       userId: "u3",
       userName: "Femi A.",
-      avatarInitials: "FA",
+      initials: "FA",
       rating: 4,
       review:
         "Very comprehensive. Covers the full syllabus. Would have been 5 stars if there were more practice questions at the end of each section.",
@@ -242,10 +243,10 @@ export function mockRatings(): RatingEntry[] {
       id: "r4",
       userId: "u4",
       userName: "Blessing N.",
-      avatarInitials: "BN",
+      initials: "BN",
       rating: 4,
       review:
-        "Good content overall. The audio quality could be a little better in some sections but the explanations are top-notch.",
+        "Good content overall. Audio quality could be a bit better in some sections but the explanations are excellent.",
       createdAt: "2025-04-15T16:00:00Z",
       helpful: 11,
     },
@@ -253,67 +254,67 @@ export function mockRatings(): RatingEntry[] {
       id: "r5",
       userId: "u5",
       userName: "Ibrahim K.",
-      avatarInitials: "IK",
+      initials: "IK",
       rating: 3,
       review:
-        "Decent material but I expected more depth on thermodynamics. The other chapters are excellent though.",
+        "Decent material but expected more depth on thermodynamics. The other chapters are excellent though.",
       createdAt: "2025-04-10T11:00:00Z",
       helpful: 6,
     },
   ];
 }
 
-export function mockRelated(currentId: string): RelatedContent[] {
+export function getMockRelated(): RelatedItem[] {
   return [
     {
-      id: "rel-1",
+      id: "r1",
       title: "WAEC Maths: Statistics & Probability",
-      contentType: "video",
+      contentType: "VIDEO",
       thumbnailUrl: "https://picsum.photos/seed/rel1/400/225",
       averageRating: 4.7,
       isFree: true,
       requiredTier: null,
       priceKobo: null,
-      subject: "mathematics",
+      subject: "MATHEMATICS",
       durationSeconds: 3600,
       totalPages: null,
     },
     {
-      id: "rel-2",
-      title: "SS3 Physics Complete Notes",
-      contentType: "lesson_note",
+      id: "r2",
+      title: "SS3 Physics Complete Lesson Notes",
+      contentType: "LESSON_NOTE",
       thumbnailUrl: "https://picsum.photos/seed/rel2/400/225",
       averageRating: 4.4,
       isFree: false,
-      requiredTier: "standard",
+      requiredTier: "STANDARD",
       priceKobo: null,
-      subject: "physics",
+      subject: "PHYSICS",
       durationSeconds: null,
       totalPages: 90,
     },
     {
-      id: "rel-3",
+      id: "r3",
       title: "NECO Chemistry Past Questions 2015–2024",
-      contentType: "past_question",
+      contentType: "PAST_QUESTION",
       thumbnailUrl: "https://picsum.photos/seed/rel3/400/225",
       averageRating: 4.5,
       isFree: false,
       requiredTier: null,
       priceKobo: 100000,
-      subject: "chemistry",
+      subject: "CHEMISTRY",
       durationSeconds: null,
       totalPages: 240,
     },
     {
-      id: "rel-4",
+      id: "r4",
       title: "Biology: Cell Structure & Metabolism",
-      contentType: "ebook",
+      contentType: "EBOOK",
       thumbnailUrl: "https://picsum.photos/seed/rel4/400/225",
       averageRating: 4.8,
       isFree: true,
       requiredTier: null,
       priceKobo: null,
-      subject: "biology",
+      subject: "BIOLOGY",
       durationSeconds: null,
       totalPages: 180,
     },
