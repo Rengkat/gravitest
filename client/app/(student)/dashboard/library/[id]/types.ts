@@ -1,35 +1,37 @@
+// Mirrors backend enums from src/common/enums/enums
+
 export type ContentType =
-  | "video"
-  | "audio"
-  | "ebook"
-  | "document"
-  | "past_question"
-  | "lesson_note"
-  | "infographic";
+  | "VIDEO"
+  | "AUDIO"
+  | "EBOOK"
+  | "DOCUMENT"
+  | "PAST_QUESTION"
+  | "LESSON_NOTE"
+  | "INFOGRAPHIC";
 
 export type Subject =
-  | "mathematics"
-  | "english"
-  | "physics"
-  | "chemistry"
-  | "biology"
-  | "economics"
-  | "government"
-  | "literature"
-  | "geography"
-  | "history"
-  | "commerce"
-  | "accounting"
-  | "further_mathematics"
-  | "agricultural_science"
-  | "civic_education";
+  | "MATHEMATICS"
+  | "ENGLISH"
+  | "PHYSICS"
+  | "CHEMISTRY"
+  | "BIOLOGY"
+  | "ECONOMICS"
+  | "GOVERNMENT"
+  | "LITERATURE"
+  | "GEOGRAPHY"
+  | "HISTORY"
+  | "COMMERCE"
+  | "ACCOUNTING"
+  | "FURTHER_MATHEMATICS"
+  | "AGRICULTURAL_SCIENCE"
+  | "CIVIC_EDUCATION";
 
-export type ExamType = "waec" | "neco" | "jamb" | "nabteb" | "common_entrance";
-export type ClassLevel = "jss1" | "jss2" | "jss3" | "ss1" | "ss2" | "ss3";
-export type SubscriptionTier = "free" | "basic" | "standard" | "premium" | "enterprise";
+export type ExamType = "WAEC" | "NECO" | "JAMB" | "NABTEB" | "COMMON_ENTRANCE";
+export type ClassLevel = "JSS1" | "JSS2" | "JSS3" | "SS1" | "SS2" | "SS3";
+export type SubscriptionTier = "FREE" | "BASIC" | "STANDARD" | "PREMIUM" | "ENTERPRISE";
+export type AccessReason = "free" | "owned" | "subscription" | "no_access" | "expired";
 
-// ─── Main content type — mirrors LibraryContent entity ───────────────────────
-
+// Mirrors LibraryContent entity
 export interface LibraryContent {
   id: string;
   title: string;
@@ -39,8 +41,8 @@ export interface LibraryContent {
   topic: string | null;
   fileUrl: string;
   thumbnailUrl: string | null;
-  durationSeconds: number | null; // video / audio
-  totalPages: number | null; // ebook / document
+  durationSeconds: number | null;
+  totalPages: number | null;
   fileSizeBytes: number | null;
   examTypes: ExamType[];
   classLevels: ClassLevel[];
@@ -50,22 +52,20 @@ export interface LibraryContent {
   totalViews: number;
   totalDownloads: number;
   averageRating: number;
-  ratingCount: number;
+  ratingCount?: number;
   isActive: boolean;
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
-  // Enriched fields from API
+  // Frontend-enriched
   author?: string;
-  previewUrl?: string; // partial file URL for locked preview
-  previewPages?: number; // how many pages are free to preview
-  previewSeconds?: number; // how many seconds of video/audio are free
+  previewSeconds?: number;
+  previewPages?: number;
   tags?: string[];
 }
 
-// ─── Access record — mirrors LibraryAccess entity ────────────────────────────
-
-export interface LibraryAccessRecord {
+// Mirrors LibraryAccess entity
+export interface LibraryAccess {
   id: string;
   userId: string;
   contentId: string;
@@ -75,52 +75,32 @@ export interface LibraryAccessRecord {
   downloadCount: number;
   progressPercent: number;
   lastAccessedAt: string | null;
-  bookmarks: Bookmark[] | null;
-  highlights: Highlight[] | null;
+  bookmarks: { position: number; note?: string; createdAt: string }[] | null;
+  highlights:
+    | { startOffset: number; endOffset: number; text: string; color: string; note?: string }[]
+    | null;
   paymentId: string | null;
   createdAt: string;
 }
 
-export interface Bookmark {
-  position: number; // page or seconds
-  note?: string;
-  createdAt: string;
-}
-
-export interface Highlight {
-  startOffset: number;
-  endOffset: number;
-  text: string;
-  color: string;
-  note?: string;
-}
-
-// ─── Access check result ──────────────────────────────────────────────────────
-
-export type AccessReason = "free" | "owned" | "subscription" | "no_access" | "expired";
-
 export interface AccessCheckResult {
   hasAccess: boolean;
-  reason: AccessReason;
-  accessRecord?: LibraryAccessRecord;
+  reason?: AccessReason;
+  accessRecord?: LibraryAccess;
 }
-
-// ─── Rating ───────────────────────────────────────────────────────────────────
 
 export interface RatingEntry {
   id: string;
   userId: string;
   userName: string;
-  avatarInitials: string;
-  rating: number; // 1-5
+  initials: string;
+  rating: number;
   review?: string;
   createdAt: string;
   helpful: number;
 }
 
-// ─── Related content ─────────────────────────────────────────────────────────
-
-export type RelatedContent = Pick<
+export type RelatedItem = Pick<
   LibraryContent,
   | "id"
   | "title"
