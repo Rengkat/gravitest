@@ -1,11 +1,37 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import Link from "next/link";
+import {
+  ChevronRight,
+  RefreshCw,
+  Star,
+  Eye,
+  Clock,
+  FileText,
+  Download,
+  User,
+  Tag,
+  Calendar,
+  Lock,
+  Crown,
+  CreditCard,
+  Zap,
+  CheckCircle2,
+  Bookmark,
+} from "lucide-react";
 import { useContentDetail, type ContentTab } from "../useContentDetail";
-import { ContentHeader } from "./ContentHeader";
-import { ContentPlayer } from "./ContentPlayer";
-import { AccessSidebar } from "./AccessSidebar";
+import { Player } from "./Player";
 import { AboutTab, RatingsTab, RelatedTab } from "./TabPanels";
+import {
+  CONTENT_CFG,
+  SUBJECT_CFG,
+  EXAM_LABELS,
+  CLASS_LABELS,
+  TIER_CFG,
+  fmtDuration,
+  fmtSize,
+  fmtPrice,
+} from "../config";
 
 const TABS: { id: ContentTab; label: string }[] = [
   { id: "about", label: "About" },
@@ -17,7 +43,7 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
   const {
     content,
     access,
-    accessRecord,
+    record,
     ratings,
     related,
     loading,
@@ -26,54 +52,184 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
     hoverRating,
     reviewText,
     submittingRating,
-    ratingSubmitted,
-    bookmarkNote,
-    showBookmarkInput,
-    progressPercent,
-    setActiveTab,
+    ratingDone,
+    progressPct,
+    setTab,
     setUserRating,
     setHoverRating,
     setReviewText,
     submitRating,
-    addBookmark,
-    setBookmarkNote,
-    setShowBookmarkInput,
     updateProgress,
+    addBookmark,
   } = useContentDetail(contentId);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 gap-3 text-text-muted text-[14px]">
+      <div className="flex items-center justify-center min-h-[60vh] gap-3 text-text-muted text-[14px]">
         <RefreshCw size={20} className="animate-spin text-green-800" />
-        Loading content…
+        Loading…
       </div>
     );
   }
 
   if (!content) {
     return (
-      <div className="flex items-center justify-center h-64 text-text-muted" role="alert">
+      <div className="flex items-center justify-center min-h-[60vh] text-text-muted" role="alert">
         Content not found.
       </div>
     );
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      {/* Header: breadcrumb, thumbnail, title, badges */}
-      <ContentHeader content={content} access={access} progressPercent={progressPercent} />
+  const typeCfg = CONTENT_CFG[content.contentType];
+  const TypeIcon = typeCfg.icon;
+  const subCfg = content.subject ? SUBJECT_CFG[content.subject] : null;
+  const tierCfg = content.requiredTier ? TIER_CFG[content.requiredTier] : null;
+  const TierIcon = tierCfg?.icon ?? Crown;
 
-      {/* Main two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
-        {/* Left: player + tabs */}
-        <div className="space-y-5">
-          {/* Player */}
-          <ContentPlayer
+  const accessLabel = content.isFree
+    ? { text: "Free", color: "#10b981", bg: "#10b98115" }
+    : tierCfg
+      ? { text: `${tierCfg.label} Plan`, color: tierCfg.color, bg: tierCfg.bg }
+      : { text: fmtPrice(content.priceKobo!), color: "#f59e0b", bg: "#f59e0b15" };
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-6">
+      {/* ── Breadcrumb ── */}
+      <nav
+        className="flex items-center gap-1.5 text-[12px] text-text-muted mb-5"
+        aria-label="Breadcrumb">
+        <Link href="/library" className="hover:text-green-700 transition-colors">
+          Library
+        </Link>
+        <ChevronRight size={12} />
+        <Link
+          href={`/library?type=${content.contentType}`}
+          className="hover:text-green-700 transition-colors">
+          {typeCfg.label}
+        </Link>
+        <ChevronRight size={12} />
+        <span className="text-green-900 font-medium truncate max-w-[220px]">{content.title}</span>
+      </nav>
+
+      {/* ── Title + meta strip ── */}
+      <div className="mb-5">
+        {/* Type + subject + access chips */}
+        <div className="flex items-center flex-wrap gap-1.5 mb-2">
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+            style={{ background: typeCfg.bg, color: typeCfg.color }}>
+            <TypeIcon size={10} /> {typeCfg.label}
+          </span>
+          {subCfg && (
+            <span
+              className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+              style={{ background: `${subCfg.color}12`, color: subCfg.color }}>
+              {subCfg.label}
+            </span>
+          )}
+          {content.topic && (
+            <span className="flex items-center gap-1 text-[11px] text-text-muted">
+              <Tag size={10} /> {content.topic}
+            </span>
+          )}
+          <span
+            className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+            style={{ background: accessLabel.bg, color: accessLabel.color }}>
+            {accessLabel.text}
+          </span>
+          {/* Exam chips */}
+          {content.examTypes.map((e) => (
+            <span
+              key={e}
+              className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700">
+              {EXAM_LABELS[e] ?? e}
+            </span>
+          ))}
+          {content.classLevels.map((c) => (
+            <span
+              key={c}
+              className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700">
+              {CLASS_LABELS[c] ?? c}
+            </span>
+          ))}
+        </div>
+
+        <h1 className="font-serif text-[24px] text-green-900 leading-snug mb-2">{content.title}</h1>
+
+        {/* One-line meta row */}
+        <div className="flex flex-wrap items-center gap-3 text-[12px] text-text-muted">
+          {content.author && (
+            <span className="flex items-center gap-1">
+              <User size={11} /> {content.author}
+            </span>
+          )}
+          {content.durationSeconds && (
+            <span className="flex items-center gap-1">
+              <Clock size={11} /> {fmtDuration(content.durationSeconds)}
+            </span>
+          )}
+          {content.totalPages && (
+            <span className="flex items-center gap-1">
+              <FileText size={11} /> {content.totalPages} pages
+            </span>
+          )}
+          {content.fileSizeBytes && (
+            <span className="flex items-center gap-1">
+              <Download size={11} /> {fmtSize(content.fileSizeBytes)}
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <Eye size={11} /> {content.totalViews.toLocaleString()} views
+          </span>
+          <span className="flex items-center gap-1">
+            <Calendar size={11} />{" "}
+            {new Date(content.createdAt).toLocaleDateString("en-NG", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
+          {/* Inline rating */}
+          <span className="flex items-center gap-1 ml-auto">
+            <Star size={12} className="fill-amber-400 text-amber-400" />
+            <strong className="text-green-900">{content.averageRating.toFixed(1)}</strong>
+            <span className="text-text-muted">
+              ({(content.ratingCount ?? ratings.length).toLocaleString()})
+            </span>
+          </span>
+        </div>
+
+        {/* Progress bar (if user has access and has started) */}
+        {access?.hasAccess && progressPct > 0 && (
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-[11px] mb-1">
+              <span className="text-text-muted font-semibold">Your progress</span>
+              <span
+                className="font-bold"
+                style={{ color: progressPct >= 100 ? "#10b981" : "#2e8b57" }}>
+                {progressPct >= 100 ? "Completed ✓" : `${progressPct}%`}
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-green-600 transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Main layout: player left, sidebar right ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_272px] gap-6 items-start">
+        {/* ── Left: player + tabs ── */}
+        <div className="space-y-5 min-w-0">
+          <Player
             content={content}
             access={access ?? { hasAccess: false, reason: "no_access" }}
-            accessRecord={accessRecord}
+            record={record}
             onProgress={updateProgress}
-            onAddBookmark={addBookmark}
+            onBookmark={(pos) => addBookmark(pos)}
           />
 
           {/* Tab bar */}
@@ -84,14 +240,13 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
             aria-label="Content sections">
             {TABS.map((tab) => (
               <button
-                title="tab"
                 key={tab.id}
                 role="tab"
                 id={`tab-${tab.id}`}
                 aria-selected={activeTab === tab.id}
                 aria-controls={`panel-${tab.id}`}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-all ${
+                onClick={() => setTab(tab.id)}
+                className={`px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "border-green-800 text-green-900 font-semibold"
                     : "border-transparent text-text-muted hover:text-green-900"
@@ -104,19 +259,18 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
             ))}
           </div>
 
-          {/* Panels */}
           <div
+            hidden={activeTab !== "about"}
             id="panel-about"
             role="tabpanel"
-            aria-labelledby="tab-about"
-            hidden={activeTab !== "about"}>
+            aria-labelledby="tab-about">
             <AboutTab content={content} />
           </div>
           <div
+            hidden={activeTab !== "ratings"}
             id="panel-ratings"
             role="tabpanel"
-            aria-labelledby="tab-ratings"
-            hidden={activeTab !== "ratings"}>
+            aria-labelledby="tab-ratings">
             <RatingsTab
               content={content}
               ratings={ratings}
@@ -124,34 +278,161 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
               hoverRating={hoverRating}
               reviewText={reviewText}
               submitting={submittingRating}
-              submitted={ratingSubmitted}
-              onSetUserRating={setUserRating}
-              onSetHoverRating={setHoverRating}
-              onSetReviewText={setReviewText}
-              onSubmit={submitRating}
+              done={ratingDone}
               hasAccess={access?.hasAccess ?? false}
+              onRate={setUserRating}
+              onHover={setHoverRating}
+              onReview={setReviewText}
+              onSubmit={submitRating}
             />
           </div>
           <div
+            hidden={activeTab !== "related"}
             id="panel-related"
             role="tabpanel"
-            aria-labelledby="tab-related"
-            hidden={activeTab !== "related"}>
+            aria-labelledby="tab-related">
             <RelatedTab items={related} />
           </div>
         </div>
 
-        {/* Right: access sidebar */}
-        <AccessSidebar
-          content={content}
-          access={access}
-          accessRecord={accessRecord}
-          progressPercent={progressPercent}
-          showBookmarkInput={showBookmarkInput}
-          bookmarkNote={bookmarkNote}
-          onSetShowBookmarkInput={setShowBookmarkInput}
-          onSetBookmarkNote={setBookmarkNote}
-        />
+        {/* ── Right: access / action sidebar ── */}
+        <aside className="space-y-4 lg:sticky lg:top-6">
+          {/* Access card */}
+          <div
+            className="rounded-2xl bg-white border p-5"
+            style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+            {/* Already has access */}
+            {access?.hasAccess ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-green-600" />
+                  <span className="text-[13px] font-semibold text-green-700">
+                    {access.reason === "free"
+                      ? "Free content — no signup needed"
+                      : access.reason === "owned"
+                        ? "You purchased this"
+                        : "Included in your plan"}
+                  </span>
+                </div>
+
+                {/* Download button for non-video/audio */}
+                {content.contentType !== "VIDEO" && content.contentType !== "AUDIO" && (
+                  <a
+                    href={content.fileUrl}
+                    download
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-800 text-white text-[14px] font-semibold hover:bg-green-700 transition-all">
+                    <Download size={15} /> Download
+                  </a>
+                )}
+              </div>
+            ) : (
+              /* Locked — show CTA */
+              <div className="space-y-3">
+                {content.priceKobo ? (
+                  <>
+                    <div className="text-[26px] font-bold text-green-900">
+                      {fmtPrice(content.priceKobo)}
+                    </div>
+                    <p className="text-[11px] text-text-muted -mt-2">One-time · Lifetime access</p>
+                    <button className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-800 text-white text-[14px] font-semibold hover:bg-green-700 transition-all">
+                      <CreditCard size={15} /> Buy Now
+                    </button>
+                  </>
+                ) : tierCfg ? (
+                  <>
+                    <div
+                      className="flex items-center gap-2 p-3 rounded-xl mb-1"
+                      style={{ background: tierCfg.bg }}>
+                      <TierIcon size={15} style={{ color: tierCfg.color }} />
+                      <div>
+                        <div className="text-[13px] font-semibold" style={{ color: tierCfg.color }}>
+                          {tierCfg.label} Plan Required
+                        </div>
+                        <div className="text-[11px] text-text-muted">
+                          Includes all {tierCfg.label} content
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-[14px] hover:opacity-90 transition-all"
+                      style={{ background: tierCfg.color, color: "#fff" }}>
+                      <TierIcon size={15} /> Upgrade to {tierCfg.label}
+                    </button>
+                  </>
+                ) : (
+                  <button className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-800 text-white text-[14px] font-semibold hover:bg-green-700 transition-all">
+                    <Zap size={15} /> Subscribe to Unlock
+                  </button>
+                )}
+
+                <Link
+                  href="/plans"
+                  className="block text-center text-[12px] text-green-700 hover:underline">
+                  View all plans →
+                </Link>
+
+                {/* Preview note */}
+                <p
+                  className="text-center text-[11px] text-text-muted pt-1 border-t"
+                  style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+                  {content.contentType === "VIDEO" || content.contentType === "AUDIO"
+                    ? `Free preview: first ${fmtDuration(content.previewSeconds ?? 90)}`
+                    : `Free preview: first ${content.previewPages ?? 2} page${(content.previewPages ?? 2) > 1 ? "s" : ""}`}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Bookmarks (if unlocked) */}
+          {access?.hasAccess && record?.bookmarks && record.bookmarks.length > 0 && (
+            <div
+              className="rounded-2xl bg-white border p-5"
+              style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+              <h3 className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-3">
+                Bookmarks
+              </h3>
+              <ul className="space-y-2">
+                {record.bookmarks.map((bm, i) => (
+                  <li key={i} className="flex items-start gap-2 text-[12px]">
+                    <Bookmark size={12} className="text-amber-500 mt-0.5 shrink-0" />
+                    <div>
+                      <span className="font-semibold text-green-900">
+                        {content.contentType === "VIDEO" || content.contentType === "AUDIO"
+                          ? fmtDuration(bm.position)
+                          : `Page ${bm.position}`}
+                      </span>
+                      {bm.note && <p className="text-text-muted text-[11px]">{bm.note}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Quick stats */}
+          <div
+            className="rounded-2xl bg-white border p-4"
+            style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Views", value: content.totalViews.toLocaleString() },
+                { label: "Downloads", value: content.totalDownloads.toLocaleString() },
+                { label: "Rating", value: `${content.averageRating.toFixed(1)} / 5` },
+                {
+                  label: "Reviews",
+                  value: (content.ratingCount ?? ratings.length).toLocaleString(),
+                },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-cream rounded-xl p-2.5">
+                  <div className="text-[14px] font-bold text-green-900">{value}</div>
+                  <div className="text-[10px] text-text-muted">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );
