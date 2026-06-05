@@ -1,6 +1,6 @@
 "use client";
 
-import { X, AlertTriangle, Info } from "lucide-react";
+import { X, AlertTriangle, Info, School } from "lucide-react";
 import type { SchoolData, SubscriptionPlan, SchoolType } from "@/types/schoolsTypes";
 import {
   SUBSCRIPTION_PLANS,
@@ -310,6 +310,7 @@ export function ActionModal({
           <div>
             <Label>Founded Year</Label>
             <input
+              title="foundedYear"
               type="number"
               className={inputCls}
               value={editForm.foundedYear}
@@ -414,7 +415,7 @@ export function ActionModal({
           {(Object.keys(SUBSCRIPTION_PLANS) as SubscriptionPlan[]).map((plan) => {
             const cfg = SUBSCRIPTION_PLANS[plan];
             const limits = PLAN_LIMITS[plan];
-            const Icon = cfg.icon;
+            // const Icon = cfg.icon;
             const selected = pendingPlan === plan;
             return (
               <label
@@ -431,7 +432,8 @@ export function ActionModal({
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                   style={{ background: cfg.bg }}>
-                  <Icon size={14} style={{ color: cfg.color }} />
+                  {/* //will change later when we have distinct icons for each plan */}
+                  <School size={14} style={{ color: cfg.color }} />
                 </div>
                 <div className="flex-1">
                   <div className="text-[13px] font-semibold text-green-900">{cfg.label}</div>

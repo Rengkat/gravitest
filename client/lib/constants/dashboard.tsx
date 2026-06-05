@@ -15,8 +15,8 @@ export const NAV_ITEMS = [
   { icon: BarChart3, label: "Performance Analysis", href: "/dashboard/performance" },
   { icon: Bot, label: "AI Tutor", href: "/ai-tutor" },
   { icon: Library, label: "Library", href: "/dashboard/library" },
-  { icon: Users, label: "Tutors", href: "/dashboard/tutors" },
-  { icon: Calendar, label: "Bookings", href: "/dashboard/bookings" },
+  // { icon: Users, label: "Tutors", href: "/dashboard/tutors" },
+  // { icon: Calendar, label: "Bookings", href: "/dashboard/bookings" },
   { icon: Gamepad2, label: "Games", href: "/dashboard/games" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];

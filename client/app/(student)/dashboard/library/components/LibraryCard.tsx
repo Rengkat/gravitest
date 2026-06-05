@@ -85,22 +85,22 @@ export default function LibraryCard({
         <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
           {item.isNew && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-600 text-white">
-              NEW
+              New
             </span>
           )}
           {item.isTrending && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500 text-white flex items-center gap-0.5">
-              <Flame size={9} /> HOT
+              <Flame size={9} /> Hot
             </span>
           )}
           {item.isPremium && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white flex items-center gap-0.5">
-              <Crown size={9} /> {item.price ? formatPrice(item.price) : "PRO"}
+              <Crown size={9} /> {item.price ? formatPrice(item.price) : "Pro"}
             </span>
           )}
           {!item.isPremium && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-600/90 text-white">
-              FREE
+              Free
             </span>
           )}
         </div>

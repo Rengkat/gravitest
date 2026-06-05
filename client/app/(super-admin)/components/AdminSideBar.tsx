@@ -57,16 +57,16 @@ const ADMIN_NAV_ITEMS = [
   //   label: "Subscriptions",
   //   icon: Repeat,
   // },
-  {
-    href: "/admin/tutors",
-    label: "Tutors",
-    icon: GraduationCap,
-  },
-  {
-    href: "/admin/bookings",
-    label: "Bookings",
-    icon: CalendarCheck,
-  },
+  // {
+  //   href: "/admin/tutors",
+  //   label: "Tutors",
+  //   icon: GraduationCap,
+  // },
+  // {
+  //   href: "/admin/bookings",
+  //   label: "Bookings",
+  //   icon: CalendarCheck,
+  // },
   {
     href: "/admin/ai-logs",
     label: "AI Usage Logs",

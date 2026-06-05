@@ -43,7 +43,7 @@ export default function LibraryRow({
           <h3 className="text-[14px] font-bold text-gray-900 truncate">{item.title}</h3>
           {item.isNew && (
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0">
-              NEW
+              New
             </span>
           )}
           {item.isPremium ? (
@@ -52,7 +52,7 @@ export default function LibraryRow({
             </span>
           ) : (
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0">
-              FREE
+              Free
             </span>
           )}
           {item.isPremium && item.previewAvailable && (
