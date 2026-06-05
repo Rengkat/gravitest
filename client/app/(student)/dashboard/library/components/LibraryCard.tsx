@@ -47,7 +47,7 @@ export default function LibraryCard({
   const colors = typeColor(item.type);
 
   const handleCardClick = () => {
-    router.push(`/library/${item.id}?preview=${item.isPremium}`);
+    router.push(`/dashboard/library/${item.id}?preview=${item.isPremium}`);
   };
 
   return (

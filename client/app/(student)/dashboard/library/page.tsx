@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 
 import { ViewMode, LibraryFilters, LibraryItem } from "@/types/library";
@@ -28,6 +29,8 @@ const DEFAULT_FILTERS: LibraryFilters = {
 };
 
 export default function LibraryPage() {
+  const router = useRouter();
+
   // ── Filter state ─────────────────────────────────────────────────────────
   const [filters, setFilters] = useState<LibraryFilters>(DEFAULT_FILTERS);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -243,9 +246,14 @@ export default function LibraryPage() {
           onBuySingle={
             paywallItem.price
               ? () => {
+                  const checkoutParams = new URLSearchParams({
+                    checkout: "single",
+                    itemId: paywallItem.id,
+                    amount: String(paywallItem.price),
+                  });
+
                   setPaywallItem(null);
-                  // TODO: open single-purchase checkout
-                  console.log("Buy single:", paywallItem.id, paywallItem.price);
+                  router.push(`/dashboard/billing?${checkoutParams.toString()}`);
                 }
               : undefined
           }
