@@ -7,7 +7,7 @@ import type {
 } from "./types";
 
 export function getMockContent(id: string): LibraryContent {
-  const n = id.charCodeAt(id.length - 1) % 7;
+  const n = id?.charCodeAt(id.length - 1) % 7;
 
   const shared = {
     id,
@@ -177,7 +177,7 @@ export function getMockContent(id: string): LibraryContent {
 }
 
 export function getMockAccess(id: string): AccessCheckResult {
-  const n = id.charCodeAt(id.length - 1) % 7;
+  const n = id?.charCodeAt(id.length - 1) % 7;
   // 0, 2, 4 = free (full access); rest = no access
   if ([0, 2, 4].includes(n)) return { hasAccess: true, reason: "free" };
   return { hasAccess: false, reason: "no_access" };
