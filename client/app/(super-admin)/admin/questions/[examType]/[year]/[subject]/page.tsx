@@ -46,10 +46,11 @@ import {
   formatNumber,
 } from "@/utils/config";
 
-interface PageProps {
-  params: { examType: string; year: string; subject: string };
+interface paramsProps {
+  examType: string;
+  year: string;
+  subject: string;
 }
-
 // ─── View Modal ──────────────────────────────────────────────────────────────
 
 function ViewModal({
@@ -74,7 +75,10 @@ function ViewModal({
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
           <h3 className="font-serif text-xl text-green-900">Question Details</h3>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+          <button
+            title="close"
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
             <X size={18} className="text-gray-500" />
           </button>
         </div>
@@ -214,7 +218,10 @@ function EditModal({
             <h3 className="font-serif text-xl text-green-900">Edit Question</h3>
             <p className="text-[11px] text-gray-400 font-mono mt-0.5">{question.id}</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+          <button
+            title="close"
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
             <X size={18} className="text-gray-500" />
           </button>
         </div>
@@ -226,6 +233,7 @@ function EditModal({
               Question Text
             </label>
             <textarea
+              title="draft"
               rows={4}
               value={draft.question}
               onChange={(e) => setDraft((d) => ({ ...d, question: e.target.value }))}
@@ -240,6 +248,7 @@ function EditModal({
                 Difficulty
               </label>
               <select
+                title="difficulty"
                 value={draft.difficulty}
                 onChange={(e) =>
                   setDraft((d) => ({ ...d, difficulty: e.target.value as DifficultyLevel }))
@@ -259,6 +268,7 @@ function EditModal({
                 Marks
               </label>
               <input
+                title="marks"
                 type="number"
                 min={1}
                 max={20}
@@ -331,7 +341,7 @@ const FORMAT_TABS: { key: QuestionFormat | "ALL"; label: string }[] = [
 ];
 
 export default function SubjectQuestionsPage() {
-  const { examType, year, subject } = useParams();
+  const { examType, year, subject } = useParams() as unknown as paramsProps;
   // const year = params.year;
   // const subject = decodeURIComponent(params.subject);
 
@@ -578,6 +588,7 @@ export default function SubjectQuestionsPage() {
                   Status
                 </label>
                 <select
+                  title="filter"
                   value={filterStatus}
                   onChange={(e) => {
                     setFilterStatus(e.target.value as QuestionStatus | "");
@@ -660,6 +671,7 @@ export default function SubjectQuestionsPage() {
           <>
             <div className="px-6 py-2 bg-gray-50 border-b border-gray-100 flex items-center gap-3">
               <input
+                title="toggle"
                 type="checkbox"
                 checked={selected.size === questions.length && questions.length > 0}
                 onChange={toggleAll}
@@ -684,6 +696,7 @@ export default function SubjectQuestionsPage() {
                     }`}>
                     <div className="flex items-start gap-4">
                       <input
+                        title="toggle"
                         type="checkbox"
                         checked={selected.has(question.id)}
                         onChange={() => toggleSelect(question.id)}

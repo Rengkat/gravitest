@@ -9,20 +9,13 @@ import { ExamType } from "@/types/adminQuestions";
 import { EXAM_META, getYearMeta, getSubjectMeta } from "@/lib/mock/questionsMock";
 import { EXAM_CONFIG, FORMAT_CONFIG, formatNumber } from "@/utils/config";
 
-interface PageProps {
-  params: { examType: string; year: string };
+interface paramsProps {
+  examType: string;
+  year: string;
 }
 
-/**
- * Page 3 — Year-Subject  /admin/questions/[examType]/[year]
- *
- * What's new at this level:
- *  • Statistics scoped to this exam type + year combination.
- *  • "Browse by Subject" grid — RELOCATED from ExamDrillDown (exam level).
- *    Clicking a subject routes to /admin/questions/[examType]/[year]/[subject].
- */
 export default function YearSubjectPage() {
-  const { examType, year } = useParams();
+  const { examType, year } = useParams() as unknown as paramsProps;
 
   const meta = EXAM_META[examType];
   const cfg = EXAM_CONFIG[examType];
