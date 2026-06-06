@@ -1,16 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ChevronRight, GraduationCap, Briefcase } from "lucide-react";
-import { ExamType, BreadcrumbLevel } from "@/types/adminQuestions";
+import { ExamType } from "@/types/adminQuestions";
 import { EXAM_CATEGORIES, EXAM_META } from "@/lib/mock/questionsMock";
 import { EXAM_CONFIG, FORMAT_CONFIG, formatNumber } from "@/utils/config";
 
-interface ExamCategoryGridProps {
-  onNavigate: (crumb: BreadcrumbLevel) => void;
-}
-
-export default function ExamCategoryGrid({ onNavigate }: ExamCategoryGridProps) {
+/**
+ * ExamCategoryGrid — updated for URL-based routing.
+ *
+ * Changes:
+ *  • `onNavigate` prop REMOVED — navigation is now via Next.js <Link>.
+ *  • "Browse {meta.name} Questions →" button and format buttons both
+ *    link to /admin/questions/[examType].
+ */
+export default function ExamCategoryGrid() {
   const [expandedExam, setExpandedExam] = useState<ExamType | null>(null);
 
   return (
@@ -112,15 +117,15 @@ export default function ExamCategoryGrid({ onNavigate }: ExamCategoryGridProps) 
                         <div className="mx-3 mb-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
                           <p className="text-[12px] text-gray-500 mb-3">{meta.description}</p>
 
-                          {/* Format buttons */}
+                          {/* Format buttons → all link to the exam type page */}
                           <div className="grid grid-cols-2 gap-2 mb-3">
                             {meta.supportedFormats.map((fmt) => {
                               const fmtCfg = FORMAT_CONFIG[fmt];
                               const FmtIcon = fmtCfg.icon;
                               return (
-                                <button
+                                <Link
                                   key={fmt}
-                                  onClick={() => onNavigate({ level: "exam", examType })}
+                                  href={`/admin/questions/${examType}`}
                                   className={`flex items-center gap-2 px-3 py-2 rounded-lg ${fmtCfg.bg} ${fmtCfg.border} border hover:opacity-80 transition-all text-left`}>
                                   <FmtIcon size={13} style={{ color: fmtCfg.color }} />
                                   <span
@@ -128,7 +133,7 @@ export default function ExamCategoryGrid({ onNavigate }: ExamCategoryGridProps) 
                                     style={{ color: fmtCfg.color }}>
                                     {fmtCfg.label}
                                   </span>
-                                </button>
+                                </Link>
                               );
                             })}
                           </div>
@@ -149,11 +154,11 @@ export default function ExamCategoryGrid({ onNavigate }: ExamCategoryGridProps) 
                             ))}
                           </div>
 
-                          <button
-                            onClick={() => onNavigate({ level: "exam", examType })}
-                            className="w-full py-2 rounded-lg bg-green-800 text-white text-[13px] font-semibold hover:bg-green-700 transition-colors">
+                          <Link
+                            href={`/admin/questions/${examType}`}
+                            className="block w-full py-2 rounded-lg bg-green-800 text-white text-[13px] font-semibold hover:bg-green-700 transition-colors text-center">
                             Browse {meta.name} Questions →
-                          </button>
+                          </Link>
                         </div>
                       )}
                     </div>

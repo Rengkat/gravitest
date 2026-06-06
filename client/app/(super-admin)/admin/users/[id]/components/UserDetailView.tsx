@@ -14,7 +14,8 @@ const TABS: { id: DetailTab; label: string }[] = [
   { id: "payments", label: "Payments" },
 ];
 
-export function UserDetailView({ userId }: { userId: string }) {
+export function UserDetailView({ id }: { id: string }) {
+  const userId = id;
   const {
     user,
     activityLog,

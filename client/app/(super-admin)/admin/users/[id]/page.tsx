@@ -9,6 +9,7 @@ export async function generateMetadata({
   return { title: `User ${params.userId} · Gravitas Admin` };
 }
 
-export default function UserDetailPage({ params }: { params: { userId: string } }) {
-  return <UserDetailView userId={params.userId} />;
+export default async function UserDetailPage({ params }: { params: { id: string } }) {
+  const resolvedParams = await params;
+  return <UserDetailView userId={resolvedParams.id} />;
 }

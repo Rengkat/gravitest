@@ -58,6 +58,7 @@ export default function QuestionFiltersBar({
           />
           {filters.searchQuery && (
             <button
+              title="Clear search"
               onClick={() => onFiltersChange({ searchQuery: "" })}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               <X size={14} />
@@ -105,6 +106,7 @@ export default function QuestionFiltersBar({
                   Exam
                 </label>
                 <select
+                  title="exam type"
                   value={filters.examType}
                   onChange={(e) => onFiltersChange({ examType: e.target.value as ExamType | "" })}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] bg-white focus:outline-none focus:border-green-500">
@@ -125,6 +127,7 @@ export default function QuestionFiltersBar({
                   Year
                 </label>
                 <select
+                  title="year"
                   value={filters.year}
                   onChange={(e) => onFiltersChange({ year: e.target.value })}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] bg-white focus:outline-none focus:border-green-500">
@@ -145,6 +148,7 @@ export default function QuestionFiltersBar({
                   Subject
                 </label>
                 <select
+                  title="subject"
                   value={filters.subject}
                   onChange={(e) => onFiltersChange({ subject: e.target.value })}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] bg-white focus:outline-none focus:border-green-500">
@@ -165,6 +169,7 @@ export default function QuestionFiltersBar({
                   Topic
                 </label>
                 <select
+                  title="topic"
                   value={filters.topic}
                   onChange={(e) => onFiltersChange({ topic: e.target.value })}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] bg-white focus:outline-none focus:border-green-500">
@@ -184,6 +189,7 @@ export default function QuestionFiltersBar({
                 Format
               </label>
               <select
+                title="format"
                 value={filters.format}
                 onChange={(e) => onFiltersChange({ format: e.target.value as QuestionFormat | "" })}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] bg-white focus:outline-none focus:border-green-500">
@@ -202,6 +208,7 @@ export default function QuestionFiltersBar({
                 Difficulty
               </label>
               <select
+                title="difficulty"
                 value={filters.difficulty}
                 onChange={(e) =>
                   onFiltersChange({ difficulty: e.target.value as DifficultyLevel | "" })
@@ -222,6 +229,7 @@ export default function QuestionFiltersBar({
                 Status
               </label>
               <select
+                title="status"
                 value={filters.status}
                 onChange={(e) => onFiltersChange({ status: e.target.value as QuestionStatus | "" })}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-[13px] bg-white focus:outline-none focus:border-green-500">
