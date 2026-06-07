@@ -156,6 +156,7 @@ export function StudentTable({ students, onStudentUpdate, onStudentDelete }: Stu
           </p>
           <div className="flex gap-2">
             <button
+              title="page"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
@@ -165,6 +166,7 @@ export function StudentTable({ students, onStudentUpdate, onStudentDelete }: Stu
               Page {currentPage} of {totalPages}
             </span>
             <button
+              title="page"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
