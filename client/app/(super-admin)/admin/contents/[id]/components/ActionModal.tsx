@@ -9,7 +9,7 @@ import {
   SECONDARY_EXAMS,
   PROFESSIONAL_EXAMS,
 } from "@/lib/constants/contents";
-import type { AdminAction, EditForm, AccessForm } from "./useContentDetail";
+import type { AdminAction, EditForm, AccessForm } from "../Usecontentdetail";
 
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
@@ -93,7 +93,8 @@ function Modal({
             title="confirm"
             onClick={onConfirm}
             disabled={confirmDisabled || loading}
-            aria-busy={loading}
+            //TODO: add aria-busy when loading is true, but it doesn't seem to update on click. Need to investigate if this is a React issue or something else
+            // aria-busy={loading}
             className={`flex-1 py-3 rounded-xl font-semibold transition-all text-[14px] disabled:opacity-50 ${danger ? "bg-red-600 text-white hover:bg-red-700" : "bg-green-800 text-white hover:bg-green-700"}`}>
             {loading ? "Processing…" : confirmLabel}
           </button>
@@ -337,8 +338,9 @@ export function ActionModal({
                   title={editForm[key] ? "Yes" : "No"}
                   className={`w-9 h-5 rounded-full transition-colors relative ${editForm[key] ? "bg-green-800" : "bg-gray-200"}`}
                   onClick={() => set(key, !editForm[key])}
-                  role="switch"
-                  aria-checked={editForm[key]}
+                  // role="switch"
+                  //TODO: aria-checked doesn't update on click. Need to investigate if this is a React issue or something else
+                  // aria-checked={editForm[key]}
                   tabIndex={0}
                   onKeyDown={(e) => e.key === " " && set(key, !editForm[key])}>
                   <div

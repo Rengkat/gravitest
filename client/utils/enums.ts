@@ -226,3 +226,88 @@ export enum Subject {
   IQ_TEST = "iq_test",
   APTITUDE_TEST = "aptitude_test",
 }
+
+export enum Gender {
+  MALE = "male",
+  FEMALE = "female",
+  OTHER = "other",
+  PREFER_NOT_TO_SAY = "prefer_not_to_say",
+}
+
+export enum NigerianState {
+  ABIA = "Abia",
+  ADAMAWA = "Adamawa",
+  AKWA_IBOM = "Akwa Ibom",
+  ANAMBRA = "Anambra",
+  BAUCHI = "Bauchi",
+  BAYELSA = "Bayelsa",
+  BENUE = "Benue",
+  BORNO = "Borno",
+  CROSS_RIVER = "Cross River",
+  DELTA = "Delta",
+  EBONYI = "Ebonyi",
+  EDO = "Edo",
+  EKITI = "Ekiti",
+  ENUGU = "Enugu",
+  GOMBE = "Gombe",
+  IMO = "Imo",
+  JIGAWA = "Jigawa",
+  KADUNA = "Kaduna",
+  KANO = "Kano",
+  KATSINA = "Katsina",
+  KEBBI = "Kebbi",
+  KOGI = "Kogi",
+  KWARA = "Kwara",
+  LAGOS = "Lagos",
+  NASARAWA = "Nasarawa",
+  NIGER = "Niger",
+  OGUN = "Ogun",
+  ONDO = "Ondo",
+  OSUN = "Osun",
+  OYO = "Oyo",
+  PLATEAU = "Plateau",
+  RIVERS = "Rivers",
+  SOKOTO = "Sokoto",
+  TARABA = "Taraba",
+  YOBE = "Yobe",
+  ZAMFARA = "Zamfara",
+  FCT_ABUJA = "Federal Capital Territory",
+}
+
+export enum ExamType {
+  JAMB = "jamb",
+  WAEC = "waec",
+  NECO = "neco",
+  NABTEB = "nabteb",
+  BECE = "bece",
+  JUNIOR_NECO = "junior_neco",
+  ICAN = "ican",
+  NMCN = "nmcn",
+  CIPM = "cipm",
+  NIM = "nim",
+  NIESV = "niesv",
+  CIBN = "cibn",
+  NSE = "nse",
+  ICEN = "icen",
+  NIQS = "niqs",
+  ARCON = "arcon",
+  MLSCN = "mlscn",
+  PCN = "pcn",
+  COMMON_ENTRANCE = "common_entrance",
+}
+
+export enum UserRole {
+  STUDENT = "student",
+  PROFESSIONAL_STUDENT = "professional_student",
+  TUTOR = "tutor",
+  CLASS_ADMIN = "class_admin",
+  SCHOOL_ADMIN = "school_admin",
+  SUPER_ADMIN = "super_admin",
+}
+
+export enum DeactivationType {
+  ADMIN_SUSPENSION = "ADMIN_SUSPENSION",
+  SECURITY_LOCK = "SECURITY_LOCK",
+  USER_REQUEST = "USER_REQUEST",
+  UNVERIFIED_EMAIL = "UNVERIFIED_EMAIL",
+}

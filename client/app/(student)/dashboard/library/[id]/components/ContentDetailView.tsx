@@ -239,7 +239,8 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
                 key={tab.id}
                 role="tab"
                 id={`tab-${tab.id}`}
-                aria-selected={activeTab === tab.id}
+                //TODO: aria-selected doesn't update on click. Need to investigate if this is a React issue or something else
+                // aria-selected={activeTab === tab.id}
                 aria-controls={`panel-${tab.id}`}
                 onClick={() => setTab(tab.id)}
                 className={`px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-all whitespace-nowrap ${

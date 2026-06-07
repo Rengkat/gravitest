@@ -66,14 +66,16 @@ export function ContentDetailView({ id }: { id: string }) {
             <div
               className="flex gap-1 border-b mb-5"
               style={{ borderColor: "rgba(30,80,50,0.1)" }}
-              role="tablist"
+              // TODO: add role="tablist" and role="tab" to the buttons, but aria-selected doesn't update on click. Need to investigate if this is a React issue or something else
+              // role="tablist"
               aria-label="Content sections">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
-                  role="tab"
+                  // TODO: aria-selected doesn't update on click. Need to investigate if this is a React issue or something else
+                  // role="tab"
                   id={`tab-${tab.id}`}
-                  aria-selected={activeTab === tab.id}
+                  // aria-selected={activeTab === tab.id}
                   aria-controls={`panel-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-4 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-all ${

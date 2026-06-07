@@ -43,7 +43,7 @@ export function ContentDetailHeader({ item }: Props) {
         </Link>
         <ChevronRight size={12} />
         <Link
-          href={`/admin/content?type=${item.type}`}
+          href={`/admin/contents?type=${item.type}`}
           className="hover:text-green-700 transition-colors">
           {typeCfg.label}
         </Link>
