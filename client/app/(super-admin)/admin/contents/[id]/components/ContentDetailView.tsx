@@ -17,7 +17,8 @@ const TABS: { id: DetailTab; label: string }[] = [
   { id: "activity", label: "Activity" },
 ];
 
-export function ContentDetailView({ contentId }: { contentId: string }) {
+export function ContentDetailView({ id }: { id: string }) {
+  const contentId = id;
   const {
     item,
     loading,

@@ -133,7 +133,7 @@ export function ContentCard({ item, onDelete, onToggleFeatured }: Props) {
         {/* Actions */}
         <div className="flex items-center gap-2">
           <Link
-            href={`/admin/content/${item.id}`}
+            href={`/admin/contents/${item.id}`}
             className="flex-1 py-2 rounded-lg bg-green-800 text-white text-[12px] font-semibold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-1">
             <Eye size={12} /> View
           </Link>

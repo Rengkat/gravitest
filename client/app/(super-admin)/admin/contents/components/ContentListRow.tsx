@@ -116,7 +116,7 @@ export function ContentListRow({ item, isSelected, onToggleSelect, onDelete }: P
       {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
         <Link
-          href={`/admin/content/${item.id}`}
+          href={`/admin/contents/${item.id}`}
           className="p-2 rounded-lg hover:bg-green-50 transition-colors">
           <Eye size={16} className="text-text-muted hover:text-green-600" />
         </Link>
