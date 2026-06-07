@@ -92,7 +92,7 @@ export function StudentActionsMenu({
                 setIsOpen(false);
               }}
               className="w-full flex items-center gap-2 px-4 py-2 text-sm text-yellow-700 hover:bg-yellow-50 transition-colors">
-              <UserX size={14} /> {student.user.isActive ? "Deactivate" : "Reactivate"} Account
+              <UserX size={14} /> {student.user.isActive ? "Deactivate" : "Reactivate"}
             </button>
 
             <button

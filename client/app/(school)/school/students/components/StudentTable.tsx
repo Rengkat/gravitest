@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { StudentActionsMenu } from "./StudentActionsMenu";
 import type { StudentWithUser } from "../types";
 
@@ -68,9 +68,8 @@ export function StudentTable({ students, onStudentUpdate, onStudentDelete }: Stu
               <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">Class</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">Status</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
-                Avg. Score
+                Admission Date
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">Level</th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
                 Last Active
               </th>
@@ -115,21 +114,12 @@ export function StudentTable({ students, onStudentUpdate, onStudentDelete }: Stu
                   {getStatusBadge(student.user.isActive, student.user.isEmailVerified)}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm font-semibold text-green-900">
-                    {student.studentProfile.averageScore.toFixed(1)}%
+                  <div className="flex items-center gap-2">
+                    <Calendar size={14} className="text-text-muted" />
+                    <span className="text-sm text-text-muted">
+                      {formatDate(student.user.createdAt)}
+                    </span>
                   </div>
-                  <div className="w-16 h-1 bg-gray-200 rounded-full mt-1">
-                    <div
-                      className="h-full rounded-full bg-green-600"
-                      style={{ width: `${student.studentProfile.averageScore}%` }}
-                    />
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm font-semibold text-green-900">
-                    Lvl {student.studentProfile.level}
-                  </div>
-                  <p className="text-xs text-text-muted">{student.studentProfile.levelTitle}</p>
                 </td>
                 <td className="px-6 py-4 text-sm text-text-muted">
                   {formatDate(student.user.lastLoginAt)}
@@ -156,7 +146,7 @@ export function StudentTable({ students, onStudentUpdate, onStudentDelete }: Stu
           </p>
           <div className="flex gap-2">
             <button
-              title="page"
+              title="Previous Page"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
@@ -166,7 +156,7 @@ export function StudentTable({ students, onStudentUpdate, onStudentDelete }: Stu
               Page {currentPage} of {totalPages}
             </span>
             <button
-              title="page"
+              title="Next Page"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
               className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
