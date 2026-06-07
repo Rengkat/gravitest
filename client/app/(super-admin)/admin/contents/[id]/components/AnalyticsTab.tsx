@@ -2,7 +2,7 @@
 
 import { Eye, Download, Star, TrendingUp, Users, BarChart3, Activity, Award } from "lucide-react";
 import type { ContentItem } from "@/types/admin-contents";
-import { MiniStatCard } from "../SharedPrimitives";
+import { MiniStatCard } from "../../../contents/components/SharedPrimitives";
 
 function StatRow({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
