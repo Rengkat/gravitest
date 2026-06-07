@@ -98,16 +98,11 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
       <nav
         className="flex items-center gap-1.5 text-[12px] text-text-muted mb-5"
         aria-label="Breadcrumb">
-        <Link href="/library" className="hover:text-green-700 transition-colors">
+        <Link href="/dashboard/library" className="hover:text-green-700 transition-colors">
           Library
         </Link>
         <ChevronRight size={12} />
-        <Link
-          href={`/library?type=${content.contentType}`}
-          className="hover:text-green-700 transition-colors">
-          {typeCfg.label}
-        </Link>
-        <ChevronRight size={12} />
+
         <span className="text-green-900 font-medium truncate max-w-[220px]">{content.title}</span>
       </nav>
 
@@ -309,7 +304,7 @@ export function ContentDetailView({ contentId }: { contentId: string }) {
                   <CheckCircle2 size={16} className="text-green-600" />
                   <span className="text-[13px] font-semibold text-green-700">
                     {access.reason === "free"
-                      ? "Free content — no signup needed"
+                      ? "Free content"
                       : access.reason === "owned"
                         ? "You purchased this"
                         : "Included in your plan"}

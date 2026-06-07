@@ -494,7 +494,7 @@ export default function SubjectQuestionsPage() {
               className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-gray-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
             />
             {searchQuery && (
-              <button
+              <button title='query'
                 onClick={() => setSearchQuery("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 <X size={14} />
@@ -545,7 +545,7 @@ export default function SubjectQuestionsPage() {
                 <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                   Format
                 </label>
-                <select
+                <select title='format'
                   value={filterFormat}
                   onChange={(e) => {
                     setFilterFormat(e.target.value as QuestionFormat | "");
@@ -566,7 +566,7 @@ export default function SubjectQuestionsPage() {
                 <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                   Difficulty
                 </label>
-                <select
+                <select title='difficulty'
                   value={filterDifficulty}
                   onChange={(e) => {
                     setFilterDifficulty(e.target.value as DifficultyLevel | "");

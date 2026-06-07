@@ -330,7 +330,7 @@ export function RelatedTab({ items }: { items: RelatedItem[] }) {
         return (
           <Link
             key={item.id}
-            href={`/library/${item.id}`}
+            href={`/dashboard/library/${item.id}`}
             className="flex gap-3 p-3 rounded-2xl bg-white border hover:border-green-300 hover:shadow-sm transition-all"
             style={{ borderColor: "rgba(30,80,50,0.08)" }}>
             {/* Thumb */}
