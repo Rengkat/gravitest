@@ -90,7 +90,10 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
         <div className="relative bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold text-green-900">Edit Student Profile</h2>
-            <button onClick={onClose} className="p-1 rounded-lg hover:bg-cream transition-colors">
+            <button
+              title="close"
+              onClick={onClose}
+              className="p-1 rounded-lg hover:bg-cream transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -106,6 +109,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       First Name *
                     </label>
                     <input
+                      title="first name"
                       type="text"
                       required
                       value={formData.firstName}
@@ -119,6 +123,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Middle Name
                     </label>
                     <input
+                      title="middle name"
                       type="text"
                       value={formData.middleName || ""}
                       onChange={(e) => handleChange("middleName", e.target.value || null)}
@@ -131,6 +136,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Last Name *
                     </label>
                     <input
+                      title="last name"
                       type="text"
                       required
                       value={formData.lastName}
@@ -142,6 +148,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                     <input
+                      title="email"
                       type="email"
                       required
                       value={formData.email}
@@ -155,6 +162,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Phone Number
                     </label>
                     <input
+                      title="phone number"
                       type="tel"
                       value={formData.phoneNumber || ""}
                       onChange={(e) => handleChange("phoneNumber", e.target.value || null)}
@@ -167,6 +175,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Date of Birth
                     </label>
                     <input
+                      title="date of birth"
                       type="date"
                       value={
                         formData.dateOfBirth
@@ -186,6 +195,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                     <select
+                      title="gender"
                       value={formData.gender || ""}
                       onChange={(e) => handleChange("gender", e.target.value || null)}
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500">
@@ -203,6 +213,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       State of Residence
                     </label>
                     <select
+                      title="state of residence"
                       value={formData.stateOfResidence || ""}
                       onChange={(e) => handleChange("stateOfResidence", e.target.value || null)}
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500">
@@ -218,6 +229,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">LGA</label>
                     <input
+                      title="lga"
                       type="text"
                       value={formData.lga || ""}
                       onChange={(e) => handleChange("lga", e.target.value || null)}
@@ -228,6 +240,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
                     <textarea
+                      title="bio"
                       rows={3}
                       value={formData.bio || ""}
                       onChange={(e) => handleChange("bio", e.target.value || null)}
@@ -246,6 +259,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Current School
                     </label>
                     <input
+                      title="current school"
                       type="text"
                       value={formData.currentSchool || ""}
                       onChange={(e) => handleChange("currentSchool", e.target.value || null)}
@@ -258,6 +272,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Current Class
                     </label>
                     <input
+                      title="current class"
                       type="text"
                       value={formData.currentClass || ""}
                       onChange={(e) => handleChange("currentClass", e.target.value || null)}
@@ -270,6 +285,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Admission Number
                     </label>
                     <input
+                      title="admission number"
                       type="text"
                       value={formData.admissionNo || ""}
                       onChange={(e) => handleChange("admissionNo", e.target.value || null)}
@@ -282,6 +298,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Graduation Year
                     </label>
                     <input
+                      title="graduation year"
                       type="number"
                       value={formData.graduationYear || ""}
                       onChange={(e) =>
@@ -333,6 +350,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Exam Date
                     </label>
                     <input
+                      title="exam date"
                       type="date"
                       value={
                         formData.examDate
@@ -351,6 +369,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Target Score
                     </label>
                     <input
+                      title="target score"
                       type="number"
                       value={formData.targetScore || ""}
                       onChange={(e) =>
@@ -368,6 +387,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Target University
                     </label>
                     <input
+                      title="target university"
                       type="text"
                       value={formData.targetUniversity || ""}
                       onChange={(e) => handleChange("targetUniversity", e.target.value || null)}
@@ -380,6 +400,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                       Target Course
                     </label>
                     <input
+                      title="target course"
                       type="text"
                       value={formData.targetCourse || ""}
                       onChange={(e) => handleChange("targetCourse", e.target.value || null)}
@@ -439,6 +460,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                     </label>
                     <input
                       type="text"
+                      title="parent name"
                       value={formData.parentName || ""}
                       onChange={(e) => handleChange("parentName", e.target.value || null)}
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
@@ -451,6 +473,7 @@ export function EditStudentModal({ isOpen, onClose, student, onSuccess }: EditSt
                     </label>
                     <input
                       type="tel"
+                      title="parent phone"
                       value={formData.parentPhone || ""}
                       onChange={(e) => handleChange("parentPhone", e.target.value || null)}
                       className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
