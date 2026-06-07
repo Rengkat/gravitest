@@ -1,4 +1,3 @@
-// src/app/school/students/components/DeleteStudentModal.tsx
 "use client";
 
 import { useState } from "react";
@@ -12,12 +11,7 @@ interface DeleteStudentModalProps {
   onSuccess: () => void;
 }
 
-export function DeleteStudentModal({
-  isOpen,
-  onClose,
-  student,
-  onSuccess,
-}: DeleteStudentModalProps) {
+function DeleteStudentModal({ isOpen, onClose, student, onSuccess }: DeleteStudentModalProps) {
   const [confirmText, setConfirmText] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
@@ -133,3 +127,4 @@ export function DeleteStudentModal({
     </div>
   );
 }
+export default DeleteStudentModal;

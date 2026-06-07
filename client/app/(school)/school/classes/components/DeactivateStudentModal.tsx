@@ -1,4 +1,3 @@
-// src/app/school/students/components/DeactivateStudentModal.tsx
 "use client";
 
 import { useState } from "react";
@@ -21,7 +20,7 @@ export function DeactivateStudentModal({
 }: DeactivateStudentModalProps) {
   const [reason, setReason] = useState("");
   const [deactivationType, setDeactivationType] = useState<DeactivationType>(
-    DeactivationType.ADMIN,
+    DeactivationType.ADMIN_SUSPENSION,
   );
   const [loading, setLoading] = useState(false);
 

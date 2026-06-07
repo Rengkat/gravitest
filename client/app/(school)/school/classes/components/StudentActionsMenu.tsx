@@ -1,4 +1,3 @@
-// src/app/school/students/components/StudentActionsMenu.tsx
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -7,7 +6,7 @@ import { MoreVertical, Eye, Edit, UserX, Trash2, Shield, Award } from "lucide-re
 import type { StudentWithUser } from "../types";
 import { EditStudentModal } from "./EditStudentModal";
 import { DeactivateStudentModal } from "./DeactivateStudentModal";
-import { DeleteStudentModal } from "./DeleteStudentModal";
+import DeleteStudentModal from "./DeleteStudentModal";
 
 interface StudentActionsMenuProps {
   student: StudentWithUser;
@@ -63,6 +62,7 @@ export function StudentActionsMenu({
     <>
       <div className="relative" ref={menuRef}>
         <button
+          title="open"
           onClick={() => setIsOpen(!isOpen)}
           className="p-1.5 rounded-lg hover:bg-cream transition-colors">
           <MoreVertical size={16} className="text-text-muted" />
