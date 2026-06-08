@@ -1,4 +1,3 @@
-// src/app/school/classes/components/ClassGrid.tsx
 "use client";
 
 import Link from "next/link";
