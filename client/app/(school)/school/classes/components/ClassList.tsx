@@ -1,4 +1,3 @@
-// src/app/school/classes/components/ClassList.tsx
 "use client";
 
 import Link from "next/link";

@@ -1,78 +1,95 @@
+// src/app/school/classes/page.tsx
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import {
-  Users,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Plus,
-  MoreVertical,
-  Mail,
-  Phone,
-  BookOpen,
-  BarChart3,
-  UserPlus,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Search, Filter, Download, LayoutGrid, List } from "lucide-react";
+import { ClassStatsCards } from "./components/ClassStatsCards";
+import { ClassGrid } from "./components/ClassGrid";
+import { ClassList } from "./components/ClassList";
+import { CreateClassModal } from "./components/CreateClassModal";
+import { MOCK_CLASSES } from "./mock";
+import type { SchoolClass, ClassFilters } from "./types";
 
-// Mock student data
-const STUDENTS = [
-  {
-    id: 1,
-    name: "Adebayo Oluwaseun",
-    email: "oluwaseun@example.com",
-    phone: "08012345678",
-    class: "SS3 Science",
-    performance: 94.5,
-    status: "active",
-    lastActive: "2024-01-15",
-  },
-  {
-    id: 2,
-    name: "Okafor Chukwudi",
-    email: "chukwudi@example.com",
-    phone: "08023456789",
-    class: "SS3 Science",
-    performance: 92.3,
-    status: "active",
-    lastActive: "2024-01-14",
-  },
-  {
-    id: 3,
-    name: "Eze Chioma",
-    email: "chioma@example.com",
-    phone: "08034567890",
-    class: "SS3 Art",
-    performance: 91.8,
-    status: "active",
-    lastActive: "2024-01-15",
-  },
-  // Add more students as needed
-];
-
-const CLASSES = ["All Classes", "SS3 Science", "SS3 Art", "SS3 Commercial", "SS2 Science"];
-
-export default function StudentsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedClass, setSelectedClass] = useState("All Classes");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const filteredStudents = STUDENTS.filter((student) => {
-    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesClass = selectedClass === "All Classes" || student.class === selectedClass;
-    return matchesSearch && matchesClass;
+export default function ClassesPage() {
+  const [classes, setClasses] = useState<SchoolClass[]>(MOCK_CLASSES);
+  const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState<ClassFilters>({
+    isActive: undefined,
+    sortBy: "name",
+    sortOrder: "ASC",
   });
 
-  const paginatedStudents = filteredStudents.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  // Calculate stats
+  const stats = {
+    totalClasses: classes.length,
+    activeClasses: classes.filter((c) => c.isActive).length,
+    inactiveClasses: classes.filter((c) => !c.isActive).length,
+    totalStudents: classes.reduce((sum, c) => sum + c.totalStudents, 0),
+    totalExams: classes.reduce((sum, c) => sum + c.totalExamsCreated, 0),
+    averageStudentsPerClass:
+      Math.round(classes.reduce((sum, c) => sum + c.totalStudents, 0) / classes.length) || 0,
+  };
+
+  // Filter and sort classes
+  const filteredClasses = classes
+    .filter((classItem) => {
+      const matchesSearch =
+        classItem.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (classItem.arm && classItem.arm.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        classItem.classCode.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        filters.isActive === undefined ? true : classItem.isActive === filters.isActive;
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      const sortField = filters.sortBy || "name";
+      const sortOrder = filters.sortOrder === "DESC" ? -1 : 1;
+
+      switch (sortField) {
+        case "name":
+          return sortOrder * a.name.localeCompare(b.name);
+        case "totalStudents":
+          return sortOrder * (a.totalStudents - b.totalStudents);
+        case "totalExamsCreated":
+          return sortOrder * (a.totalExamsCreated - b.totalExamsCreated);
+        case "createdAt":
+          return sortOrder * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        default:
+          return sortOrder * a.name.localeCompare(b.name);
+      }
+    });
+
+  const handleCreateClass = async (classData: any) => {
+    // Replace with actual API call
+    const newClass: SchoolClass = {
+      id: `class-${Date.now()}`,
+      schoolId: "school-001",
+      ...classData,
+      classCode: `KCL-${classData.name.toUpperCase().replace(/\s/g, "")}-${classData.year || 2025}`,
+      pinHash: "hashed_temp",
+      pinLastChangedAt: new Date(),
+      totalStudents: 0,
+      totalExamsCreated: 0,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setClasses((prev) => [newClass, ...prev]);
+    setShowCreateModal(false);
+  };
+
+  const handleClassUpdate = (updatedClass: SchoolClass) => {
+    setClasses((prev) => prev.map((c) => (c.id === updatedClass.id ? updatedClass : c)));
+  };
+
+  const handleClassDelete = (classId: string) => {
+    setClasses((prev) => prev.filter((c) => c.id !== classId));
+  };
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -80,198 +97,108 @@ export default function StudentsPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="font-serif text-3xl text-green-900 mb-2">Students</h1>
-            <p className="text-text-muted">Manage all students in your school</p>
+            <h1 className="font-serif text-3xl text-green-900 mb-2">Classes</h1>
+            <p className="text-text-muted">
+              Manage all classes, view performance, and configure settings
+            </p>
           </div>
-          <div className="flex gap-3">
-            <Link
-              href="/school/students/bulk-upload"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-cream transition-all text-[14px] font-medium">
-              <Upload size={16} /> Bulk Upload
-            </Link>
-            <Link
-              href="/school/students/add"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-800 text-white hover:bg-green-700 transition-all text-[14px] font-medium">
-              <Plus size={16} /> Add Student
-            </Link>
-          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-800 text-white hover:bg-green-700 transition-all">
+            <Plus size={16} /> Create Class
+          </button>
         </div>
       </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div
-          className="p-4 rounded-2xl bg-white border"
-          style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <Users size={16} className="text-green-600" />
-            <span className="text-[12px] text-text-muted">Total Students</span>
-          </div>
-          <div className="text-[22px] font-bold text-green-900">{STUDENTS.length}</div>
-        </div>
-        <div
-          className="p-4 rounded-2xl bg-white border"
-          style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <BookOpen size={16} className="text-blue-600" />
-            <span className="text-[12px] text-text-muted">Active Classes</span>
-          </div>
-          <div className="text-[22px] font-bold text-green-900">12</div>
-        </div>
-        <div
-          className="p-4 rounded-2xl bg-white border"
-          style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart3 size={16} className="text-orange-600" />
-            <span className="text-[12px] text-text-muted">Avg Performance</span>
-          </div>
-          <div className="text-[22px] font-bold text-green-900">78.5%</div>
-        </div>
-        <div
-          className="p-4 rounded-2xl bg-white border"
-          style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <UserPlus size={16} className="text-purple-600" />
-            <span className="text-[12px] text-text-muted">New This Month</span>
-          </div>
-          <div className="text-[22px] font-bold text-green-900">45</div>
-        </div>
-      </div>
+      {/* Stats Cards */}
+      <ClassStatsCards stats={stats} />
 
-      {/* Search and Filter Bar */}
-      <div
-        className="bg-white rounded-2xl border p-4 mb-6"
-        style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1 relative">
+      {/* Filters and View Toggle */}
+      <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex-1 min-w-[200px]">
+          <div className="relative">
             <Search
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted"
               size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted"
             />
             <input
               type="text"
-              placeholder="Search by name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-green-500/30"
+              placeholder="Search by class name, arm, or code..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-green-500"
             />
           </div>
-          <div className="flex gap-2">
-            <select
-              title="select class"
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              className="px-4 py-3 rounded-xl border border-gray-200 text-[14px] focus:outline-none focus:ring-2 focus:ring-green-500/30">
-              {CLASSES.map((cls) => (
-                <option key={cls} value={cls}>
-                  {cls}
-                </option>
-              ))}
-            </select>
-            <button className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 hover:bg-cream transition-all">
-              <Filter size={16} /> Filter
+        </div>
+
+        <div className="flex gap-3">
+          <select
+            value={
+              filters.isActive === undefined ? "all" : filters.isActive ? "active" : "inactive"
+            }
+            onChange={(e) => {
+              const value = e.target.value;
+              setFilters((prev) => ({
+                ...prev,
+                isActive: value === "all" ? undefined : value === "active",
+              }));
+            }}
+            className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-green-500">
+            <option value="all">All Classes</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+
+          <select
+            value={filters.sortBy}
+            onChange={(e) => setFilters((prev) => ({ ...prev, sortBy: e.target.value as any }))}
+            className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-green-500">
+            <option value="name">Sort by Name</option>
+            <option value="totalStudents">Sort by Students</option>
+            <option value="totalExamsCreated">Sort by Exams</option>
+            <option value="createdAt">Sort by Date</option>
+          </select>
+
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-cream transition-all">
+            <Filter size={16} /> More Filters
+          </button>
+
+          <div className="flex rounded-xl border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 px-3 transition-all ${viewMode === "grid" ? "bg-green-800 text-white" : "bg-white text-text-muted hover:bg-cream"}`}>
+              <LayoutGrid size={18} />
             </button>
-            <button className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 hover:bg-cream transition-all">
-              <Download size={16} /> Export
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 px-3 transition-all ${viewMode === "list" ? "bg-green-800 text-white" : "bg-white text-text-muted hover:bg-cream"}`}>
+              <List size={18} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Students Table */}
-      <div
-        className="bg-white rounded-2xl border overflow-hidden"
-        style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-cream">
-              <tr>
-                <th className="px-6 py-4 text-left text-[12px] font-semibold text-green-900">
-                  Name
-                </th>
-                <th className="px-6 py-4 text-left text-[12px] font-semibold text-green-900">
-                  Email
-                </th>
-                <th className="px-6 py-4 text-left text-[12px] font-semibold text-green-900">
-                  Phone
-                </th>
-                <th className="px-6 py-4 text-left text-[12px] font-semibold text-green-900">
-                  Class
-                </th>
-                <th className="px-6 py-4 text-center text-[12px] font-semibold text-green-900">
-                  Performance
-                </th>
-                <th className="px-6 py-4 text-center text-[12px] font-semibold text-green-900">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-center text-[12px] font-semibold text-green-900">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedStudents.map((student) => (
-                <tr key={student.id} className="border-t hover:bg-cream/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="text-[14px] font-semibold text-green-900">{student.name}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1 text-[13px] text-text-muted">
-                      <Mail size={12} /> {student.email}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1 text-[13px] text-text-muted">
-                      <Phone size={12} /> {student.phone}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[13px] text-text-muted">{student.class}</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-800 text-[12px] font-semibold">
-                      {student.performance}%
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-800 text-[11px]">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      title="vertical"
-                      className="p-1.5 rounded-lg hover:bg-cream transition-colors">
-                      <MoreVertical size={16} className="text-text-muted" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Classes Display */}
+      {viewMode === "grid" ? (
+        <ClassGrid
+          classes={filteredClasses}
+          onClassUpdate={handleClassUpdate}
+          onClassDelete={handleClassDelete}
+        />
+      ) : (
+        <ClassList
+          classes={filteredClasses}
+          onClassUpdate={handleClassUpdate}
+          onClassDelete={handleClassDelete}
+        />
+      )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 py-4 border-t">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg border disabled:opacity-50">
-              <ChevronLeft size={16} />
-            </button>
-            <span className="text-[13px] text-text-muted">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border disabled:opacity-50">
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Create Class Modal */}
+      <CreateClassModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={handleCreateClass}
+      />
     </div>
   );
 }
