@@ -1,6 +1,6 @@
 "use client";
 
-import { GraduationCap, BookOpen, Target, Calendar, Building2, Users } from "lucide-react";
+import { GraduationCap, BookOpen, Target, Calendar, Building2, Users, Phone } from "lucide-react";
 import type { StudentWithUser } from "../../types";
 
 interface StudentAcademicInfoProps {

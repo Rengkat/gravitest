@@ -103,7 +103,7 @@ export function StudentGamification({ student }: StudentGamificationProps) {
           <div className="flex items-center justify-between mt-1">
             <span className="text-sm text-text-muted">Last Study Date</span>
             <span className="text-sm">
-              {new Date(studentProfile.lastStudyDate).toLocaleDateString()}
+              {new Date(studentProfile?.lastStudyDate).toLocaleDateString()}
             </span>
           </div>
         )}
