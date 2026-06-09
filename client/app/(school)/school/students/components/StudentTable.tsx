@@ -1,4 +1,3 @@
-// src/app/school/students/components/StudentTable.tsx
 "use client";
 
 import { useState } from "react";

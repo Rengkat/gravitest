@@ -1,119 +1,123 @@
 "use client";
 
-import { Activity, Calendar, Award, TrendingUp, User, Settings, LogIn, Edit } from "lucide-react";
+import {
+  Activity,
+  Calendar,
+  Award,
+  TrendingUp,
+  User,
+  Settings,
+  LogIn,
+  Edit,
+  Flame,
+} from "lucide-react";
 import type { ActivityLog } from "../../types";
 
-interface ActivityTimelineProps {
-  activities: ActivityLog[];
+function relativeTime(date: Date): string {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days = Math.floor(diff / 86_400_000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return new Date(date).toLocaleDateString("en-NG", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-export function ActivityTimeline({ activities }: ActivityTimelineProps) {
-  const getActivityIcon = (action: string) => {
-    switch (action) {
-      case "login":
-        return <LogIn size={16} className="text-blue-600" />;
-      case "exam_completed":
-        return <TrendingUp size={16} className="text-green-600" />;
-      case "profile_update":
-        return <User size={16} className="text-purple-600" />;
-      case "badge_earned":
-        return <Award size={16} className="text-yellow-600" />;
-      case "streak_milestone":
-        return <Flame size={16} className="text-orange-600" />;
-      case "settings_change":
-        return <Settings size={16} className="text-gray-600" />;
-      case "edit":
-        return <Edit size={16} className="text-indigo-600" />;
-      default:
-        return <Activity size={16} className="text-text-muted" />;
-    }
-  };
+const ACTION_META: Record<string, { icon: any; color: string; bg: string }> = {
+  login: { icon: LogIn, color: "#3b82f6", bg: "#3b82f615" },
+  exam_completed: { icon: TrendingUp, color: "#10b981", bg: "#10b98115" },
+  profile_update: { icon: User, color: "#8b5cf6", bg: "#8b5cf615" },
+  badge_earned: { icon: Award, color: "#f59e0b", bg: "#f59e0b15" },
+  streak_milestone: { icon: Flame, color: "#f97316", bg: "#f9731615" },
+  settings_change: { icon: Settings, color: "#6b7280", bg: "#6b728015" },
+  edit: { icon: Edit, color: "#6366f1", bg: "#6366f115" },
+};
 
-  const getActivityColor = (action: string) => {
-    switch (action) {
-      case "login":
-        return "bg-blue-50";
-      case "exam_completed":
-        return "bg-green-50";
-      case "profile_update":
-        return "bg-purple-50";
-      case "badge_earned":
-        return "bg-yellow-50";
-      case "streak_milestone":
-        return "bg-orange-50";
-      default:
-        return "bg-gray-50";
-    }
-  };
+const DEFAULT_META = { icon: Activity, color: "#6b7280", bg: "#6b728015" };
 
-  const formatRelativeTime = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - new Date(date).getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins} minutes ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return new Date(date).toLocaleDateString("en-NG", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
+export function ActivityTimeline({ activities }: { activities: ActivityLog[] }) {
   if (activities.length === 0) {
     return (
       <div
-        className="p-6 rounded-2xl bg-white border text-center"
+        className="rounded-2xl bg-white border p-12 text-center"
         style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-        <Activity size={48} className="mx-auto text-text-muted mb-3" />
-        <p className="text-text-muted">No activity records found</p>
+        <Activity size={40} className="mx-auto text-text-muted mb-3 opacity-30" />
+        <p className="text-[14px] font-semibold text-green-900 mb-1">No activity yet</p>
+        <p className="text-[12px] text-text-muted">
+          Activity records will appear here as the student uses the platform.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="p-6 rounded-2xl bg-white border" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-      <h2 className="text-lg font-semibold text-green-900 mb-4">Recent Activity</h2>
-      <div className="space-y-4">
-        {activities.map((activity) => (
-          <div key={activity.id} className="flex gap-3">
-            <div
-              className={`w-8 h-8 rounded-full ${getActivityColor(activity.action)} flex items-center justify-center flex-shrink-0`}>
-              {getActivityIcon(activity.action)}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between flex-wrap gap-2">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                  <p className="text-xs text-text-muted mt-1">
-                    By: {activity.performedBy === "system" ? "System" : activity.performedBy}
-                  </p>
+    <div className="rounded-2xl bg-white border p-5" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+      <h2 className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-5">
+        Recent Activity
+      </h2>
+
+      <ol aria-label="Student activity timeline">
+        {activities.map((entry, i) => {
+          const meta = ACTION_META[entry.action] ?? DEFAULT_META;
+          const Icon = meta.icon;
+          const isLast = i === activities.length - 1;
+
+          return (
+            <li key={entry.id} className="flex gap-3">
+              {/* Spine */}
+              <div className="flex flex-col items-center">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 border-white shadow-sm"
+                  style={{ background: meta.bg }}>
+                  <Icon size={14} style={{ color: meta.color }} />
                 </div>
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <Calendar size={12} />
-                  <span title={new Date(activity.performedAt).toLocaleString()}>
-                    {formatRelativeTime(activity.performedAt)}
-                  </span>
-                </div>
+                {!isLast && <div className="w-px flex-1 bg-gray-100 my-1" />}
               </div>
-              {activity.metadata && (
-                <div className="mt-2 text-xs text-text-muted bg-cream p-2 rounded-lg">
-                  {Object.entries(activity.metadata).map(([key, value]) => (
-                    <span key={key} className="mr-3">
-                      <strong>{key}:</strong> {String(value)}
-                    </span>
-                  ))}
+
+              {/* Content */}
+              <div className="pb-4 flex-1 min-w-0 pt-1">
+                <div className="flex items-start justify-between gap-2 flex-wrap">
+                  <div>
+                    <p className="text-[13px] font-medium text-green-900 leading-snug">
+                      {entry.description}
+                    </p>
+                    <p className="text-[11px] text-text-muted mt-0.5">
+                      By: {entry.performedBy === "system" ? "System" : entry.performedBy}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 text-[11px] text-text-muted shrink-0">
+                    <Calendar size={10} />
+                    <time
+                      dateTime={new Date(entry.performedAt).toISOString()}
+                      title={new Date(entry.performedAt).toLocaleString("en-NG")}>
+                      {relativeTime(entry.performedAt)}
+                    </time>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+
+                {entry.metadata && Object.keys(entry.metadata).length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    {Object.entries(entry.metadata).map(([k, v]) => (
+                      <span
+                        key={k}
+                        className="px-2 py-0.5 rounded-lg bg-cream text-[10px] text-text-muted">
+                        <strong>{k}:</strong> {String(v)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
