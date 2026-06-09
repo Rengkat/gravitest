@@ -100,7 +100,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-serif text-lg text-green-900">Edit Student</h2>
           <button
-            title="edit"
             onClick={() => setEditing(false)}
             className="p-1.5 rounded-lg hover:bg-cream transition-colors">
             <X size={17} />
@@ -115,7 +114,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>First Name *</Label>
                 <input
-                  title="firstName"
                   type="text"
                   className={inputCls}
                   value={form.firstName}
@@ -126,7 +124,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>Middle Name</Label>
                 <input
-                  title="middleName"
                   type="text"
                   className={inputCls}
                   value={form.middleName ?? ""}
@@ -136,7 +133,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>Last Name *</Label>
                 <input
-                  title="lastName"
                   type="text"
                   className={inputCls}
                   value={form.lastName}
@@ -147,7 +143,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>Email *</Label>
                 <input
-                  title="email"
                   type="email"
                   className={inputCls}
                   value={form.email}
@@ -168,7 +163,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>Date of Birth</Label>
                 <input
-                  title="dateOfBirth"
                   type="date"
                   className={inputCls}
                   value={
@@ -214,7 +208,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>Admission No.</Label>
                 <input
-                  title="admissionNo"
                   type="text"
                   className={inputCls}
                   value={form.admissionNo ?? ""}
@@ -224,7 +217,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>Class</Label>
                 <input
-                  title="currentClass"
                   type="text"
                   className={inputCls}
                   value={form.currentClass ?? ""}
@@ -272,7 +264,6 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
               <div>
                 <Label>Parent Name</Label>
                 <input
-                  title="parentName"
                   type="text"
                   className={inputCls}
                   value={form.parentName ?? ""}
@@ -409,7 +400,7 @@ export function StudentDetailView({ student, onStudentUpdate }: Props) {
                 <span className="text-[13px] font-medium text-green-900">{label}</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
-                <input title="check" type="checkbox" className="sr-only peer" defaultChecked />
+                <input type="checkbox" className="sr-only peer" defaultChecked />
                 <div className="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600" />
               </label>
             </div>
