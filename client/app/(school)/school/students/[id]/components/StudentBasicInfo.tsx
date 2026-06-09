@@ -1,4 +1,3 @@
-// src/app/school/students/[id]/components/StudentBasicInfo.tsx
 "use client";
 
 import {
@@ -79,7 +78,7 @@ export function StudentBasicInfo({ student }: Props) {
           }
         />
         {user.phoneNumber && <InfoRow icon={Phone} label="Phone" value={user.phoneNumber} />}
-        {user?.dateOfBirth && (
+        {user.dateOfBirth && (
           <InfoRow icon={Calendar} label="Date of Birth" value={fmtDate(user.dateOfBirth)} />
         )}
         {user.gender && (
