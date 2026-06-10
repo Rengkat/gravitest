@@ -70,20 +70,20 @@ export function PaymentDetailsCard({ transaction }: Props) {
             </div>
           </div>
 
-          {transaction.settlementReference && (
+          {transaction?.settlementReference && (
             <div>
               <div className="text-[12px] text-text-muted mb-1">Settlement Reference</div>
               <div className="p-3 rounded-xl bg-gray-50">
-                <code className="text-[12px] font-mono">{transaction.settlementReference}</code>
+                <code className="text-[12px] font-mono">{transaction?.settlementReference}</code>
               </div>
             </div>
           )}
 
-          {transaction.settlementDate && (
+          {transaction?.settlementDate && (
             <div>
               <div className="text-[12px] text-text-muted mb-1">Settlement Date</div>
               <div className="p-3 rounded-xl bg-gray-50">
-                <span className="text-[13px]">{transaction.settlementDate}</span>
+                <span className="text-[13px]">{transaction?.settlementDate}</span>
               </div>
             </div>
           )}
