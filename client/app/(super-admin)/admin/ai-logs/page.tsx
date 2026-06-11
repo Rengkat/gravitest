@@ -10,18 +10,16 @@ import {
   Settings,
   MessageSquare,
   BarChart3,
-  TrendingUp,
+  FileText,
+  Clock,
+  Target,
   AlertTriangle,
   RefreshCw,
-  Zap,
-  Clock,
-  CheckCircle,
-  XCircle,
+  TrendingUp,
   Users,
-  Sparkles,
-  Target,
-  FileText,
-  GraduationCap,
+  Zap,
+  CheckCircle,
+  Bot,
 } from "lucide-react";
 import { useAIData } from "./useAIData";
 import { AICostAnalytics } from "./components/AICostAnalytics";
@@ -31,7 +29,7 @@ import { FlaggedConversations } from "./components/FlaggedConversations";
 import { SystemPromptEditor } from "./components/SystemPromptEditor";
 import { RateLimitControls } from "./components/RateLimitControls";
 import { AIConfigPanel } from "./components/AIConfigPanel";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { LoadingSpinner } from "./components/LoadingSinner";
 
 type Tab =
   | "overview"
@@ -74,47 +72,47 @@ export default function AIManagementPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="font-serif text-3xl text-green-900">AI Tutor Management</h1>
-              <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[12px] font-semibold">
-                v2.0
-              </span>
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-800 to-green-600 flex items-center justify-center shadow-sm">
+              <Bot size={20} className="text-white" />
             </div>
-            <p className="text-text-muted">
-              Monitor AI usage, manage costs, configure models, and ensure content quality.
-            </p>
+            <div>
+              <h1 className="font-serif text-2xl text-green-900">AI Tutor Management</h1>
+              <p className="text-text-muted text-[13px] -mt-0.5">
+                Monitor usage, manage costs, and ensure quality
+              </p>
+            </div>
           </div>
-          <button
-            onClick={refreshData}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 hover:bg-cream transition-all">
-            <RefreshCw size={16} className="text-text-muted" />
-            <span className="text-[14px] font-medium text-text-muted">Refresh</span>
-          </button>
         </div>
+        <button
+          onClick={refreshData}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 hover:bg-cream transition-all text-[13px]">
+          <RefreshCw size={14} className="text-text-muted" />
+          <span className="text-text-muted">Refresh</span>
+        </button>
+      </div>
 
-        {/* Tabs */}
-        <div
-          className="flex items-center gap-1 mt-6 border-b"
-          style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2.5 text-[13px] font-medium transition-all flex items-center gap-2 border-b-2 ${
-                activeTab === tab.id
-                  ? "border-green-800 text-green-900"
-                  : "border-transparent text-text-muted hover:text-green-700"
-              }`}>
-              <tab.icon size={14} style={{ color: activeTab === tab.id ? tab.color : undefined }} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Tabs */}
+      <div
+        className="flex items-center gap-1 border-b overflow-x-auto pb-0"
+        style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-3 py-2 text-[12px] font-medium transition-all flex items-center gap-1.5 whitespace-nowrap border-b-2 ${
+              activeTab === tab.id
+                ? "border-green-800 text-green-900"
+                : "border-transparent text-text-muted hover:text-green-700"
+            }`}>
+            <tab.icon size={13} style={{ color: activeTab === tab.id ? tab.color : undefined }} />
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Tab Content */}
@@ -123,9 +121,11 @@ export default function AIManagementPage() {
           <OverviewTab stats={stats} costStats={costStats} performanceStats={performanceStats} />
         )}
 
-        {activeTab === "cost" && <AICostAnalytics stats={costStats} />}
+        {activeTab === "cost" && costStats && <AICostAnalytics stats={costStats} />}
 
-        {activeTab === "performance" && <AIPerformanceMonitor stats={performanceStats} />}
+        {activeTab === "performance" && performanceStats && (
+          <AIPerformanceMonitor stats={performanceStats} />
+        )}
 
         {activeTab === "models" && <AIModelSelector onUpdate={updateModelConfig} />}
 
@@ -135,8 +135,8 @@ export default function AIManagementPage() {
 
         {activeTab === "limits" && <RateLimitControls onUpdate={updateRateLimits} />}
 
-        {activeTab === "config" && (
-          <AIConfigPanel features={stats?.features} onToggle={toggleFeature} />
+        {activeTab === "config" && stats && (
+          <AIConfigPanel features={stats.features} onToggle={toggleFeature} />
         )}
       </div>
     </div>
@@ -148,7 +148,7 @@ function OverviewTab({ stats, costStats, performanceStats }: any) {
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <MetricCard
           icon={MessageSquare}
           label="Total Sessions"
@@ -193,30 +193,24 @@ function OverviewTab({ stats, costStats, performanceStats }: any) {
           value={stats?.flaggedCount || "0"}
           color="#ef4444"
         />
-        <MetricCard
-          icon={Brain}
-          label="Active Models"
-          value={stats?.activeModels || 0}
-          color="#6b7280"
-        />
       </div>
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div
-          className="bg-white rounded-2xl border p-6"
+          className="bg-white rounded-xl border p-5"
           style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-          <h3 className="font-serif text-lg text-green-900 mb-4">Cost by Feature</h3>
+          <h3 className="font-serif text-base text-green-900 mb-4">Cost by Feature</h3>
           <div className="space-y-3">
-            {costStats?.costByFeature?.map((item: any) => (
+            {costStats?.costByFeature?.slice(0, 5).map((item: any) => (
               <div key={item.feature} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                  <Sparkles size={14} className="text-green-800" />
+                <div className="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
+                  <Zap size={12} className="text-green-800" />
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between mb-1">
-                    <span className="text-[13px] text-green-900">{item.feature}</span>
-                    <span className="text-[13px] font-bold text-green-900">
+                    <span className="text-[12px] text-green-900">{item.feature}</span>
+                    <span className="text-[12px] font-bold text-green-900">
                       ${item.cost.toFixed(2)}
                     </span>
                   </div>
@@ -227,28 +221,28 @@ function OverviewTab({ stats, costStats, performanceStats }: any) {
                     />
                   </div>
                 </div>
-                <span className="text-[11px] text-text-muted">{item.percentage}%</span>
+                <span className="text-[10px] text-text-muted">{item.percentage}%</span>
               </div>
             ))}
           </div>
         </div>
 
         <div
-          className="bg-white rounded-2xl border p-6"
+          className="bg-white rounded-xl border p-5"
           style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-          <h3 className="font-serif text-lg text-green-900 mb-4">Top AI Features</h3>
+          <h3 className="font-serif text-base text-green-900 mb-4">Top AI Features</h3>
           <div className="space-y-3">
             {stats?.featureUsage?.slice(0, 5).map((feature: any, i: number) => (
               <div key={feature.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[12px] font-bold text-green-900 w-6">{i + 1}</span>
-                  <span className="text-[13px] text-green-900">{feature.name}</span>
+                  <span className="text-[11px] font-bold text-green-900 w-5">{i + 1}</span>
+                  <span className="text-[12px] text-green-900">{feature.name}</span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-[12px] text-text-muted">
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-text-muted">
                     {feature.count.toLocaleString()} req
                   </span>
-                  <span className="text-[13px] font-bold text-green-900">
+                  <span className="text-[12px] font-bold text-green-900">
                     ${feature.cost?.toFixed(2)}
                   </span>
                 </div>
@@ -260,30 +254,30 @@ function OverviewTab({ stats, costStats, performanceStats }: any) {
 
       {/* Recent Activity */}
       <div
-        className="bg-white rounded-2xl border p-6"
+        className="bg-white rounded-xl border p-5"
         style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-        <h3 className="font-serif text-lg text-green-900 mb-4">Recent AI Activity</h3>
+        <h3 className="font-serif text-base text-green-900 mb-4">Recent AI Activity</h3>
         <div className="space-y-3">
-          {stats?.recentActivity?.map((activity: any) => (
+          {stats?.recentActivity?.slice(0, 5).map((activity: any) => (
             <div
               key={activity.id}
-              className="flex items-center gap-3 p-3 rounded-xl hover:bg-cream/20 transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                <MessageSquare size={14} className="text-blue-600" />
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-cream/20 transition-colors">
+              <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+                <MessageSquare size={12} className="text-blue-600" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-semibold text-green-900">
+                  <span className="text-[12px] font-semibold text-green-900">
                     {activity.userName}
                   </span>
-                  <span className="text-[11px] text-text-muted">•</span>
-                  <span className="text-[11px] text-text-muted">{activity.feature}</span>
+                  <span className="text-[10px] text-text-muted">•</span>
+                  <span className="text-[10px] text-text-muted">{activity.feature}</span>
                 </div>
-                <div className="text-[11px] text-text-muted truncate">{activity.preview}</div>
+                <div className="text-[10px] text-text-muted truncate">{activity.preview}</div>
               </div>
               <div className="text-right">
-                <div className="text-[11px] text-text-muted">{activity.time}</div>
-                <div className="text-[10px] text-green-700 font-mono">
+                <div className="text-[10px] text-text-muted">{activity.time}</div>
+                <div className="text-[9px] text-green-700 font-mono">
                   ${activity.cost?.toFixed(4)}
                 </div>
               </div>
@@ -297,22 +291,20 @@ function OverviewTab({ stats, costStats, performanceStats }: any) {
 
 function MetricCard({ icon: Icon, label, value, color, trend, sub }: any) {
   return (
-    <div
-      className="p-3 rounded-2xl bg-white border transition-all"
-      style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+    <div className="p-3 rounded-xl bg-white border" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
       <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center mb-2"
+        className="w-7 h-7 rounded-lg flex items-center justify-center mb-2"
         style={{ background: `${color}15` }}>
-        <Icon size={14} style={{ color }} />
+        <Icon size={13} style={{ color }} />
       </div>
-      <div className="text-lg font-bold text-green-900">{value}</div>
-      <div className="text-[11px] text-text-muted">{label}</div>
+      <div className="text-base font-bold text-green-900">{value}</div>
+      <div className="text-[10px] text-text-muted">{label}</div>
       {trend && (
-        <div className="text-[10px] text-green-600 mt-1 flex items-center gap-0.5">
-          <TrendingUp size={10} /> +{trend}%
+        <div className="text-[9px] text-green-600 mt-1 flex items-center gap-0.5">
+          <TrendingUp size={8} /> +{trend}%
         </div>
       )}
-      {sub && <div className="text-[9px] text-text-muted mt-0.5">{sub}</div>}
+      {sub && <div className="text-[8px] text-text-muted mt-0.5">{sub}</div>}
     </div>
   );
 }

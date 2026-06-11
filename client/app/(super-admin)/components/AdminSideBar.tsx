@@ -1,3 +1,5 @@
+// app/components/AdminSideBar.tsx
+import { useState, useEffect } from "react";
 import GravitasLogoMark from "@/lib/components/gravitas-logo";
 import {
   LayoutDashboard,
@@ -16,11 +18,35 @@ import {
   CalendarCheck,
   Shield,
   Gamepad2,
+  ChevronDown,
+  ChevronRight,
+  BarChart3,
+  Activity,
+  MessageSquare,
+  DollarSign,
+  Target,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const ADMIN_NAV_ITEMS = [
+type NavItem = {
+  href?: string;
+  label: string;
+  icon: any;
+  exact?: boolean;
+  isDropdown?: boolean;
+  isExpanded?: boolean;
+  children?: {
+    href: string;
+    label: string;
+    icon: any;
+    badge?: number;
+  }[];
+};
+
+const ADMIN_NAV_ITEMS: NavItem[] = [
   {
     href: "/admin",
     label: "Platform Overview",
@@ -52,25 +78,48 @@ const ADMIN_NAV_ITEMS = [
     label: "Transactions",
     icon: CreditCard,
   },
-  // {
-  //   href: "/admin/subscriptions",
-  //   label: "Subscriptions",
-  //   icon: Repeat,
-  // },
-  // {
-  //   href: "/admin/tutors",
-  //   label: "Tutors",
-  //   icon: GraduationCap,
-  // },
-  // {
-  //   href: "/admin/bookings",
-  //   label: "Bookings",
-  //   icon: CalendarCheck,
-  // },
   {
-    href: "/admin/ai-logs",
-    label: "AI Usage Logs",
+    label: "AI Logs",
     icon: Bot,
+    isDropdown: true,
+    children: [
+      {
+        href: "/admin/ai-logs",
+        label: "Overview",
+        icon: BarChart3,
+      },
+      {
+        href: "/admin/ai-logs/conversations",
+        label: "Conversations",
+        icon: MessageSquare,
+        badge: 234,
+      },
+      {
+        href: "/admin/ai-logs/cost",
+        label: "Cost Analytics",
+        icon: DollarSign,
+      },
+      {
+        href: "/admin/ai-logs/performance",
+        label: "Performance",
+        icon: Activity,
+      },
+      {
+        href: "/admin/ai-logs/scoring",
+        label: "AI Scoring",
+        icon: Target,
+      },
+      {
+        href: "/admin/ai-logs/prompts",
+        label: "System Prompts",
+        icon: Sparkles,
+      },
+      {
+        href: "/admin/ai-logs/limits",
+        label: "Rate Limits",
+        icon: Clock,
+      },
+    ],
   },
   {
     href: "/admin/games",
@@ -91,6 +140,39 @@ type AdminSideBarProps = {
 
 const AdminSideBar = ({ sidebarOpen, closeSidebar }: AdminSideBarProps) => {
   const pathname = usePathname();
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(["AI Tutor"]);
+
+  // Load expanded state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("adminSidebarExpanded");
+    if (saved) {
+      try {
+        setExpandedDropdowns(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse saved sidebar state");
+      }
+    }
+  }, []);
+
+  // Save expanded state to localStorage
+  useEffect(() => {
+    localStorage.setItem("adminSidebarExpanded", JSON.stringify(expandedDropdowns));
+  }, [expandedDropdowns]);
+
+  const toggleDropdown = (label: string) => {
+    setExpandedDropdowns((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+    );
+  };
+
+  const isActive = (href: string) => {
+    if (href === "/admin") return pathname === href;
+    return pathname?.startsWith(href);
+  };
+
+  const isChildActive = (children: { href: string }[]) => {
+    return children?.some((child) => isActive(child.href));
+  };
 
   return (
     <aside
@@ -116,15 +198,75 @@ const AdminSideBar = ({ sidebarOpen, closeSidebar }: AdminSideBarProps) => {
       {/* Navigation */}
       <nav className="p-4 space-y-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 200px)" }}>
         {ADMIN_NAV_ITEMS.map((item) => {
-          const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
           const Icon = item.icon;
+
+          if (item.isDropdown) {
+            const isExpanded = expandedDropdowns.includes(item.label);
+            const hasActiveChild = isChildActive(item.children || []);
+
+            return (
+              <div key={item.label}>
+                <button
+                  onClick={() => toggleDropdown(item.label)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
+                    hasActiveChild
+                      ? "bg-green-800 text-white"
+                      : "text-text-muted hover:bg-green-500/5 hover:text-green-800"
+                  }`}>
+                  <div className="flex items-center gap-3">
+                    <Icon size={18} strokeWidth={1.8} />
+                    <span className="text-[14px] font-medium">{item.label}</span>
+                  </div>
+                  {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+
+                {isExpanded && (
+                  <div className="ml-6 mt-1 space-y-1 border-l-2 border-green-100 pl-3">
+                    {item.children?.map((child) => {
+                      const ChildIcon = child.icon;
+                      const active = isActive(child.href);
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={closeSidebar}
+                          className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all text-[13px] ${
+                            active
+                              ? "bg-green-800 text-white"
+                              : "text-text-muted hover:bg-green-500/5 hover:text-green-800"
+                          }`}>
+                          <div className="flex items-center gap-2">
+                            <ChildIcon size={14} />
+                            <span>{child.label}</span>
+                          </div>
+                          {child.badge && (
+                            <span
+                              className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                                active ? "bg-white/20 text-white" : "bg-red-100 text-red-600"
+                              }`}>
+                              {child.badge}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          const active = item.exact
+            ? pathname === item.href
+            : pathname?.startsWith(item.href || "");
+
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={item.href || "#"}
               onClick={closeSidebar}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
+                active
                   ? "bg-green-800 text-white"
                   : "text-text-muted hover:bg-green-500/5 hover:text-green-800"
               }`}>
