@@ -12,7 +12,7 @@ import {
   Filter,
   X,
 } from "lucide-react";
-import { Transaction, TransactionStatus } from "@/types/billing";
+import { TransactionStatus } from "@/types/billing";
 import {
   MOCK_TRANSACTIONS,
   TX_STATUS_CONFIG,

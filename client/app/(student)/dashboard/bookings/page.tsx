@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { BOOKINGS } from "@/lib/mock/bookings";
-import { Booking, BookingFilters, BookingStatus, BookingType } from "@/types/bookings";
+import { Booking, BookingFilters } from "@/types/bookings";
 import { applyBookingFilters } from "@/lib/constants/bookings";
 
 import BookingsHero from "./components/BookingsHero";

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CreditCard, Plus, Trash2, Check, X, Shield, Loader2, Lock } from "lucide-react";
 import { SavedCard } from "@/types/billing";
-import { MOCK_CARDS, BRAND_CONFIG, formatCurrency } from "@/lib/constants/billing";
+import { MOCK_CARDS, BRAND_CONFIG } from "@/lib/constants/billing";
 
 export default function PaymentMethods() {
   const [cards, setCards] = useState<SavedCard[]>(MOCK_CARDS);

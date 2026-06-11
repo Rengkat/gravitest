@@ -1,17 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Crown,
-  Zap,
-  CheckCircle,
-  Calendar,
-  X,
-  Loader2,
-  AlertTriangle,
-  ArrowUpRight,
-} from "lucide-react";
-import { CURRENT_PLAN, PLANS, formatDate, formatCurrency } from "@/lib/constants/billing";
+import { Crown, Zap, X, Loader2, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { CURRENT_PLAN, formatDate, formatCurrency } from "@/lib/constants/billing";
 
 interface CurrentPlanCardProps {
   onUpgrade: () => void;
