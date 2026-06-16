@@ -24,11 +24,11 @@ import {
 } from "lucide-react";
 import { PROFESSIONAL_EXAMS, SECONDARY_EXAMS, SUBJECTS, TOPICS } from "@/lib/constants/practice";
 import { ExamCategory, PracticeConfig, QuestionType } from "@/types/practice";
-import ExamCard from "./ExamCard";
-import ProfCard from "./ProfileCard";
-import SubjectSelector from "./SubjectSelector";
-import SummaryPanel from "./SummaryPanel";
-import StepIndicator from "./StepIndicator";
+import ExamCard from "../ExamCard";
+import ProfCard from "../ProfileCard";
+import SubjectSelector from "../SubjectSelector";
+import SummaryPanel from "../SummaryPanel";
+import StepIndicator from "../StepIndicator";
 
 const YEARS = Array.from({ length: 11 }, (_, i) => (2024 - i).toString());
 const QUESTION_COUNTS = [10, 20, 30, 40, 50, 60];
