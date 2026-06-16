@@ -1,4 +1,3 @@
-// app/dashboard/games/word-connect/page.tsx
 "use client";
 
 import { useState } from "react";

@@ -18,7 +18,7 @@ export const GAMES: Game[] = [
     difficulty: "Intermediate",
     category: "Quiz",
     tags: ["Quiz", "Trivia", "Prize", "Lifelines"],
-    path: "/games/who-wants-to-be-scholar",
+    path: "/dashboard/games/who-wants-tobe-a-scholar",
     isPopular: true,
     isFeatured: false,
     achievements: 12,
@@ -43,7 +43,7 @@ export const GAMES: Game[] = [
     difficulty: "Advanced",
     category: "History",
     tags: ["History", "Decisions", "Nigeria", "Strategy"],
-    path: "/games/nigerian-trail",
+    path: "/dashboard/games/nigerian-trail",
     isPopular: true,
     isFeatured: true,
     achievements: 15,
@@ -68,7 +68,7 @@ export const GAMES: Game[] = [
     difficulty: "Intermediate",
     category: "Geography",
     tags: ["Geography", "Deduction", "Timer", "Clues"],
-    path: "/games/where-is-madam-karmen",
+    path: "/dashboard/games/madam-karmen",
     isNew: true,
     achievements: 10,
     xpReward: 400,
@@ -91,7 +91,7 @@ export const GAMES: Game[] = [
     difficulty: "Beginner",
     category: "Word",
     tags: ["Word", "Vocabulary", "Puzzle", "Spelling"],
-    path: "/games/word-connect",
+    path: "/dashboard/games/word-connect",
     isPopular: true,
     achievements: 8,
     xpReward: 200,
@@ -115,7 +115,7 @@ export const GAMES: Game[] = [
     difficulty: "Advanced",
     category: "Logic",
     tags: ["Logic", "Puzzle", "Deduction", "Culture"],
-    path: "/games/zombie-logic",
+    path: "/dashboard/games/zombie-logic",
     achievements: 18,
     xpReward: 900,
     completionRate: 41,
@@ -137,7 +137,7 @@ export const GAMES: Game[] = [
     difficulty: "Beginner",
     category: "Math",
     tags: ["Math", "Algebra", "Equations", "Escape"],
-    path: "/games/algebra-heist",
+    path: "/dashboard/games/algebra-heist",
     isPopular: true,
     achievements: 7,
     xpReward: 300,
@@ -147,39 +147,107 @@ export const GAMES: Game[] = [
 ];
 
 export const LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, username: "ScholarKing01",  avatar: "SK", score: 47800, game: "Who Wants to Be a Scholar?", badge: "👑", },
-  { rank: 2, username: "HistoryBuff_NG", avatar: "HB", score: 39200, game: "The Nigerian Trail",          badge: "🏆", },
-  { rank: 3, username: "GeoMasterX",     avatar: "GM", score: 34500, game: "Where Is Madam Karmen?",      badge: "🥉", },
-  { rank: 4, username: "LogicLord99",    avatar: "LL", score: 29100, game: "Zombie Logic",                badge: "⭐", },
-  { rank: 5, username: "AlgebraAce",     avatar: "AA", score: 25600, game: "Biodun's Algebra Heist",      badge: "🎯", },
-  { rank: 156, username: "You",          avatar: "ME", score: 12450, game: "Word Connect",                badge: "🔤", isCurrentUser: true },
+  {
+    rank: 1,
+    username: "ScholarKing01",
+    avatar: "SK",
+    score: 47800,
+    game: "Who Wants to Be a Scholar?",
+    badge: "👑",
+  },
+  {
+    rank: 2,
+    username: "HistoryBuff_NG",
+    avatar: "HB",
+    score: 39200,
+    game: "The Nigerian Trail",
+    badge: "🏆",
+  },
+  {
+    rank: 3,
+    username: "GeoMasterX",
+    avatar: "GM",
+    score: 34500,
+    game: "Where Is Madam Karmen?",
+    badge: "🥉",
+  },
+  {
+    rank: 4,
+    username: "LogicLord99",
+    avatar: "LL",
+    score: 29100,
+    game: "Zombie Logic",
+    badge: "⭐",
+  },
+  {
+    rank: 5,
+    username: "AlgebraAce",
+    avatar: "AA",
+    score: 25600,
+    game: "Biodun's Algebra Heist",
+    badge: "🎯",
+  },
+  {
+    rank: 156,
+    username: "You",
+    avatar: "ME",
+    score: 12450,
+    game: "Word Connect",
+    badge: "🔤",
+    isCurrentUser: true,
+  },
 ];
 
 export const PLAYER_STATS: PlayerStats = {
-  totalXP:              4820,
-  level:                12,
-  gamesPlayed:          34,
+  totalXP: 4820,
+  level: 12,
+  gamesPlayed: 34,
   achievementsUnlocked: 23,
-  currentStreak:        5,
-  rank:                 156,
+  currentStreak: 5,
+  rank: 156,
 };
 
-export const CATEGORIES: (string)[] = [
-  "All", "Quiz", "History", "Geography", "Word", "Logic", "Math", "Strategy",
+export const CATEGORIES: string[] = [
+  "All",
+  "Quiz",
+  "History",
+  "Geography",
+  "Word",
+  "Logic",
+  "Math",
+  "Strategy",
 ];
 
-export const DIFFICULTIES: (string)[] = [
-  "All", "Beginner", "Intermediate", "Advanced", "Expert",
-];
+export const DIFFICULTIES: string[] = ["All", "Beginner", "Intermediate", "Advanced", "Expert"];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 export function getDifficultyConfig(difficulty: Difficulty) {
   const map = {
-    Beginner:     { label: "Beginner",     color: "text-emerald-400", bg: "bg-emerald-400/10 border border-emerald-400/20", dot: "bg-emerald-400" },
-    Intermediate: { label: "Intermediate", color: "text-amber-400",   bg: "bg-amber-400/10 border border-amber-400/20",   dot: "bg-amber-400" },
-    Advanced:     { label: "Advanced",     color: "text-orange-400",  bg: "bg-orange-400/10 border border-orange-400/20",  dot: "bg-orange-400" },
-    Expert:       { label: "Expert",       color: "text-red-400",     bg: "bg-red-400/10 border border-red-400/20",        dot: "bg-red-400" },
+    Beginner: {
+      label: "Beginner",
+      color: "text-emerald-400",
+      bg: "bg-emerald-400/10 border border-emerald-400/20",
+      dot: "bg-emerald-400",
+    },
+    Intermediate: {
+      label: "Intermediate",
+      color: "text-amber-400",
+      bg: "bg-amber-400/10 border border-amber-400/20",
+      dot: "bg-amber-400",
+    },
+    Advanced: {
+      label: "Advanced",
+      color: "text-orange-400",
+      bg: "bg-orange-400/10 border border-orange-400/20",
+      dot: "bg-orange-400",
+    },
+    Expert: {
+      label: "Expert",
+      color: "text-red-400",
+      bg: "bg-red-400/10 border border-red-400/20",
+      dot: "bg-red-400",
+    },
   };
   return map[difficulty] ?? map.Beginner;
 }

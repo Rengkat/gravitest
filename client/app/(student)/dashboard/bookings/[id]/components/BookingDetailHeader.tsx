@@ -2,8 +2,12 @@ import Link from "next/link";
 import { ChevronLeft, Download, Share2 } from "lucide-react";
 import { Booking } from "@/types/bookings";
 import {
-  STATUS_COLORS, STATUS_ICONS, STATUS_LABEL, TYPE_COLORS,
-  formatPrice, formatDate, getInitials,
+  STATUS_COLORS,
+  STATUS_ICONS,
+  STATUS_LABEL,
+  TYPE_COLORS,
+  formatPrice,
+  getInitials,
 } from "@/lib/constants/bookings";
 import { Star } from "lucide-react";
 
@@ -13,7 +17,11 @@ interface BookingDetailHeaderProps {
   onShare: () => void;
 }
 
-export default function BookingDetailHeader({ booking, onDownload, onShare }: BookingDetailHeaderProps) {
+export default function BookingDetailHeader({
+  booking,
+  onDownload,
+  onShare,
+}: BookingDetailHeaderProps) {
   const StatusIcon = STATUS_ICONS[booking.status];
   const isPhysical = booking.type === "physical";
 
@@ -27,8 +35,7 @@ export default function BookingDetailHeader({ booking, onDownload, onShare }: Bo
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/bookings"
-            className="inline-flex items-center gap-1.5 text-green-700 hover:text-green-800 text-[14px] font-medium transition-colors"
-          >
+            className="inline-flex items-center gap-1.5 text-green-700 hover:text-green-800 text-[14px] font-medium transition-colors">
             <ChevronLeft size={18} />
             Back to Bookings
           </Link>
@@ -36,14 +43,12 @@ export default function BookingDetailHeader({ booking, onDownload, onShare }: Bo
             <button
               onClick={onShare}
               className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-green-700 hover:border-green-300 transition-colors"
-              title="Share"
-            >
+              title="Share">
               <Share2 size={16} />
             </button>
             <button
               onClick={onDownload}
-              className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-[13px] font-medium flex items-center gap-1.5"
-            >
+              className="px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-[13px] font-medium flex items-center gap-1.5">
               <Download size={15} />
               Invoice
             </button>
@@ -67,11 +72,13 @@ export default function BookingDetailHeader({ booking, onDownload, onShare }: Bo
               {booking.subject} — {booking.topic}
             </p>
             <div className="flex flex-wrap gap-2">
-              <span className={`px-3 py-1 rounded-full text-[12px] font-semibold border flex items-center gap-1.5 ${STATUS_COLORS[booking.status]}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-[12px] font-semibold border flex items-center gap-1.5 ${STATUS_COLORS[booking.status]}`}>
                 <StatusIcon size={12} />
                 {STATUS_LABEL[booking.status]}
               </span>
-              <span className={`px-3 py-1 rounded-full text-[12px] font-semibold border ${TYPE_COLORS[booking.type]}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-[12px] font-semibold border ${TYPE_COLORS[booking.type]}`}>
                 {isPhysical ? "In-Person Session" : "Online Session"}
               </span>
               {booking.invoiceId && (

@@ -12,7 +12,6 @@ import {
   User,
   Tag,
   Calendar,
-  Lock,
   Crown,
   CreditCard,
   Zap,
@@ -21,7 +20,7 @@ import {
 } from "lucide-react";
 import { useContentDetail, type ContentTab } from "../useContentDetail";
 import { Player } from "./Player";
-import { AboutTab, RatingsTab, RelatedTab } from "./TabPanels";
+import { AboutTab, RatingsTab } from "./TabPanels";
 import {
   CONTENT_CFG,
   SUBJECT_CFG,
@@ -32,6 +31,7 @@ import {
   fmtSize,
   fmtPrice,
 } from "../config";
+import { RelatedTab } from "./RelatedTab";
 
 const TABS: { id: ContentTab; label: string }[] = [
   { id: "about", label: "About" },
