@@ -1,5 +1,4 @@
 import { PERFORMANCE_DATA } from "@/lib/mock/performance";
-import React from "react";
 
 const PerformanceDot = ({}) => {
   return (
