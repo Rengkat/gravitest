@@ -31,6 +31,7 @@ export interface Notification {
   actionUrl: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
+  updatedAt: string;
   readAt: string | null;
 }
 
