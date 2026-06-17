@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  Star,
-  BookOpen,
-  School,
-  Trophy,
-  Clock,
-  Zap,
-  Users,
-  CheckCircle2,
-  AlertCircle,
-  MapPin,
-} from "lucide-react";
+import { Star, BookOpen, School, Trophy, Clock, Zap, Users, CheckCircle2 } from "lucide-react";
 import type { User } from "../types";
 import { Badge } from "./Primitives";
 

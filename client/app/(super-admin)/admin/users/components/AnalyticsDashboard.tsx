@@ -5,14 +5,10 @@ import {
   GraduationCap,
   BookOpen,
   School,
-  ShieldCheck,
   UserCheck,
   Clock,
   DollarSign,
   Star,
-  TrendingUp,
-  Building2,
-  Hash,
 } from "lucide-react";
 import type { UserStats } from "../types";
 import { ROLE_CONFIG, STATUS_CONFIG, SUBSCRIPTION_CONFIG } from "../constants";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, UserCheck, UserX, Trash2, Download, AlertCircle, ShieldOff } from "lucide-react";
+import { Check, X, UserCheck, UserX, Trash2, Download, ShieldOff } from "lucide-react";
 import type { UserStatus, UserRole, AccountType, SubscriptionTier } from "../types";
 import { ROLE_CONFIG, SUBSCRIPTION_CONFIG } from "../constants";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, FilterX, RefreshCw } from "lucide-react";
+import { Search, Filter, FilterX } from "lucide-react";
 import type {
   UserFilters,
   UserRole,

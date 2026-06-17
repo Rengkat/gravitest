@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, Edit, Trash2, MoreVertical, BadgeCheck } from "lucide-react";
+import { Eye, Edit, Trash2, BadgeCheck } from "lucide-react";
 import type { User, UserStatus } from "../types";
-import { ROLE_CONFIG, STATUS_CONFIG, SUBSCRIPTION_CONFIG, ACCOUNT_TYPE_CONFIG } from "../constants";
+import { ROLE_CONFIG, STATUS_CONFIG, SUBSCRIPTION_CONFIG } from "../constants";
 import { Avatar, Badge } from "./Primitives";
 import { RoleProfilePanel } from "./RoleProfilePanel";
 
