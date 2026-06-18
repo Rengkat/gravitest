@@ -11,5 +11,5 @@ export async function generateMetadata({
 
 export default async function UserDetailPage({ params }: { params: { id: string } }) {
   const resolvedParams = await params;
-  return <UserDetailView userId={resolvedParams.id} />;
+  return <UserDetailView id={resolvedParams.id} />;
 }
