@@ -112,9 +112,9 @@ export function UserGridCard({ user, onDelete, onStatusChange }: Props) {
             className="flex-1 py-2 rounded-lg bg-green-800 text-white text-[12px] font-semibold text-center hover:bg-green-700 transition-all flex items-center justify-center gap-1">
             <Eye size={12} /> View Profile
           </Link>
-          <button title="edit" className="p-2 rounded-lg hover:bg-blue-50 transition-colors">
+          {/* <button title="edit" className="p-2 rounded-lg hover:bg-blue-50 transition-colors">
             <Edit size={14} className="text-text-muted hover:text-blue-600" />
-          </button>
+          </button> */}
           <button
             title="delete"
             onClick={() => onDelete(user.id)}

@@ -126,9 +126,9 @@ export function UserTableRow({
           className="p-2 rounded-lg hover:bg-green-50 transition-colors">
           <Eye size={16} className="text-text-muted hover:text-green-600" />
         </Link>
-        <button title="edit" className="p-2 rounded-lg hover:bg-blue-50 transition-colors">
+        {/* <button title="edit" className="p-2 rounded-lg hover:bg-blue-50 transition-colors">
           <Edit size={16} className="text-text-muted hover:text-blue-600" />
-        </button>
+        </button> */}
         <button
           title="delete"
           onClick={() => onDelete(user.id)}
