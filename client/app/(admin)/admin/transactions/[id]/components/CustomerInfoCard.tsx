@@ -17,10 +17,10 @@ export function CustomerInfoCard({ transaction }: Props) {
       <h3 className="font-serif text-lg text-green-900 mb-4">Customer Information</h3>
 
       <div className="space-y-4">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-cream/50">
-          <div className="w-12 h-12 rounded-full bg-green-800 text-white flex items-center justify-center font-bold text-lg">
+        <div className="flex items-center gap-3 p-3 rounded-full bg-cream/50">
+          {/* <div className="w-12 h-12 rounded-full bg-green-800 text-white flex items-center justify-center font-bold text-lg">
             {transaction.userName.charAt(0)}
-          </div>
+          </div> */}
           <div className="flex-1">
             <div className="font-semibold text-green-900">{transaction.userName}</div>
             <div className="text-[12px] text-text-muted">{transaction.userEmail}</div>

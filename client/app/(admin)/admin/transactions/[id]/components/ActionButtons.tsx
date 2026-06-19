@@ -60,7 +60,7 @@ export function ActionButtons({
           onClick={onRetryWebhook}
           disabled={processingAction}
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-text-muted hover:bg-cream transition-colors text-[13px] font-semibold">
-          <RefreshCw size={14} />
+          {/* <RefreshCw size={14} /> */}
           Retry Webhook
         </button>
 
@@ -68,12 +68,12 @@ export function ActionButtons({
           onClick={onSendReceipt}
           disabled={processingAction}
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-text-muted hover:bg-cream transition-colors text-[13px] font-semibold">
-          <Mail size={14} />
+          {/* <Mail size={14} /> */}
           Send Receipt
         </button>
 
         <button className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-text-muted hover:bg-cream transition-colors text-[13px] font-semibold">
-          <Download size={14} />
+          {/* <Download size={14} /> */}
           Download PDF
         </button>
 
