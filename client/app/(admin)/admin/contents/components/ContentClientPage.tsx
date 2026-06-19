@@ -16,14 +16,14 @@ import {
   Image,
   Download,
 } from "lucide-react";
-import { useContent } from "./useContent";
-import { SearchFilterBar } from "./components/SearchFilterBar";
-import { ContentCard } from "./components/ContentCard";
-import { ContentListRow } from "./components/ContentListRow";
-import { AnalyticsDashboard } from "./components/AnalyticsDashboard";
-import { AddContentModal } from "./components/AddContentModal";
-import { BulkActionsBar } from "./components/BulkActionsBar";
-import { MiniStatCard, Pagination } from "./components/SharedPrimitives";
+import { useContent } from "../useContent";
+import { SearchFilterBar } from "./SearchFilterBar";
+import { ContentCard } from "./ContentCard";
+import { ContentListRow } from "./ContentListRow";
+import { AnalyticsDashboard } from "./AnalyticsDashboard";
+import { AddContentModal } from "./AddContentModal";
+import { BulkActionsBar } from "./BulkActionsBar";
+import { MiniStatCard, Pagination } from "./SharedPrimitives";
 
 type ViewMode = "grid" | "list" | "analytics";
 

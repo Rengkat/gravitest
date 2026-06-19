@@ -5,17 +5,7 @@ import { Plus } from "lucide-react";
 import BankStatsPanel from "./components/BankStatsPanel";
 import ExamCategoryGrid from "./components/ExamCategoryGrid";
 
-/**
- * Page 1 — Main Dashboard  /admin/questions
- *
- * Changes from original:
- *  • Removed the "Search All Questions" filter + table section that
- *    previously lived at the bottom of this page. It now lives on the
- *    Subject Questions page (/[examType]/[year]/[subject]).
- *  • All navigation is now real Next.js routing instead of crumb state.
- *  • ExamCategoryGrid navigates via <Link href="/admin/questions/[examType]">
- *    instead of calling an onNavigate callback.
- */
+
 export default function AdminQuestionsPage() {
   return (
     <div className="max-w-7xl mx-auto">
@@ -42,12 +32,7 @@ export default function AdminQuestionsPage() {
       <BankStatsPanel />
 
       {/* ── Exam category grid (Professional + Secondary School) ── */}
-      {/*
-        ExamCategoryGrid has been updated to use Link href routing.
-        Clicking any exam type navigates to /admin/questions/[examType].
-        The "Browse by Subject" section has been removed from ExamDrillDown
-        and is now part of the Year-Subject page.
-      */}
+   
       <ExamCategoryGrid />
     </div>
   );
