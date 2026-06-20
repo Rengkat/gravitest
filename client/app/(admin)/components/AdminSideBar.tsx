@@ -1,4 +1,3 @@
-// app/components/AdminSideBar.tsx
 import { useState, useEffect } from "react";
 import GravitasLogoMark from "@/lib/components/gravitas-logo";
 import {
@@ -27,6 +26,7 @@ import {
   Target,
   Clock,
   Sparkles,
+  Brain,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,12 +37,12 @@ type NavItem = {
   icon: any;
   exact?: boolean;
   isDropdown?: boolean;
-  isExpanded?: boolean;
   children?: {
     href: string;
     label: string;
     icon: any;
     badge?: number;
+    exact?: boolean;
   }[];
 };
 
@@ -87,6 +87,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
         href: "/admin/ai-logs",
         label: "Overview",
         icon: BarChart3,
+        exact: true, // must match exactly, not every /admin/ai-logs/* sub-route
       },
       {
         href: "/admin/ai-logs/conversations",
@@ -119,6 +120,21 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
         label: "Rate Limits",
         icon: Clock,
       },
+      {
+        href: "/admin/ai-logs/models",
+        label: "Model Management",
+        icon: Brain,
+      },
+      {
+        href: "/admin/ai-logs/flagged",
+        label: "Flagged Content",
+        icon: Shield,
+      },
+      {
+        href: "/admin/ai-logs/settings",
+        label: "AI Settings",
+        icon: Settings,
+      },
     ],
   },
   {
@@ -140,19 +156,34 @@ type AdminSideBarProps = {
 
 const AdminSideBar = ({ sidebarOpen, closeSidebar }: AdminSideBarProps) => {
   const pathname = usePathname();
-  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(["AI Tutor"]);
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([]);
 
-  // Load expanded state from localStorage on mount
+  // Load expanded state from localStorage on mount, but ALSO auto-expand
+  // any dropdown whose child route is currently active — otherwise a page
+  // refresh on e.g. /admin/ai-logs/cost would land with the dropdown closed
+  // and no visible active link, which reads as "nothing is highlighted".
   useEffect(() => {
     const saved = localStorage.getItem("adminSidebarExpanded");
+    let initial: string[] = [];
     if (saved) {
       try {
-        setExpandedDropdowns(JSON.parse(saved));
+        initial = JSON.parse(saved);
       } catch (e) {
         console.error("Failed to parse saved sidebar state");
       }
     }
-  }, []);
+
+    const activeDropdown = ADMIN_NAV_ITEMS.find(
+      (item) =>
+        item.isDropdown && item.children?.some((child) => isActiveHref(child.href, child.exact)),
+    );
+    if (activeDropdown && !initial.includes(activeDropdown.label)) {
+      initial = [...initial, activeDropdown.label];
+    }
+
+    setExpandedDropdowns(initial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   // Save expanded state to localStorage
   useEffect(() => {
@@ -165,14 +196,19 @@ const AdminSideBar = ({ sidebarOpen, closeSidebar }: AdminSideBarProps) => {
     );
   };
 
-  const isActive = (href: string) => {
-    if (href === "/admin") return pathname === href;
-    return pathname?.startsWith(href);
-  };
+  // Exact-match routes (like the AI Logs "Overview" link at /admin/ai-logs)
+  // must NOT highlight when a deeper sub-route like /admin/ai-logs/cost is
+  // active. Only routes explicitly marked exact get this stricter check;
+  // everything else still uses startsWith so /admin/users/123 highlights
+  // the "Users" parent link.
+  function isActiveHref(href: string, exact?: boolean) {
+    if (!pathname) return false;
+    if (exact) return pathname === href;
+    return pathname === href || pathname.startsWith(href + "/");
+  }
 
-  const isChildActive = (children: { href: string }[]) => {
-    return children?.some((child) => isActive(child.href));
-  };
+  const isChildActive = (children: { href: string; exact?: boolean }[] = []) =>
+    children.some((child) => isActiveHref(child.href, child.exact));
 
   return (
     <aside
@@ -202,7 +238,7 @@ const AdminSideBar = ({ sidebarOpen, closeSidebar }: AdminSideBarProps) => {
 
           if (item.isDropdown) {
             const isExpanded = expandedDropdowns.includes(item.label);
-            const hasActiveChild = isChildActive(item.children || []);
+            const hasActiveChild = isChildActive(item.children);
 
             return (
               <div key={item.label}>
@@ -224,7 +260,7 @@ const AdminSideBar = ({ sidebarOpen, closeSidebar }: AdminSideBarProps) => {
                   <div className="ml-6 mt-1 space-y-1 border-l-2 border-green-100 pl-3">
                     {item.children?.map((child) => {
                       const ChildIcon = child.icon;
-                      const active = isActive(child.href);
+                      const active = isActiveHref(child.href, child.exact);
                       return (
                         <Link
                           key={child.href}
@@ -256,9 +292,7 @@ const AdminSideBar = ({ sidebarOpen, closeSidebar }: AdminSideBarProps) => {
             );
           }
 
-          const active = item.exact
-            ? pathname === item.href
-            : pathname?.startsWith(item.href || "");
+          const active = isActiveHref(item.href || "", item.exact);
 
           return (
             <Link
