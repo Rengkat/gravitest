@@ -1,127 +1,188 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { MessageSquare, Search, Eye, User, Clock, DollarSign } from "lucide-react";
+import { MessageSquare, Flag, CheckCircle, Activity } from "lucide-react";
+import { ConversationList } from "./components/ConversationList";
+import type { AIConversation } from "../types";
+
+// TODO: replace with GET /admin/ai/conversations
+const MOCK_CONVERSATIONS: AIConversation[] = [
+  {
+    id: "1",
+    sessionId: "sess-1",
+    userId: "u1",
+    userName: "Oluwaseun Adebayo",
+    userEmail: "oluwaseun@email.com",
+    userRole: "student",
+    feature: "sabi_tutor",
+    model: "gpt-4o",
+    subject: "Mathematics",
+    topic: "Quadratic Equations",
+    examType: "WAEC",
+    startTime: new Date(Date.now() - 30 * 60_000).toISOString(),
+    endTime: new Date(Date.now() - 2 * 60_000).toISOString(),
+    lastActivity: new Date(Date.now() - 2 * 60_000).toISOString(),
+    messageCount: 12,
+    totalTokens: 2345,
+    totalCost: 0.045,
+    status: "completed",
+    isFlagged: false,
+    userRating: 5,
+  },
+  {
+    id: "2",
+    sessionId: "sess-2",
+    userId: "u2",
+    userName: "Chioma Eze",
+    userEmail: "chioma@email.com",
+    userRole: "student",
+    feature: "sabi_solve",
+    model: "gpt-4o-mini",
+    subject: "Physics",
+    topic: "Newton's Laws",
+    startTime: new Date(Date.now() - 20 * 60_000).toISOString(),
+    lastActivity: new Date(Date.now() - 15 * 60_000).toISOString(),
+    messageCount: 8,
+    totalTokens: 1890,
+    totalCost: 0.032,
+    status: "active",
+    isFlagged: false,
+  },
+  {
+    id: "3",
+    sessionId: "sess-3",
+    userId: "u3",
+    userName: "Emeka Nwosu",
+    userEmail: "emeka@email.com",
+    userRole: "student",
+    feature: "sabi_quiz",
+    model: "gpt-4o",
+    subject: "Chemistry",
+    examType: "NECO",
+    startTime: new Date(Date.now() - 90 * 60_000).toISOString(),
+    endTime: new Date(Date.now() - 60 * 60_000).toISOString(),
+    lastActivity: new Date(Date.now() - 60 * 60_000).toISOString(),
+    messageCount: 23,
+    totalTokens: 4567,
+    totalCost: 0.089,
+    status: "completed",
+    isFlagged: false,
+    userRating: 4,
+  },
+  {
+    id: "4",
+    sessionId: "sess-4",
+    userId: "u4",
+    userName: "Test User",
+    userEmail: "test.user@email.com",
+    userRole: "student",
+    feature: "sabi_tutor",
+    model: "gpt-4o",
+    subject: "Mathematics",
+    examType: "JAMB",
+    startTime: new Date(Date.now() - 3 * 60 * 60_000).toISOString(),
+    endTime: new Date(Date.now() - 2.9 * 60 * 60_000).toISOString(),
+    lastActivity: new Date(Date.now() - 2.9 * 60 * 60_000).toISOString(),
+    messageCount: 4,
+    totalTokens: 612,
+    totalCost: 0.018,
+    status: "flagged",
+    isFlagged: true,
+    flagReason: "Attempted to get answers for live exam",
+  },
+  {
+    id: "5",
+    sessionId: "sess-5",
+    userId: "u5",
+    userName: "Another User",
+    userEmail: "another.user@email.com",
+    userRole: "student",
+    feature: "sabi_explain",
+    model: "claude-3.5-sonnet",
+    subject: "Biology",
+    startTime: new Date(Date.now() - 6 * 60 * 60_000).toISOString(),
+    endTime: new Date(Date.now() - 5.9 * 60 * 60_000).toISOString(),
+    lastActivity: new Date(Date.now() - 5.9 * 60 * 60_000).toISOString(),
+    messageCount: 2,
+    totalTokens: 340,
+    totalCost: 0.009,
+    status: "flagged",
+    isFlagged: true,
+    flagReason: "Explicit content request",
+  },
+  {
+    id: "6",
+    sessionId: "sess-6",
+    userId: "u6",
+    userName: "Ifeoma Obi",
+    userEmail: "ifeoma@email.com",
+    userRole: "tutor",
+    feature: "sabi_essay",
+    model: "gpt-4o",
+    subject: "English Language",
+    topic: "Essay Structure",
+    startTime: new Date(Date.now() - 12 * 60 * 60_000).toISOString(),
+    endTime: new Date(Date.now() - 11.8 * 60 * 60_000).toISOString(),
+    lastActivity: new Date(Date.now() - 11.8 * 60 * 60_000).toISOString(),
+    messageCount: 15,
+    totalTokens: 5230,
+    totalCost: 0.142,
+    status: "completed",
+    isFlagged: false,
+    userRating: 5,
+  },
+];
 
 export default function AIConversationsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const conversations = [
-    {
-      id: "1",
-      user: "Oluwaseun Adebayo",
-      email: "oluwaseun@email.com",
-      messages: 12,
-      lastActive: "2 min ago",
-      tokens: 2345,
-      cost: 0.045,
-      subject: "Mathematics",
-    },
-    {
-      id: "2",
-      user: "Chioma Eze",
-      email: "chioma@email.com",
-      messages: 8,
-      lastActive: "15 min ago",
-      tokens: 1890,
-      cost: 0.032,
-      subject: "Physics",
-    },
-    {
-      id: "3",
-      user: "Emeka Nwosu",
-      email: "emeka@email.com",
-      messages: 23,
-      lastActive: "1 hour ago",
-      tokens: 4567,
-      cost: 0.089,
-      subject: "Chemistry",
-    },
-  ];
+  const flagged = MOCK_CONVERSATIONS.filter((c) => c.isFlagged).length;
+  const active = MOCK_CONVERSATIONS.filter((c) => c.status === "active").length;
+  const completed = MOCK_CONVERSATIONS.filter((c) => c.status === "completed").length;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-2xl text-green-900">AI Conversations</h1>
-          <p className="text-text-muted text-[13px]">Monitor and review AI tutoring sessions</p>
-        </div>
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search by user or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 text-[13px] w-64 focus:outline-none focus:ring-2 focus:ring-green-500/30"
-          />
-        </div>
+      <div>
+        <h1 className="font-serif text-2xl text-green-900">AI Conversations</h1>
+        <p className="text-text-muted text-[13px]">Monitor and review AI tutoring sessions</p>
       </div>
 
-      <div className="bg-white rounded-xl border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-cream/30 border-b" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-              <tr>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-text-muted">
-                  User
-                </th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-text-muted">
-                  Subject
-                </th>
-                <th className="text-center px-4 py-3 text-[11px] font-semibold text-text-muted">
-                  Messages
-                </th>
-                <th className="text-right px-4 py-3 text-[11px] font-semibold text-text-muted">
-                  Tokens
-                </th>
-                <th className="text-right px-4 py-3 text-[11px] font-semibold text-text-muted">
-                  Cost
-                </th>
-                <th className="text-left px-4 py-3 text-[11px] font-semibold text-text-muted">
-                  Last Active
-                </th>
-                <th className="text-center px-4 py-3 text-[11px] font-semibold text-text-muted">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-              {conversations.map((conv) => (
-                <tr key={conv.id} className="hover:bg-cream/20 transition-colors">
-                  <td className="px-4 py-3">
-                    <div>
-                      <div className="text-[13px] font-medium text-green-900">{conv.user}</div>
-                      <div className="text-[10px] text-text-muted">{conv.email}</div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-[13px] text-green-900">{conv.subject}</td>
-                  <td className="px-4 py-3 text-center text-[13px] text-green-900">
-                    {conv.messages}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[12px] text-green-900">
-                    {conv.tokens.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[12px] font-semibold text-green-900">
-                    ${conv.cost.toFixed(3)}
-                  </td>
-                  <td className="px-4 py-3 text-[12px] text-text-muted">{conv.lastActive}</td>
-                  <td className="px-4 py-3 text-center">
-                    <Link href={`/admin/ai-logs/conversations/${conv.id}`}>
-                      <button
-                        title="detail"
-                        className="p-1.5 rounded-lg hover:bg-green-50 transition-colors">
-                        <Eye size={14} className="text-text-muted hover:text-green-600" />
-                      </button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          {
+            icon: MessageSquare,
+            label: "Total Sessions",
+            value: MOCK_CONVERSATIONS.length,
+            color: "#2e8b57",
+            bg: "#2e8b5715",
+          },
+          { icon: Activity, label: "Active Now", value: active, color: "#3b82f6", bg: "#3b82f615" },
+          {
+            icon: CheckCircle,
+            label: "Completed",
+            value: completed,
+            color: "#10b981",
+            bg: "#10b98115",
+          },
+          { icon: Flag, label: "Flagged", value: flagged, color: "#ef4444", bg: "#ef444415" },
+        ].map(({ icon: Icon, label, value, color, bg }) => (
+          <div
+            key={label}
+            className="flex items-center gap-3 p-4 rounded-2xl bg-white border"
+            style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: bg }}>
+              <Icon size={17} style={{ color }} />
+            </div>
+            <div>
+              <div className="text-[18px] font-bold text-green-900 leading-tight">{value}</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                {label}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+
+      <ConversationList conversations={MOCK_CONVERSATIONS} basePath="/admin/ai/conversations" />
     </div>
   );
 }
