@@ -161,6 +161,7 @@ export function RateLimitControls({ onUpdate }: Props) {
                   </td>
                   <td className="px-6 py-4">
                     <input
+                      title="Requests per Day"
                       type="number"
                       value={limit.requestsPerDay}
                       onChange={(e) =>
@@ -171,6 +172,7 @@ export function RateLimitControls({ onUpdate }: Props) {
                   </td>
                   <td className="px-6 py-4">
                     <input
+                      title="Requests per Hour"
                       type="number"
                       value={limit.requestsPerHour}
                       onChange={(e) =>
@@ -181,6 +183,7 @@ export function RateLimitControls({ onUpdate }: Props) {
                   </td>
                   <td className="px-6 py-4">
                     <input
+                      title="Tokens per Minute"
                       type="number"
                       value={limit.tokensPerMinute}
                       onChange={(e) =>
@@ -191,6 +194,7 @@ export function RateLimitControls({ onUpdate }: Props) {
                   </td>
                   <td className="px-6 py-4">
                     <input
+                      title="Concurrent Sessions"
                       type="number"
                       value={limit.concurrentSessions}
                       onChange={(e) =>
@@ -245,6 +249,7 @@ export function RateLimitControls({ onUpdate }: Props) {
       {/* Save Button */}
       <div className="flex justify-end">
         <button
+          title="Save Changes"
           onClick={handleSave}
           disabled={saving}
           className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-green-800 text-white font-semibold hover:bg-green-700 transition-all disabled:opacity-50">

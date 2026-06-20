@@ -1,4 +1,3 @@
-// app/admin/ai/components/AIPerformanceMonitor.tsx
 "use client";
 
 import { useState } from "react";

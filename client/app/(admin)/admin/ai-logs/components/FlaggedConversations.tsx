@@ -178,6 +178,7 @@ export function FlaggedConversations({ sessions: initialSessions }: Props) {
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
               <h3 className="font-serif text-lg text-green-900">Flagged Conversation Review</h3>
               <button
+                title="Close"
                 onClick={() => setSelectedSession(null)}
                 className="p-2 rounded-lg hover:bg-gray-100">
                 <XCircle size={20} />
