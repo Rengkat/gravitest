@@ -1,90 +1,60 @@
 "use client";
 
-import { useState } from "react";
 import {
-  Brain,
-  DollarSign,
-  Activity,
-  Shield,
-  Settings,
   MessageSquare,
-  BarChart3,
-  FileText,
-  Clock,
-  Target,
-  AlertTriangle,
-  RefreshCw,
-  TrendingUp,
-  Users,
+  DollarSign,
   Zap,
   CheckCircle,
+  Users,
+  Target,
+  AlertTriangle,
+  TrendingUp,
+  RefreshCw,
   Bot,
 } from "lucide-react";
 import { useAIData } from "./useAIData";
-import { AICostAnalytics } from "./components/AICostAnalytics";
-import { AIPerformanceMonitor } from "./components/AIPerformanceMonitor";
-import { AIModelSelector } from "./components/AIModelSelector";
-import { FlaggedConversations } from "./components/FlaggedConversations";
-import { SystemPromptEditor } from "./components/SystemPromptEditor";
-import { RateLimitControls } from "./components/RateLimitControls";
-import { AIConfigPanel } from "./components/AIConfigPanel";
 import { LoadingSpinner } from "./components/LoadingSinner";
 
-type Tab =
-  | "overview"
-  | "cost"
-  | "performance"
-  | "models"
-  | "flagged"
-  | "prompts"
-  | "limits"
-  | "config";
+function MetricCard({ icon: Icon, label, value, color, trend, sub }: any) {
+  return (
+    <div className="p-3 rounded-xl bg-white border" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
+      <div
+        className="w-7 h-7 rounded-lg flex items-center justify-center mb-2"
+        style={{ background: `${color}15` }}>
+        <Icon size={13} style={{ color }} />
+      </div>
+      <div className="text-base font-bold text-green-900">{value}</div>
+      <div className="text-[10px] text-text-muted">{label}</div>
+      {trend && (
+        <div className="text-[9px] text-green-600 mt-1 flex items-center gap-0.5">
+          <TrendingUp size={8} /> +{trend}%
+        </div>
+      )}
+      {sub && <div className="text-[8px] text-text-muted mt-0.5">{sub}</div>}
+    </div>
+  );
+}
 
-export default function AIManagementPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
-  const {
-    stats,
-    costStats,
-    performanceStats,
-    flaggedSessions,
-    loading,
-    refreshData,
-    updateModelConfig,
-    updateRateLimits,
-    updateSystemPrompt,
-    toggleFeature,
-  } = useAIData();
-
-  const tabs: { id: Tab; label: string; icon: any; color: string }[] = [
-    { id: "overview", label: "Overview", icon: BarChart3, color: "#2e8b57" },
-    { id: "cost", label: "Cost Analytics", icon: DollarSign, color: "#f59e0b" },
-    { id: "performance", label: "Performance", icon: Activity, color: "#3b82f6" },
-    { id: "models", label: "Model Management", icon: Brain, color: "#8b5cf6" },
-    { id: "flagged", label: "Flagged Content", icon: Shield, color: "#ef4444" },
-    { id: "prompts", label: "System Prompts", icon: FileText, color: "#10b981" },
-    { id: "limits", label: "Rate Limits", icon: Clock, color: "#f97316" },
-    { id: "config", label: "Feature Flags", icon: Settings, color: "#6b7280" },
-  ];
+export default function AILogsOverviewPage() {
+  const { stats, costStats, performanceStats, loading, refreshData } = useAIData();
 
   if (loading) {
-    return <LoadingSpinner text="Loading AI management dashboard..." />;
+    return <LoadingSpinner text="Loading AI overview..." />;
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-800 to-green-600 flex items-center justify-center shadow-sm">
-              <Bot size={20} className="text-white" />
-            </div>
-            <div>
-              <h1 className="font-serif text-2xl text-green-900">AI Tutor Management</h1>
-              <p className="text-text-muted text-[13px] -mt-0.5">
-                Monitor usage, manage costs, and ensure quality
-              </p>
-            </div>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-800 to-green-600 flex items-center justify-center shadow-sm">
+            <Bot size={20} className="text-white" />
+          </div>
+          <div>
+            <h1 className="font-serif text-2xl text-green-900">AI Tutor Overview</h1>
+            <p className="text-text-muted text-[13px] -mt-0.5">
+              Platform-wide usage, cost, and quality snapshot
+            </p>
           </div>
         </div>
         <button
@@ -95,57 +65,6 @@ export default function AIManagementPage() {
         </button>
       </div>
 
-      {/* Tabs */}
-      <div
-        className="flex items-center gap-1 border-b overflow-x-auto pb-0"
-        style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-2 text-[12px] font-medium transition-all flex items-center gap-1.5 whitespace-nowrap border-b-2 ${
-              activeTab === tab.id
-                ? "border-green-800 text-green-900"
-                : "border-transparent text-text-muted hover:text-green-700"
-            }`}>
-            <tab.icon size={13} style={{ color: activeTab === tab.id ? tab.color : undefined }} />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="space-y-6">
-        {activeTab === "overview" && (
-          <OverviewTab stats={stats} costStats={costStats} performanceStats={performanceStats} />
-        )}
-
-        {activeTab === "cost" && costStats && <AICostAnalytics stats={costStats} />}
-
-        {activeTab === "performance" && performanceStats && (
-          <AIPerformanceMonitor stats={performanceStats} />
-        )}
-
-        {activeTab === "models" && <AIModelSelector onUpdate={updateModelConfig} />}
-
-        {activeTab === "flagged" && <FlaggedConversations sessions={flaggedSessions} />}
-
-        {activeTab === "prompts" && <SystemPromptEditor onSave={updateSystemPrompt} />}
-
-        {activeTab === "limits" && <RateLimitControls onUpdate={updateRateLimits} />}
-
-        {activeTab === "config" && stats && (
-          <AIConfigPanel features={stats.features} onToggle={toggleFeature} />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Overview Tab Component
-function OverviewTab({ stats, costStats, performanceStats }: any) {
-  return (
-    <div className="space-y-6">
       {/* Key Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <MetricCard
@@ -284,26 +203,6 @@ function OverviewTab({ stats, costStats, performanceStats }: any) {
           ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function MetricCard({ icon: Icon, label, value, color, trend, sub }: any) {
-  return (
-    <div className="p-3 rounded-xl bg-white border" style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-      <div
-        className="w-7 h-7 rounded-lg flex items-center justify-center mb-2"
-        style={{ background: `${color}15` }}>
-        <Icon size={13} style={{ color }} />
-      </div>
-      <div className="text-base font-bold text-green-900">{value}</div>
-      <div className="text-[10px] text-text-muted">{label}</div>
-      {trend && (
-        <div className="text-[9px] text-green-600 mt-1 flex items-center gap-0.5">
-          <TrendingUp size={8} /> +{trend}%
-        </div>
-      )}
-      {sub && <div className="text-[8px] text-text-muted mt-0.5">{sub}</div>}
     </div>
   );
 }
