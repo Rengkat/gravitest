@@ -1,17 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  AlertTriangle,
-  Flag,
-  Eye,
-  CheckCircle,
-  XCircle,
-  MessageSquare,
-  User,
-  Clock,
-} from "lucide-react";
-import Link from "next/link";
+import { Flag, Eye, CheckCircle, XCircle, MessageSquare, Clock } from "lucide-react";
 
 interface FlaggedSession {
   id: string;

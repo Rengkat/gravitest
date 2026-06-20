@@ -6,14 +6,12 @@ import {
   Clock,
   Zap,
   CheckCircle,
-  XCircle,
   AlertTriangle,
   TrendingUp,
   TrendingDown,
   RefreshCw,
   Gauge,
   Cpu,
-  Wifi,
 } from "lucide-react";
 import {
   LineChart,

@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Save, Copy, RefreshCw, History, Check, AlertCircle, FileText } from "lucide-react";
+import {
+  Save,
+  Copy,
+  RefreshCw,
+  History,
+  Check,
+  AlertCircle,
+  FileText,
+  XCircle,
+} from "lucide-react";
 
 interface PromptVersion {
   id: string;
@@ -126,6 +135,7 @@ export function SystemPromptEditor({ onSave }: Props) {
         <div className="mb-4">
           <label className="block text-[12px] font-semibold text-green-900 mb-2">Prompt Name</label>
           <input
+            title="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -187,6 +197,7 @@ export function SystemPromptEditor({ onSave }: Props) {
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
               <h3 className="font-serif text-lg text-green-900">Version History</h3>
               <button
+                title="Close"
                 onClick={() => setShowHistory(false)}
                 className="p-2 rounded-lg hover:bg-gray-100">
                 <XCircle size={20} />

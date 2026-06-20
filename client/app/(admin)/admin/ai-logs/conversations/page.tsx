@@ -108,7 +108,7 @@ export default function AIConversationsPage() {
                   </td>
                   <td className="px-4 py-3 text-[12px] text-text-muted">{conv.lastActive}</td>
                   <td className="px-4 py-3 text-center">
-                    <Link href={`/admin/ai/conversations/${conv.id}`}>
+                    <Link href={`/admin/ai-logs/conversations/${conv.id}`}>
                       <button
                         title="detail"
                         className="p-1.5 rounded-lg hover:bg-green-50 transition-colors">

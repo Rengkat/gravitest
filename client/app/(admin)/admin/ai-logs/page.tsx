@@ -1,7 +1,6 @@
-// app/admin/ai/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Brain,
   DollarSign,

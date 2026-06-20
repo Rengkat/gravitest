@@ -1,6 +1,3 @@
-// Shared types and helpers for the AI conversation detail view.
-// Aligned with ../types.ts (AIConversation, AIMessage, AIFeature, AIModel).
-
 import type { AIConversation, AIMessage, AIFeature, AIModel } from "../types";
 
 // ─── Extended detail shape used by the conversation detail page ──────────────
