@@ -10,10 +10,10 @@ import {
   Users,
   Clock,
 } from "lucide-react";
-import { ScoreDistribution } from "./components/ScoreDistribution";
-import { AutoGradingPanel } from "./components/AutoGradingPanel";
-import { FeedbackAnalytics } from "./components/FeedbackAnalytics";
-import { RubricManager } from "./components/RubricManager";
+import { ScoreDistribution } from "../scoring/components/ScoreDistribution";
+import { AutoGradingPanel } from "../scoring/components/AutoGradingPanel";
+import { FeedbackAnalytics } from "../scoring/components/FeedbackAnalytics";
+import { RubricManager } from "../scoring/components/RubricManager";
 import type { PracticeQuestionScore, ExamSubmission, ScoringAnalytics } from "../types";
 
 type Tab = "overview" | "grading" | "feedback" | "rubrics";
