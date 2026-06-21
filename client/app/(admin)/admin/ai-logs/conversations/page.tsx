@@ -182,7 +182,10 @@ export default function AIConversationsPage() {
         ))}
       </div>
 
-      <ConversationList conversations={MOCK_CONVERSATIONS} basePath="/admin/ai/conversations" />
+      <ConversationList
+        conversations={MOCK_CONVERSATIONS}
+        basePath="/admin/ai-logs/conversations"
+      />
     </div>
   );
 }

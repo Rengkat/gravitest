@@ -20,7 +20,10 @@ interface Props {
 
 const PAGE_SIZE = 12;
 
-export function ConversationList({ conversations, basePath = "/admin/ai/conversations" }: Props) {
+export function ConversationList({
+  conversations,
+  basePath = "/admin/ai-logs/conversations",
+}: Props) {
   const [search, setSearch] = useState("");
   const [filterFeature, setFilterFeature] = useState<string>("all");
   const [filterFlagged, setFilterFlagged] = useState<"all" | "flagged" | "clean">("all");
@@ -110,7 +113,7 @@ export function ConversationList({ conversations, basePath = "/admin/ai/conversa
               <tr>
                 {[
                   "User",
-                  "Feature",
+                  // "Feature",
                   "Model",
                   "Subject",
                   "Messages",
@@ -159,13 +162,13 @@ export function ConversationList({ conversations, basePath = "/admin/ai/conversa
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    {/* <td className="px-4 py-3">
                       <span
                         className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
                         style={{ background: featCfg.bg, color: featCfg.color }}>
                         {FEATURE_LABELS[conv.feature]}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="px-4 py-3 text-[11px] text-text-muted whitespace-nowrap">
                       {MODEL_LABELS[conv.model]}
                     </td>
