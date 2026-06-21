@@ -287,6 +287,7 @@ export default function ExamSubmissionDetailPage() {
                 Adjusted Final Score (%)
               </label>
               <input
+                title="score"
                 type="number"
                 min={0}
                 max={100}
