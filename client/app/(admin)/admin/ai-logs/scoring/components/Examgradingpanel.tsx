@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, School, User, CheckCircle2, Clock, FileEdit } from "lucide-react";
+import { ChevronDown, ChevronUp, School, CheckCircle2, Clock, FileEdit } from "lucide-react";
 import Link from "next/link";
 import type { ExamSubmission } from "../../types";
 
