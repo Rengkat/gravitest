@@ -24,7 +24,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   ComposedChart,
-  Bar,
 } from "recharts";
 
 interface Props {

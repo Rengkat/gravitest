@@ -1,16 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import {
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Calendar,
-  Download,
-} from "lucide-react";
-import {
-  LineChart,
   Line,
   BarChart,
   Bar,
@@ -18,7 +10,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   AreaChart,
   Area,

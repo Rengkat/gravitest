@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Brain, Zap, DollarSign, Activity, RefreshCw, Check, AlertCircle } from "lucide-react";
+import { Brain, DollarSign, Activity, RefreshCw, Check } from "lucide-react";
 
 interface ModelConfig {
   id: string;

@@ -1,16 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Save,
-  Copy,
-  RefreshCw,
-  History,
-  Check,
-  AlertCircle,
-  FileText,
-  XCircle,
-} from "lucide-react";
+import { Save, Copy, RefreshCw, History, AlertCircle, FileText, XCircle } from "lucide-react";
 
 interface PromptVersion {
   id: string;
