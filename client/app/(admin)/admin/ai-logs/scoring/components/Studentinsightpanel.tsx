@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp, TrendingDown, Lightbulb } from "lucide-react";
-import { buildStudentInsight, levelColor, type SubjectPoint } from "./insights";
+import { buildStudentInsight, levelColor, type SubjectPoint } from "./Insights";
 
 interface Props {
   studentId: string;
