@@ -11,6 +11,7 @@ import {
   ArrowRight,
   GraduationCap,
   BookOpen,
+  School,
 } from "lucide-react";
 
 export default function AIScoringDashboard() {
@@ -75,17 +76,18 @@ export default function AIScoringDashboard() {
 
       {/* Navigation Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link href="/admin/ai/scoring/practice">
-          <div className="bg-gradient-to-br from-green-900 to-green-800 rounded-xl p-6 text-white hover:shadow-lg transition-all cursor-pointer">
+        <Link href="/admin/ai-logs/scoring/practice">
+          <div className="bg-gradient-to-br from-green-900 to-green-800 rounded-2xl p-6 text-white hover:shadow-lg transition-all cursor-pointer h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                <BookOpen size={24} />
+                <Target size={24} />
               </div>
               <ArrowRight size={20} className="opacity-70" />
             </div>
-            <h3 className="font-serif text-xl mb-2">Practice Questions</h3>
+            <h3 className="font-serif text-xl mb-2">Practice Scoring</h3>
             <p className="text-white/70 text-[13px] mb-4">
-              Review AI-graded practice questions and student responses
+              AI grading for self-registered users practicing questions on their own, outside of any
+              school.
             </p>
             <div className="flex items-center gap-4 text-[12px]">
               <span className="flex items-center gap-1">
@@ -94,32 +96,30 @@ export default function AIScoringDashboard() {
               </span>
               <span className="flex items-center gap-1">
                 <Clock size={12} />
-                124 pending
+                Individual feedback
               </span>
             </div>
           </div>
         </Link>
 
-        <Link href="/admin/ai/scoring/exams">
-          <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-xl p-6 text-white hover:shadow-lg transition-all cursor-pointer">
+        <Link href="/admin/ai-logs/scoring/exams">
+          <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-2xl p-6 text-white hover:shadow-lg transition-all cursor-pointer h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                <GraduationCap size={24} />
+                <School size={24} />
               </div>
               <ArrowRight size={20} className="opacity-70" />
             </div>
-            <h3 className="font-serif text-xl mb-2">Exam Grading</h3>
+            <h3 className="font-serif text-xl mb-2">School Exam Scoring</h3>
             <p className="text-white/70 text-[13px] mb-4">
-              Monitor AI-graded exams and teacher reviews
+              AI grading for exams submitted by partner schools, with teacher review workflow.
             </p>
             <div className="flex items-center gap-4 text-[12px]">
               <span className="flex items-center gap-1">
-                <CheckCircle size={12} />
-                156 exams graded
+                <GraduationCap size={12} />3 submissions
               </span>
               <span className="flex items-center gap-1">
-                <Users size={12} />
-                45 schools
+                <Users size={12} />2 schools
               </span>
             </div>
           </div>
