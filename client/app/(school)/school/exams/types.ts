@@ -88,7 +88,7 @@ export interface ExamStats {
 export interface ClassExamStats {
   classId: string;
   className: string;
-  classArm?: string;
+  classArm?: string | null;
   totalExams: number;
   publishedExams: number;
   completedExams: number;
