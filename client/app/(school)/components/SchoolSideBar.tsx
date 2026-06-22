@@ -11,10 +11,8 @@ import {
   Bot,
   Settings,
   LogOut,
-  User,
   BookOpen,
   School as SchoolIcon,
-  FileText,
 } from "lucide-react";
 import GravitasLogoMark from "@/lib/components/gravitas-logo";
 
