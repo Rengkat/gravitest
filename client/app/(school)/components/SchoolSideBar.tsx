@@ -36,8 +36,8 @@ const SCHOOL_NAV_ITEMS = [
     icon: GraduationCap,
   },
   {
-    href: "/school/questions",
-    label: "Questions",
+    href: "/school/exams",
+    label: "Exams",
     icon: HelpCircle,
   },
   {
@@ -47,7 +47,7 @@ const SCHOOL_NAV_ITEMS = [
   },
   {
     href: "/school/ai",
-    label: "AI Analytics",
+    label: "Use AI",
     icon: Bot,
   },
   {
