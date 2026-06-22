@@ -1,4 +1,3 @@
-// src/app/school/exams/components/ExamStatsCards.tsx
 "use client";
 
 import { FileText, Clock, CheckCircle, PlayCircle, BookOpen, TrendingUp } from "lucide-react";
