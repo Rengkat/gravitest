@@ -1,19 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Users } from "lucide-react";
+import { TERMS, TERM_LABELS } from "../types";
 import type { CreateExamDto, ClassExamStats, Term } from "../types";
 
 interface CreateExamModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (examData: CreateExamDto) => void;
+  onCreate: (examData: CreateExamDto) => void | Promise<void>;
   classStats: ClassExamStats[];
+  /** When provided, the class field is pre-filled and locked (e.g. from a class detail page). */
+  lockedClassId?: string;
+  /** Subjects to offer in the dropdown, typically the locked class's subjects. */
+  subjectOptions?: string[];
 }
 
-export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: CreateExamModalProps) {
-  const [formData, setFormData] = useState<CreateExamDto>({
-    classId: classStats[0]?.classId || "",
+const toDateTimeInputValue = (date: Date) =>
+  new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+function buildInitialFormData(classStats: ClassExamStats[], lockedClassId?: string): CreateExamDto {
+  const now = new Date();
+  const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+  return {
+    classId: lockedClassId ?? classStats[0]?.classId ?? "",
     subject: "",
     title: "",
     term: "FIRST",
@@ -21,26 +31,51 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
     description: "",
     totalMarks: 100,
     durationMinutes: 60,
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: now,
+    endDate: oneHourLater,
     instruction: "",
     passingScore: 40,
-  });
-  const [loading, setLoading] = useState(false);
+  };
+}
 
-  const handleChange = (field: keyof CreateExamDto, value: any) => {
+export function CreateExamModal({
+  isOpen,
+  onClose,
+  onCreate,
+  classStats,
+  lockedClassId,
+  subjectOptions,
+}: CreateExamModalProps) {
+  const [formData, setFormData] = useState<CreateExamDto>(() =>
+    buildInitialFormData(classStats, lockedClassId),
+  );
+  const [submitting, setSubmitting] = useState(false);
+
+  // Reset the form whenever the modal is (re)opened, so stale input from a
+  // previous session never leaks into a new one.
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(buildInitialFormData(classStats, lockedClassId));
+    }
+  }, [isOpen, classStats, lockedClassId]);
+
+  if (!isOpen) return null;
+
+  const handleChange = <K extends keyof CreateExamDto>(field: K, value: CreateExamDto[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    onCreate(formData);
-    setLoading(false);
-    onClose();
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await onCreate(formData);
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -51,7 +86,8 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
           <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
             <h2 className="text-xl font-semibold text-green-900">Create New Exam</h2>
             <button
-              title="close"
+              type="button"
+              title="Close"
               onClick={onClose}
               className="p-1 rounded-lg hover:bg-cream transition-colors">
               <X size={20} />
@@ -62,42 +98,76 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
             <div className="space-y-4">
               {/* Class Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="exam-class"
+                  className="block text-sm font-medium text-gray-700 mb-1">
                   Class * <Users size={14} className="inline ml-1" />
                 </label>
                 <select
-                  title="class id"
+                  id="exam-class"
                   required
+                  disabled={Boolean(lockedClassId)}
                   value={formData.classId}
                   onChange={(e) => handleChange("classId", e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500">
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500 disabled:bg-gray-50 disabled:text-gray-500">
                   {classStats.map((cls) => (
                     <option key={cls.classId} value={cls.classId}>
-                      {cls.className} {cls.classArm ? `(${cls.classArm})` : ""} -{" "}
+                      {cls.className} {cls.classArm ? `(${cls.classArm})` : ""} —{" "}
                       {cls.totalStudents} students
                     </option>
                   ))}
                 </select>
+                {lockedClassId && (
+                  <p className="text-xs text-text-muted mt-1">
+                    Creating this exam for the current class.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.subject}
-                    onChange={(e) => handleChange("subject", e.target.value)}
-                    placeholder="e.g., Mathematics"
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
-                  />
+                  <label
+                    htmlFor="exam-subject"
+                    className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  {subjectOptions && subjectOptions.length > 0 ? (
+                    <select
+                      id="exam-subject"
+                      required
+                      value={formData.subject}
+                      onChange={(e) => handleChange("subject", e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500">
+                      <option value="" disabled>
+                        Select a subject
+                      </option>
+                      {subjectOptions.map((subject) => (
+                        <option key={subject} value={subject}>
+                          {subject}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      id="exam-subject"
+                      type="text"
+                      required
+                      value={formData.subject}
+                      onChange={(e) => handleChange("subject", e.target.value)}
+                      placeholder="e.g., Mathematics"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
+                    />
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="exam-title"
+                    className="block text-sm font-medium text-gray-700 mb-1">
                     Exam Title *
                   </label>
                   <input
+                    id="exam-title"
                     type="text"
                     required
                     value={formData.title}
@@ -110,24 +180,33 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Term *</label>
+                  <label
+                    htmlFor="exam-term"
+                    className="block text-sm font-medium text-gray-700 mb-1">
+                    Term *
+                  </label>
                   <select
-                    title="term"
+                    id="exam-term"
                     required
                     value={formData.term}
                     onChange={(e) => handleChange("term", e.target.value as Term)}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500">
-                    <option value="FIRST">First Term</option>
-                    <option value="SECOND">Second Term</option>
-                    <option value="THIRD">Third Term</option>
+                    {TERMS.map((term) => (
+                      <option key={term} value={term}>
+                        {TERM_LABELS[term]}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="exam-term-year"
+                    className="block text-sm font-medium text-gray-700 mb-1">
                     Term Year *
                   </label>
                   <input
+                    id="exam-term-year"
                     type="text"
                     required
                     value={formData.termYear}
@@ -139,8 +218,13 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label
+                  htmlFor="exam-description"
+                  className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
                 <textarea
+                  id="exam-description"
                   rows={2}
                   value={formData.description}
                   onChange={(e) => handleChange("description", e.target.value)}
@@ -151,31 +235,35 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="exam-total-marks"
+                    className="block text-sm font-medium text-gray-700 mb-1">
                     Total Marks *
                   </label>
                   <input
-                    title="total marks"
+                    id="exam-total-marks"
                     type="number"
                     required
                     min={1}
                     value={formData.totalMarks}
-                    onChange={(e) => handleChange("totalMarks", parseInt(e.target.value))}
+                    onChange={(e) => handleChange("totalMarks", Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="exam-duration"
+                    className="block text-sm font-medium text-gray-700 mb-1">
                     Duration (minutes) *
                   </label>
                   <input
-                    title="durations"
+                    id="exam-duration"
                     type="number"
                     required
                     min={1}
                     value={formData.durationMinutes}
-                    onChange={(e) => handleChange("durationMinutes", parseInt(e.target.value))}
+                    onChange={(e) => handleChange("durationMinutes", Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
                   />
                 </div>
@@ -183,36 +271,33 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="exam-start"
+                    className="block text-sm font-medium text-gray-700 mb-1">
                     Start Date & Time *
                   </label>
                   <input
-                    title="time"
+                    id="exam-start"
                     type="datetime-local"
                     required
-                    value={new Date(
-                      formData.startDate.getTime() - formData.startDate.getTimezoneOffset() * 60000,
-                    )
-                      .toISOString()
-                      .slice(0, 16)}
+                    value={toDateTimeInputValue(formData.startDate)}
                     onChange={(e) => handleChange("startDate", new Date(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="exam-end"
+                    className="block text-sm font-medium text-gray-700 mb-1">
                     End Date & Time *
                   </label>
                   <input
-                    title="time"
+                    id="exam-end"
                     type="datetime-local"
                     required
-                    value={new Date(
-                      formData.endDate.getTime() - formData.endDate.getTimezoneOffset() * 60000,
-                    )
-                      .toISOString()
-                      .slice(0, 16)}
+                    min={toDateTimeInputValue(formData.startDate)}
+                    value={toDateTimeInputValue(formData.endDate)}
                     onChange={(e) => handleChange("endDate", new Date(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
                   />
@@ -220,8 +305,13 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
+                <label
+                  htmlFor="exam-instructions"
+                  className="block text-sm font-medium text-gray-700 mb-1">
+                  Instructions
+                </label>
                 <textarea
+                  id="exam-instructions"
                   rows={2}
                   value={formData.instruction}
                   onChange={(e) => handleChange("instruction", e.target.value)}
@@ -231,16 +321,18 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="exam-passing-score"
+                  className="block text-sm font-medium text-gray-700 mb-1">
                   Passing Score (%)
                 </label>
                 <input
-                  title="score"
+                  id="exam-passing-score"
                   type="number"
                   min={0}
                   max={100}
                   value={formData.passingScore}
-                  onChange={(e) => handleChange("passingScore", parseInt(e.target.value))}
+                  onChange={(e) => handleChange("passingScore", Number(e.target.value))}
                   className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500"
                 />
               </div>
@@ -255,9 +347,9 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={submitting}
                 className="px-4 py-2 rounded-lg bg-green-800 text-white hover:bg-green-700 disabled:opacity-50 transition-colors">
-                {loading ? "Creating..." : "Create Exam"}
+                {submitting ? "Creating..." : "Create Exam"}
               </button>
             </div>
           </form>
