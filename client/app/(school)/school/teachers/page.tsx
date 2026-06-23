@@ -1,96 +1,102 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect, useMemo } from "react";
 import {
-  Plus,
   Search,
   Filter,
   Mail,
   Phone,
-  BookOpen,
   Users,
-  MoreVertical,
-  Edit,
   Trash2,
   UserPlus,
   CheckCircle,
   XCircle,
-  Clock,
   ChevronLeft,
   ChevronRight,
   GraduationCap,
-  Award,
-  BarChart3,
 } from "lucide-react";
-import { MOCK_TEACHERS } from "./mock-data";
-import type { Teacher, TeacherFilters } from "./types";
+import { MOCK_TEACHERS, MOCK_INVITATIONS } from "./mock-data";
+import type { Teacher, TeacherFilters, TeacherFormData, TeacherInvitation } from "./types";
 import { InviteTeacherModal } from "./components/InviteTeacherModal";
 import { AssignClassModal } from "./components/AssignClassModal";
 import { TeacherDetailsModal } from "./components/TeacherDetailsModal";
+import { ConfirmationModal } from "./components/ConfirmationModal";
+import { PendingInvitationsList } from "./components/PendingInvitationsList";
+
+const ITEMS_PER_PAGE = 10;
+const INVITATION_VALID_DAYS = 7;
 
 export default function TeacherManagementPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
+  const [invitations, setInvitations] = useState<TeacherInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<TeacherFilters>({});
+
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+
+  const [teacherToRemove, setTeacherToRemove] = useState<Teacher | null>(null);
+  const [invitationToRevoke, setInvitationToRevoke] = useState<TeacherInvitation | null>(null);
+  const [resendingInviteId, setResendingInviteId] = useState<string | null>(null);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     // Simulate API call
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setTeachers(MOCK_TEACHERS);
-      setFilteredTeachers(MOCK_TEACHERS);
+      setInvitations(MOCK_INVITATIONS);
       setLoading(false);
     }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Filter teachers
+  const pendingInvitations = useMemo(
+    () => invitations.filter((inv) => inv.status === "PENDING"),
+    [invitations],
+  );
+
+  // Filtered + paginated teachers (derived, not duplicated into separate state)
+  const filteredTeachers = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+
+    return teachers.filter((teacher) => {
+      const matchesSearch =
+        !term ||
+        teacher.firstName.toLowerCase().includes(term) ||
+        teacher.lastName.toLowerCase().includes(term) ||
+        teacher.email.toLowerCase().includes(term) ||
+        teacher.subjects.some((s) => s.toLowerCase().includes(term));
+
+      const matchesRole = filters.role ? teacher.role === filters.role : true;
+      const matchesStatus = filters.status
+        ? filters.status === "active"
+          ? teacher.isActive
+          : !teacher.isActive
+        : true;
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [teachers, searchTerm, filters]);
+
+  // Reset to page 1 whenever the filtered set changes shape, so we never
+  // get stuck looking at an empty page after a filter narrows the results.
   useEffect(() => {
-    let filtered = teachers;
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (teacher) =>
-          teacher.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          teacher.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          teacher.subjects.some((s) => s.toLowerCase().includes(searchTerm.toLowerCase())),
-      );
-    }
-
-    // Role filter
-    if (filters.role) {
-      filtered = filtered.filter((teacher) => teacher.role === filters.role);
-    }
-
-    // Status filter
-    if (filters.status) {
-      filtered = filtered.filter((teacher) =>
-        filters.status === "active" ? teacher.isActive : !teacher.isActive,
-      );
-    }
-
-    setFilteredTeachers(filtered);
     setCurrentPage(1);
-  }, [searchTerm, filters, teachers]);
+  }, [searchTerm, filters.role, filters.status]);
 
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTeachers = filteredTeachers.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredTeachers.length / ITEMS_PER_PAGE));
+  const indexOfFirstItem = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentTeachers = filteredTeachers.slice(
+    indexOfFirstItem,
+    indexOfFirstItem + ITEMS_PER_PAGE,
+  );
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName[0]}${lastName[0]}`.toUpperCase();
-  };
+  const getInitials = (firstName: string, lastName: string) =>
+    `${firstName[0]}${lastName[0]}`.toUpperCase();
 
   const getRoleBadge = (role: string) => {
     const configs: Record<string, { color: string; bg: string }> = {
@@ -100,75 +106,95 @@ export default function TeacherManagementPage() {
     };
     const config = configs[role] || configs.TEACHER;
     return (
-      <span className={`px-2 py-1 text-xs rounded-full ${config.bg} ${config.color}`}>
+      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${config.bg} ${config.color}`}>
         {role.replace("_", " ")}
       </span>
     );
   };
 
-  const handleInviteTeacher = (formData: any) => {
-    // Simulate API call
-    const newTeacher: Teacher = {
-      id: `teacher-${Date.now()}`,
-      userId: `user-${Date.now()}`,
+  // --- Invitations: this is the ONLY way a teacher enters the system. ---
+  // Sending an invite creates a PENDING record; the teacher only shows up
+  // in the active table once they accept it (handled outside this admin
+  // view — e.g. the email link flow).
+  const handleInviteTeacher = (formData: TeacherFormData) => {
+    const newInvitation: TeacherInvitation = {
+      id: `invite-${Date.now()}`,
+      email: formData.email,
       firstName: formData.firstName,
       lastName: formData.lastName,
-      email: formData.email,
-      phoneNumber: formData.phoneNumber || null,
-      avatarUrl: null,
       role: formData.role,
-      subjects: formData.subjects || [],
-      assignedClasses: formData.classIds.map((classId: string) => ({
-        classId,
-        className: "New Class", // Would fetch from DB
-        classArm: null,
-        role: formData.role === "CLASS_ADMIN" ? "CLASS_ADMIN" : "SUBJECT_TEACHER",
-        subjects: formData.subjects || [],
-        assignedAt: new Date(),
-        isActive: true,
-      })),
-      totalExams: 0,
-      averageStudentScore: 0,
-      passRate: 0,
-      isActive: true,
-      lastActive: null,
-      joinedAt: new Date(),
+      classIds: formData.classIds,
+      invitedBy: "current-admin",
+      token: `tok_${Math.random().toString(36).slice(2, 10)}`,
+      status: "PENDING",
+      expiresAt: new Date(Date.now() + INVITATION_VALID_DAYS * 24 * 60 * 60 * 1000),
+      createdAt: new Date(),
     };
-    setTeachers((prev) => [newTeacher, ...prev]);
+    setInvitations((prev) => [newInvitation, ...prev]);
     setShowInviteModal(false);
   };
 
-  const handleAssignClass = (teacherId: string, classData: any) => {
-    // Update teacher's assigned classes
+  const handleResendInvitation = async (invitation: TeacherInvitation) => {
+    setResendingInviteId(invitation.id);
+    // Simulate sending the email again.
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    setInvitations((prev) =>
+      prev.map((inv) =>
+        inv.id === invitation.id
+          ? {
+              ...inv,
+              expiresAt: new Date(Date.now() + INVITATION_VALID_DAYS * 24 * 60 * 60 * 1000),
+            }
+          : inv,
+      ),
+    );
+    setResendingInviteId(null);
+  };
+
+  const handleRevokeInvitation = async () => {
+    if (!invitationToRevoke) return;
+    setInvitations((prev) => prev.filter((inv) => inv.id !== invitationToRevoke.id));
+    setInvitationToRevoke(null);
+  };
+
+  const handleAssignClass = (
+    teacherId: string,
+    classData: {
+      classId: string;
+      className: string;
+      classArm: string | null;
+      role: "CLASS_ADMIN" | "SUBJECT_TEACHER";
+      subjects: string[];
+    },
+  ) => {
     setTeachers((prev) =>
-      prev.map((teacher) => {
-        if (teacher.id === teacherId) {
-          return {
-            ...teacher,
-            assignedClasses: [
-              ...teacher.assignedClasses,
-              {
-                classId: classData.classId,
-                className: classData.className,
-                classArm: classData.classArm,
-                role: classData.role,
-                subjects: classData.subjects,
-                assignedAt: new Date(),
-                isActive: true,
-              },
-            ],
-          };
-        }
-        return teacher;
-      }),
+      prev.map((teacher) =>
+        teacher.id === teacherId
+          ? {
+              ...teacher,
+              assignedClasses: [
+                ...teacher.assignedClasses,
+                {
+                  classId: classData.classId,
+                  className: classData.className,
+                  classArm: classData.classArm,
+                  role: classData.role,
+                  subjects: classData.subjects,
+                  assignedAt: new Date(),
+                  isActive: true,
+                },
+              ],
+            }
+          : teacher,
+      ),
     );
     setShowAssignModal(false);
   };
 
-  const handleRemoveTeacher = (teacherId: string) => {
-    if (confirm("Are you sure you want to remove this teacher?")) {
-      setTeachers((prev) => prev.filter((t) => t.id !== teacherId));
-    }
+  const handleConfirmRemoveTeacher = async () => {
+    if (!teacherToRemove) return;
+    setTeachers((prev) => prev.filter((t) => t.id !== teacherToRemove.id));
+    setTeacherToRemove(null);
   };
 
   if (loading) {
@@ -187,10 +213,11 @@ export default function TeacherManagementPage() {
           <div>
             <h1 className="font-serif text-3xl text-green-900 mb-1">Teacher Management</h1>
             <p className="text-text-muted">
-              Manage all teachers, assign classes, and track performance
+              Teachers can only join by invitation — manage invites, classes, and performance here.
             </p>
           </div>
           <button
+            type="button"
             onClick={() => setShowInviteModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-800 text-white hover:bg-green-700 transition-all">
             <UserPlus size={16} />
@@ -228,6 +255,14 @@ export default function TeacherManagementPage() {
         </div>
       </div>
 
+      {/* Pending Invitations */}
+      <PendingInvitationsList
+        invitations={pendingInvitations}
+        onResend={handleResendInvitation}
+        onRevoke={setInvitationToRevoke}
+        resendingId={resendingInviteId}
+      />
+
       {/* Search and Filters */}
       <div className="mb-6 flex flex-wrap gap-4">
         <div className="flex-1 min-w-[200px]">
@@ -247,7 +282,7 @@ export default function TeacherManagementPage() {
         </div>
 
         <select
-          title="role"
+          aria-label="Filter by role"
           value={filters.role || "all"}
           onChange={(e) =>
             setFilters((prev) => ({
@@ -263,12 +298,13 @@ export default function TeacherManagementPage() {
         </select>
 
         <select
-          title="status"
+          aria-label="Filter by status"
           value={filters.status || "all"}
           onChange={(e) =>
             setFilters((prev) => ({
               ...prev,
-              status: e.target.value === "all" ? undefined : (e.target.value as any),
+              status:
+                e.target.value === "all" ? undefined : (e.target.value as "active" | "inactive"),
             }))
           }
           className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-green-500">
@@ -277,7 +313,9 @@ export default function TeacherManagementPage() {
           <option value="inactive">Inactive</option>
         </select>
 
-        <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-cream transition-all">
+        <button
+          type="button"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 hover:bg-cream transition-all">
           <Filter size={16} /> More Filters
         </button>
       </div>
@@ -290,111 +328,142 @@ export default function TeacherManagementPage() {
           <table className="w-full">
             <thead className="bg-cream">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900 min-w-[240px]">
                   Teacher
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">Role</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900 min-w-[160px]">
                   Subjects
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900 min-w-[180px]">
                   Classes
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900 min-w-[120px]">
                   Performance
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900 min-w-[140px]">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900 min-w-[110px]">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {currentTeachers.map((teacher) => (
-                <tr key={teacher.id} className="hover:bg-cream/30 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                <tr key={teacher.id} className="hover:bg-cream/30 transition-colors align-top">
+                  {/* Teacher: avatar, name, role badge, contact info — given room to breathe */}
+                  <td className="px-6 py-5">
+                    <div className="flex items-start gap-3">
+                      <div className="w-11 h-11 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
                         <span className="text-green-700 font-semibold">
                           {getInitials(teacher.firstName, teacher.lastName)}
                         </span>
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <button
+                          type="button"
                           onClick={() => {
                             setSelectedTeacher(teacher);
                             setShowDetailsModal(true);
                           }}
-                          className="font-medium text-green-900 hover:text-green-700 transition-colors text-left">
+                          className="font-medium text-[15px] text-green-900 hover:text-green-700 transition-colors text-left">
                           {teacher.firstName} {teacher.lastName}
                         </button>
-                        <div className="flex items-center gap-2 text-xs text-text-muted">
-                          <Mail size={12} />
-                          <span>{teacher.email}</span>
-                          {teacher.phoneNumber && (
-                            <>
-                              <span>•</span>
-                              <Phone size={12} />
-                              <span>{teacher.phoneNumber}</span>
-                            </>
-                          )}
+                        <div className="mt-1">{getRoleBadge(teacher.role)}</div>
+                        <div className="flex items-center gap-1.5 text-xs text-text-muted mt-2">
+                          <Mail size={12} className="shrink-0" />
+                          <span className="truncate max-w-[180px]">{teacher.email}</span>
                         </div>
+                        {teacher.phoneNumber && (
+                          <div className="flex items-center gap-1.5 text-xs text-text-muted mt-1">
+                            <Phone size={12} className="shrink-0" />
+                            <span>{teacher.phoneNumber}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">{getRoleBadge(teacher.role)}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {teacher.subjects.slice(0, 2).map((subject, idx) => (
+
+                  {/* Subjects */}
+                  <td className="px-6 py-5">
+                    <div className="flex flex-wrap gap-1.5">
+                      {teacher.subjects.slice(0, 2).map((subject) => (
                         <span
-                          key={idx}
-                          className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                          key={subject}
+                          className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
                           {subject}
                         </span>
                       ))}
                       {teacher.subjects.length > 2 && (
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-                          +{teacher.subjects.length - 2}
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                          +{teacher.subjects.length - 2} more
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
+
+                  {/* Classes */}
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-gray-800 mb-1.5">
                       <Users size={14} className="text-text-muted" />
-                      <span className="font-medium">{teacher.assignedClasses.length}</span>
+                      {teacher.assignedClasses.length}{" "}
+                      {teacher.assignedClasses.length === 1 ? "class" : "classes"}
                     </div>
-                    <div className="text-xs text-text-muted">
-                      {teacher.assignedClasses.map((c) => c.className).join(", ")}
+                    <div className="flex flex-wrap gap-1.5">
+                      {teacher.assignedClasses.slice(0, 2).map((c) => (
+                        <span
+                          key={c.classId}
+                          className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-700">
+                          {c.className}
+                          {c.classArm ? ` (${c.classArm})` : ""}
+                        </span>
+                      ))}
+                      {teacher.assignedClasses.length > 2 && (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                          +{teacher.assignedClasses.length - 2} more
+                        </span>
+                      )}
+                      {teacher.assignedClasses.length === 0 && (
+                        <span className="text-xs text-text-muted">No classes yet</span>
+                      )}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
+
+                  {/* Performance */}
+                  <td className="px-6 py-5">
+                    <div className="flex flex-col gap-0.5">
                       <span className="font-semibold text-green-900">
                         {teacher.averageStudentScore}%
                       </span>
                       <span className="text-xs text-text-muted">{teacher.passRate}% pass rate</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    {teacher.isActive ? (
-                      <span className="flex items-center gap-1 text-xs text-green-600">
-                        <CheckCircle size={12} /> Active
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-xs text-red-600">
-                        <XCircle size={12} /> Inactive
-                      </span>
-                    )}
-                    {teacher.lastActive && (
-                      <span className="text-xs text-text-muted block">
-                        Last active: {new Date(teacher.lastActive).toLocaleDateString()}
-                      </span>
-                    )}
+
+                  {/* Status */}
+                  <td className="px-6 py-5">
+                    <div className="flex flex-col gap-1">
+                      {teacher.isActive ? (
+                        <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+                          <CheckCircle size={12} /> Active
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-xs font-medium text-red-600">
+                          <XCircle size={12} /> Inactive
+                        </span>
+                      )}
+                      {teacher.lastActive && (
+                        <span className="text-xs text-text-muted">
+                          Last active {new Date(teacher.lastActive).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-6 py-4">
+
+                  {/* Actions */}
+                  <td className="px-6 py-5">
                     <div className="flex gap-1">
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedTeacher(teacher);
                           setShowDetailsModal(true);
@@ -404,6 +473,7 @@ export default function TeacherManagementPage() {
                         <GraduationCap size={16} className="text-text-muted" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedTeacher(teacher);
                           setShowAssignModal(true);
@@ -413,7 +483,8 @@ export default function TeacherManagementPage() {
                         <Users size={16} className="text-text-muted" />
                       </button>
                       <button
-                        onClick={() => handleRemoveTeacher(teacher.id)}
+                        type="button"
+                        onClick={() => setTeacherToRemove(teacher)}
                         className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
                         title="Remove Teacher">
                         <Trash2 size={16} className="text-red-500" />
@@ -422,20 +493,30 @@ export default function TeacherManagementPage() {
                   </td>
                 </tr>
               ))}
+
+              {currentTeachers.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-text-muted">
+                    No teachers match your search or filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t flex items-center justify-between">
+          <div className="px-6 py-4 border-t flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-text-muted">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredTeachers.length)}{" "}
-              of {filteredTeachers.length} teachers
+              Showing {indexOfFirstItem + 1} to{" "}
+              {Math.min(indexOfFirstItem + ITEMS_PER_PAGE, filteredTeachers.length)} of{" "}
+              {filteredTeachers.length} teachers
             </p>
             <div className="flex gap-2">
               <button
-                title="page"
+                type="button"
+                aria-label="Previous page"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
@@ -445,7 +526,8 @@ export default function TeacherManagementPage() {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                title="page"
+                type="button"
+                aria-label="Next page"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
@@ -474,6 +556,49 @@ export default function TeacherManagementPage() {
         isOpen={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
         teacher={selectedTeacher}
+      />
+
+      <ConfirmationModal
+        isOpen={teacherToRemove !== null}
+        title="Remove this teacher?"
+        message={
+          teacherToRemove ? (
+            <>
+              <strong className="text-gray-700">
+                {teacherToRemove.firstName} {teacherToRemove.lastName}
+              </strong>{" "}
+              will lose access to all {teacherToRemove.assignedClasses.length} assigned class
+              {teacherToRemove.assignedClasses.length === 1 ? "" : "es"} immediately. This can't be
+              undone — they would need a new invitation to rejoin.
+            </>
+          ) : (
+            ""
+          )
+        }
+        confirmLabel="Remove Teacher"
+        variant="danger"
+        onConfirm={handleConfirmRemoveTeacher}
+        onCancel={() => setTeacherToRemove(null)}
+      />
+
+      <ConfirmationModal
+        isOpen={invitationToRevoke !== null}
+        title="Revoke this invitation?"
+        message={
+          invitationToRevoke ? (
+            <>
+              The invitation link sent to{" "}
+              <strong className="text-gray-700">{invitationToRevoke.email}</strong> will stop
+              working immediately.
+            </>
+          ) : (
+            ""
+          )
+        }
+        confirmLabel="Revoke Invitation"
+        variant="danger"
+        onConfirm={handleRevokeInvitation}
+        onCancel={() => setInvitationToRevoke(null)}
       />
     </div>
   );

@@ -1,4 +1,20 @@
-import { Teacher } from "./types";
+import { Teacher, TeacherInvitation } from "./types";
+
+export const MOCK_INVITATIONS: TeacherInvitation[] = [
+  {
+    id: "invite-001",
+    email: "tunde.bakare@example.com",
+    firstName: "Mr. Tunde",
+    lastName: "Bakare",
+    role: "TEACHER",
+    classIds: ["class-002"],
+    invitedBy: "admin-001",
+    token: "tok_8f2a1c",
+    status: "PENDING",
+    expiresAt: new Date("2026-06-29"),
+    createdAt: new Date("2026-06-20"),
+  },
+];
 
 export const MOCK_TEACHERS: Teacher[] = [
   {
