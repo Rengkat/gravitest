@@ -2,71 +2,43 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FileText,
-  Calendar,
-  Clock,
-  Users,
-  CheckCircle,
-  XCircle,
-  Edit,
-  Trash2,
-  Eye,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit, Trash2, Eye } from "lucide-react";
+import { StatusBadge } from "./StatusBadge";
+import { EmptyState } from "./EmptyState";
 import type { Exam } from "../types";
 
 interface ExamListProps {
   exams: Exam[];
-  onExamUpdate: (updatedExam: Exam) => void;
   onExamDelete: (examId: string) => void;
+  onExamEdit?: (exam: Exam) => void;
+  /** Hide the Class column when the list is already scoped to one class. */
+  showClassColumn?: boolean;
+  emptyStateDescription?: string;
 }
 
-export function ExamList({ exams, onExamUpdate, onExamDelete }: ExamListProps) {
+const ITEMS_PER_PAGE = 10;
+
+export function ExamList({
+  exams,
+  onExamDelete,
+  onExamEdit,
+  showClassColumn = true,
+  emptyStateDescription = "Create your first exam to get started",
+}: ExamListProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentExams = exams.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(exams.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(exams.length / ITEMS_PER_PAGE));
+  const indexOfFirstItem = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentExams = exams.slice(indexOfFirstItem, indexOfFirstItem + ITEMS_PER_PAGE);
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-NG", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const formatDate = (date: Date) =>
+    new Date(date).toLocaleDateString("en-NG", { year: "numeric", month: "short", day: "numeric" });
 
-  const getStatusBadge = (status: string) => {
-    const configs: Record<string, { color: string; icon: any }> = {
-      DRAFT: { color: "bg-gray-100 text-gray-700", icon: FileText },
-      PUBLISHED: { color: "bg-blue-100 text-blue-700", icon: Eye },
-      ONGOING: { color: "bg-yellow-100 text-yellow-700", icon: Clock },
-      COMPLETED: { color: "bg-green-100 text-green-700", icon: CheckCircle },
-    };
-    const config = configs[status] || configs.DRAFT;
-    const Icon = config.icon;
-    return (
-      <span className={`flex items-center gap-1 px-2 py-1 text-xs rounded-full ${config.color}`}>
-        <Icon size={12} />
-        {status.charAt(0) + status.slice(1).toLowerCase()}
-      </span>
-    );
-  };
+  const formatTime = (date: Date) =>
+    new Date(date).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" });
 
   if (exams.length === 0) {
-    return (
-      <div
-        className="text-center py-12 bg-white rounded-2xl border"
-        style={{ borderColor: "rgba(30,80,50,0.08)" }}>
-        <FileText size={48} className="mx-auto text-text-muted mb-3" />
-        <p className="text-text-muted">No exams found</p>
-        <p className="text-sm text-text-muted mt-1">Create your first exam to get started</p>
-      </div>
-    );
+    return <EmptyState title="No exams found" description={emptyStateDescription} />;
   }
 
   return (
@@ -81,7 +53,11 @@ export function ExamList({ exams, onExamUpdate, onExamDelete }: ExamListProps) {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
                   Exam Title
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">Class</th>
+                {showClassColumn && (
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
+                    Class
+                  </th>
+                )}
                 <th className="px-6 py-4 text-left text-sm font-semibold text-green-900">
                   Subject
                 </th>
@@ -111,12 +87,16 @@ export function ExamList({ exams, onExamUpdate, onExamDelete }: ExamListProps) {
                       )}
                     </Link>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm">
-                      {exam.className}
-                      {exam.classArm && <span className="text-text-muted"> ({exam.classArm})</span>}
-                    </div>
-                  </td>
+                  {showClassColumn && (
+                    <td className="px-6 py-4">
+                      <div className="text-sm">
+                        {exam.className}
+                        {exam.classArm && (
+                          <span className="text-text-muted"> ({exam.classArm})</span>
+                        )}
+                      </div>
+                    </td>
+                  )}
                   <td className="px-6 py-4 text-sm">{exam.subject}</td>
                   <td className="px-6 py-4">
                     <span className="font-medium">{exam.totalQuestions}</span>
@@ -127,15 +107,12 @@ export function ExamList({ exams, onExamUpdate, onExamDelete }: ExamListProps) {
                   <td className="px-6 py-4 text-sm text-text-muted">
                     <div className="flex flex-col">
                       <span>{formatDate(exam.startDate)}</span>
-                      <span className="text-xs">
-                        {new Date(exam.startDate).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+                      <span className="text-xs">{formatTime(exam.startDate)}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">{getStatusBadge(exam.status)}</td>
+                  <td className="px-6 py-4">
+                    <StatusBadge status={exam.status} withIcon />
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-1">
                       <Link
@@ -147,14 +124,14 @@ export function ExamList({ exams, onExamUpdate, onExamDelete }: ExamListProps) {
                       {exam.status === "DRAFT" && (
                         <>
                           <button
-                            onClick={() => {
-                              /* Open edit modal */
-                            }}
+                            type="button"
+                            onClick={() => onExamEdit?.(exam)}
                             className="p-1.5 rounded-lg hover:bg-cream transition-colors"
                             title="Edit Exam">
                             <Edit size={16} className="text-text-muted" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => onExamDelete(exam.id)}
                             className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
                             title="Delete Exam">
@@ -172,14 +149,15 @@ export function ExamList({ exams, onExamUpdate, onExamDelete }: ExamListProps) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t flex items-center justify-between">
+          <div className="px-6 py-4 border-t flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-text-muted">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, exams.length)} of{" "}
-              {exams.length} exams
+              Showing {indexOfFirstItem + 1} to{" "}
+              {Math.min(indexOfFirstItem + ITEMS_PER_PAGE, exams.length)} of {exams.length} exams
             </p>
             <div className="flex gap-2">
               <button
-                title="page number"
+                type="button"
+                aria-label="Previous page"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
@@ -189,7 +167,8 @@ export function ExamList({ exams, onExamUpdate, onExamDelete }: ExamListProps) {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                title="page numer"
+                type="button"
+                aria-label="Next page"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-lg border border-gray-200 hover:bg-cream disabled:opacity-50 disabled:cursor-not-allowed transition-all">
