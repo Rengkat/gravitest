@@ -186,7 +186,9 @@ export function InviteTeacherModal({ isOpen, onClose, onInvite }: InviteTeacherM
                     title="role"
                     required
                     value={formData.role}
-                    onChange={(e) => handleChange("role", e.target.value as any)}
+                    onChange={(e) =>
+                      handleChange("role", e.target.value as TeacherFormData["role"])
+                    }
                     className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500">
                     <option value="TEACHER">Teacher</option>
                     <option value="CLASS_ADMIN">Class Admin</option>
