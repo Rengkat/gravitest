@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Calendar, Clock, BookOpen, Users } from "lucide-react";
+import { X, Users } from "lucide-react";
 import type { CreateExamDto, ClassExamStats, Term } from "../types";
 
 interface CreateExamModalProps {
@@ -66,6 +66,7 @@ export function CreateExamModal({ isOpen, onClose, onCreate, classStats }: Creat
                   Class * <Users size={14} className="inline ml-1" />
                 </label>
                 <select
+                  title="class id"
                   required
                   value={formData.classId}
                   onChange={(e) => handleChange("classId", e.target.value)}

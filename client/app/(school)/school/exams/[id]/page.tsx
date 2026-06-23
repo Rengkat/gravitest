@@ -247,7 +247,7 @@ export default function ExamDetailPage() {
         onClose={() => setShowQuestionBankModal(false)}
         onSelectQuestions={(questions) => {
           // Add selected questions from bank
-          questions.forEach((q) => {
+          questions.forEach((q: any) => {
             handleAddQuestion({
               type: q.type,
               category: q.category,

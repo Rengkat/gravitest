@@ -1,40 +1,55 @@
-export enum QuestionType {
-  MCQ = "MCQ",
-  THEORY = "THEORY",
-  PRACTICAL = "PRACTICAL",
-  TRUE_FALSE = "TRUE_FALSE",
-  FILL_IN_BLANK = "FILL_IN_BLANK",
-  MATCHING = "MATCHING",
-  ESSAY = "ESSAY",
-  OBJECTIVE = "OBJECTIVE",
-}
+export const QUESTION_TYPES = [
+  "MCQ",
+  "THEORY",
+  "PRACTICAL",
+  "TRUE_FALSE",
+  "FILL_IN_BLANK",
+  "MATCHING",
+  "ESSAY",
+  "OBJECTIVE",
+] as const;
+export type QuestionType = (typeof QUESTION_TYPES)[number];
 
-export enum DifficultyLevel {
-  EASY = "EASY",
-  MEDIUM = "MEDIUM",
-  HARD = "HARD",
-  VERY_HARD = "VERY_HARD",
-}
+export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
+  MCQ: "Multiple Choice",
+  THEORY: "Theory",
+  PRACTICAL: "Practical",
+  TRUE_FALSE: "True / False",
+  FILL_IN_BLANK: "Fill in the Blank",
+  MATCHING: "Matching",
+  ESSAY: "Essay",
+  OBJECTIVE: "Objective",
+};
 
-export enum ExamStatus {
-  DRAFT = "DRAFT",
-  PUBLISHED = "PUBLISHED",
-  ONGOING = "ONGOING",
-  COMPLETED = "COMPLETED",
-  ARCHIVED = "ARCHIVED",
-}
+export const DIFFICULTY_LEVELS = ["EASY", "MEDIUM", "HARD", "VERY_HARD"] as const;
+export type DifficultyLevel = (typeof DIFFICULTY_LEVELS)[number];
 
-export enum Term {
-  FIRST = "FIRST",
-  SECOND = "SECOND",
-  THIRD = "THIRD",
-}
+export const EXAM_STATUSES = ["DRAFT", "PUBLISHED", "ONGOING", "COMPLETED", "ARCHIVED"] as const;
+export type ExamStatus = (typeof EXAM_STATUSES)[number];
+
+export const EXAM_STATUS_LABELS: Record<ExamStatus, string> = {
+  DRAFT: "Draft",
+  PUBLISHED: "Published",
+  ONGOING: "Ongoing",
+  COMPLETED: "Completed",
+  ARCHIVED: "Archived",
+};
+
+export const TERMS = ["FIRST", "SECOND", "THIRD"] as const;
+export type Term = (typeof TERMS)[number];
+
+export const TERM_LABELS: Record<Term, string> = {
+  FIRST: "First Term",
+  SECOND: "Second Term",
+  THIRD: "Third Term",
+};
 
 export interface Question {
   id: string;
   examId: string;
   type: QuestionType;
-  category: string;
+  /** Free-text topic within the subject, e.g. "Algebra", "Mechanics". */
+  topic: string;
   questionText: string;
   options?: string[];
   correctAnswer: string | string[];
@@ -51,8 +66,8 @@ export interface Exam {
   id: string;
   schoolId: string;
   classId: string;
-  className?: string;
-  classArm?: string;
+  className: string;
+  classArm?: string | null;
   subject: string;
   title: string;
   term: Term;
@@ -85,15 +100,36 @@ export interface ExamStats {
   averageMarks: number;
 }
 
+/** A school class (e.g. "SS3 Science", arm "A"). */
+export interface SchoolClass {
+  classId: string;
+  className: string;
+  classArm?: string | null;
+  totalStudents: number;
+  /** Subjects offered by this class, used to scaffold per-subject stats. */
+  subjects: string[];
+}
+
+/** Aggregate exam stats for one subject, scoped to a single class. */
+export interface SubjectExamStats {
+  subject: string;
+  totalExams: number;
+  publishedExams: number;
+  completedExams: number;
+  totalQuestions: number;
+  averageScore: number | null;
+}
+
+/** Aggregate exam stats for a class, shown on the classes overview grid. */
 export interface ClassExamStats {
   classId: string;
   className: string;
   classArm?: string | null;
+  totalStudents: number;
   totalExams: number;
   publishedExams: number;
   completedExams: number;
-  averageScore: number;
-  totalStudents: number;
+  averageScore: number | null;
 }
 
 export interface CreateExamDto {
@@ -123,18 +159,12 @@ export interface UpdateExamDto {
   passingScore?: number;
 }
 
-export interface CreateQuestionDto {
-  examId: string;
-  type: QuestionType;
-  category: string;
-  questionText: string;
-  options?: string[];
-  correctAnswer: string | string[];
-  explanation?: string;
-  marks: number;
-  difficulty: DifficultyLevel;
+export type CreateQuestionDto = Omit<
+  Question,
+  "id" | "examId" | "orderIndex" | "isActive" | "createdAt" | "updatedAt"
+> & {
   orderIndex?: number;
-}
+};
 
 export interface ExamFilters {
   search?: string;
