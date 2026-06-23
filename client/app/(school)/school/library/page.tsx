@@ -1,5 +1,6 @@
+import LibraryClientPage from "@/Components/libraryContnents/components/LibraryContentClient";
 const page = () => {
-  return <div>page</div>;
+  return <LibraryClientPage />;
 };
 
 export default page;
