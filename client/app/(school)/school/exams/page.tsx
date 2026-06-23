@@ -1,100 +1,102 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Search, Filter, LayoutGrid, List, ArrowUpDown } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Search, LayoutGrid, List } from "lucide-react";
 import { ExamStatsCards } from "./components/ExamStatsCards";
 import { ExamClassGrid } from "./components/ExamClassGrid";
 import { ExamList } from "./components/ExamList";
 import { CreateExamModal } from "./components/CreateExamModal";
-import { MOCK_EXAMS, MOCK_CLASS_EXAM_STATS } from "./mock";
+import {
+  fetchExams,
+  fetchClassExamStats,
+  computeOverallStats,
+  createExam,
+  deleteExam,
+} from "./mock";
 import type { Exam, ExamFilters, ClassExamStats, CreateExamDto } from "./types";
+import { EXAM_STATUSES, EXAM_STATUS_LABELS, TERMS, TERM_LABELS } from "./types";
 
 export default function ExamsPage() {
-  const [exams, setExams] = useState<Exam[]>(MOCK_EXAMS);
-  const [classStats, setClassStats] = useState<ClassExamStats[]>(MOCK_CLASS_EXAM_STATS);
-  const [loading, setLoading] = useState(false);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [classStats, setClassStats] = useState<ClassExamStats[]>([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedClassId, setSelectedClassId] = useState<string | undefined>(undefined);
   const [filters, setFilters] = useState<ExamFilters>({
     sortBy: "startDate",
     sortOrder: "DESC",
   });
 
-  // Calculate overall stats
-  const stats = {
-    totalExams: exams.length,
-    draftExams: exams.filter((e) => e.status === "DRAFT").length,
-    publishedExams: exams.filter((e) => e.status === "PUBLISHED").length,
-    ongoingExams: exams.filter((e) => e.status === "ONGOING").length,
-    completedExams: exams.filter((e) => e.status === "COMPLETED").length,
-    totalQuestions: exams.reduce((sum, e) => sum + e.totalQuestions, 0),
-    averageMarks: Math.round(
-      exams.reduce((sum, e) => sum + (e.averageScore || 0), 0) / exams.length || 0,
-    ),
-  };
-
-  // Filter and sort exams
-  const filteredExams = exams
-    .filter((exam) => {
-      const matchesSearch =
-        exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        exam.className?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        false;
-
-      const matchesClass = selectedClassId ? exam.classId === selectedClassId : true;
-      const matchesStatus = filters.status ? exam.status === filters.status : true;
-      const matchesTerm = filters.term ? exam.term === filters.term : true;
-
-      return matchesSearch && matchesClass && matchesStatus && matchesTerm;
-    })
-    .sort((a, b) => {
-      const sortField = filters.sortBy || "startDate";
-      const sortOrder = filters.sortOrder === "ASC" ? 1 : -1;
-
-      switch (sortField) {
-        case "title":
-          return sortOrder * a.title.localeCompare(b.title);
-        case "startDate":
-          return sortOrder * (new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-        case "totalMarks":
-          return sortOrder * (a.totalMarks - b.totalMarks);
-        case "totalQuestions":
-          return sortOrder * (a.totalQuestions - b.totalQuestions);
-        default:
-          return sortOrder * (new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-      }
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    Promise.all([fetchExams(), fetchClassExamStats()]).then(([examData, stats]) => {
+      if (!isMounted) return;
+      setExams(examData);
+      setClassStats(stats);
+      setLoading(false);
     });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const stats = useMemo(() => computeOverallStats(exams), [exams]);
+
+  const filteredExams = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+
+    return exams
+      .filter((exam) => {
+        const matchesSearch =
+          !term ||
+          exam.title.toLowerCase().includes(term) ||
+          exam.subject.toLowerCase().includes(term) ||
+          exam.className.toLowerCase().includes(term);
+
+        const matchesStatus = filters.status ? exam.status === filters.status : true;
+        const matchesTerm = filters.term ? exam.term === filters.term : true;
+
+        return matchesSearch && matchesStatus && matchesTerm;
+      })
+      .sort((a, b) => {
+        const sortOrder = filters.sortOrder === "ASC" ? 1 : -1;
+        switch (filters.sortBy) {
+          case "title":
+            return sortOrder * a.title.localeCompare(b.title);
+          case "totalMarks":
+            return sortOrder * (a.totalMarks - b.totalMarks);
+          case "totalQuestions":
+            return sortOrder * (a.totalQuestions - b.totalQuestions);
+          case "startDate":
+          default:
+            return sortOrder * (new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+        }
+      });
+  }, [exams, searchTerm, filters]);
 
   const handleCreateExam = async (examData: CreateExamDto) => {
-    // Replace with actual API call
-    const newExam: Exam = {
-      id: `exam-${Date.now()}`,
-      schoolId: "school-001",
-      ...examData,
-      totalQuestions: 0,
-      submittedCount: 0,
-      status: ExamStatus.DRAFT,
-      questions: [],
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const newExam = await createExam(examData);
     setExams((prev) => [newExam, ...prev]);
-    setShowCreateModal(false);
+    // Refresh per-class stats so the new exam is reflected on the grid.
+    setClassStats(await fetchClassExamStats());
   };
 
-  const handleExamUpdate = (updatedExam: Exam) => {
-    setExams((prev) => prev.map((e) => (e.id === updatedExam.id ? updatedExam : e)));
+  const handleExamDelete = async (examId: string) => {
+    if (!confirm("Are you sure you want to delete this exam?")) return;
+    await deleteExam(examId);
+    setExams((prev) => prev.filter((e) => e.id !== examId));
+    setClassStats(await fetchClassExamStats());
   };
 
-  const handleExamDelete = (examId: string) => {
-    if (confirm("Are you sure you want to delete this exam?")) {
-      setExams((prev) => prev.filter((e) => e.id !== examId));
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-800" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -108,6 +110,7 @@ export default function ExamsPage() {
             </p>
           </div>
           <button
+            type="button"
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-800 text-white hover:bg-green-700 transition-all">
             <Plus size={16} /> Create Exam
@@ -115,8 +118,13 @@ export default function ExamsPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Overall Stats */}
       <ExamStatsCards stats={stats} />
+
+      {/* Classes Overview */}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-serif text-xl text-green-900">Classes</h2>
+      </div>
 
       {/* Filters and View Toggle */}
       <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
@@ -138,62 +146,56 @@ export default function ExamsPage() {
 
         <div className="flex flex-wrap gap-3">
           <select
-            title="class id"
-            value={selectedClassId || "all"}
+            aria-label="Filter by status"
+            value={filters.status || "all"}
             onChange={(e) =>
-              setSelectedClassId(e.target.value === "all" ? undefined : e.target.value)
+              setFilters((prev) => ({
+                ...prev,
+                status: e.target.value === "all" ? undefined : (e.target.value as Exam["status"]),
+              }))
             }
             className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-green-500">
-            <option value="all">All Classes</option>
-            {classStats.map((cls) => (
-              <option key={cls.classId} value={cls.classId}>
-                {cls.className} {cls.classArm ? `(${cls.classArm})` : ""}
+            <option value="all">All Status</option>
+            {EXAM_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {EXAM_STATUS_LABELS[status]}
               </option>
             ))}
           </select>
 
           <select
-            title="status"
-            value={filters.status || "all"}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                status: e.target.value === "all" ? undefined : (e.target.value as any),
-              }))
-            }
-            className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-green-500">
-            <option value="all">All Status</option>
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="ONGOING">Ongoing</option>
-            <option value="COMPLETED">Completed</option>
-          </select>
-
-          <select
-            title="term"
+            aria-label="Filter by term"
             value={filters.term || "all"}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
-                term: e.target.value === "all" ? undefined : (e.target.value as any),
+                term: e.target.value === "all" ? undefined : (e.target.value as Exam["term"]),
               }))
             }
             className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:border-green-500">
             <option value="all">All Terms</option>
-            <option value="FIRST">First Term</option>
-            <option value="SECOND">Second Term</option>
-            <option value="THIRD">Third Term</option>
+            {TERMS.map((term) => (
+              <option key={term} value={term}>
+                {TERM_LABELS[term]}
+              </option>
+            ))}
           </select>
 
           <div className="flex rounded-xl border border-gray-200 overflow-hidden">
             <button
               title="view mode"
+              type="button"
+              aria-label="Group by class"
+              aria-pressed={viewMode === "grid"}
               onClick={() => setViewMode("grid")}
               className={`p-2 px-3 transition-all ${viewMode === "grid" ? "bg-green-800 text-white" : "bg-white text-text-muted hover:bg-cream"}`}>
               <LayoutGrid size={18} />
             </button>
             <button
               title="view mode"
+              type="button"
+              aria-label="Show flat list"
+              aria-pressed={viewMode === "list"}
               onClick={() => setViewMode("list")}
               className={`p-2 px-3 transition-all ${viewMode === "list" ? "bg-green-800 text-white" : "bg-white text-text-muted hover:bg-cream"}`}>
               <List size={18} />
@@ -202,20 +204,11 @@ export default function ExamsPage() {
         </div>
       </div>
 
-      {/* Exams Display */}
+      {/* Exams Display: grouped by class, or a flat searchable/sortable table */}
       {viewMode === "grid" ? (
-        <ExamClassGrid
-          classStats={classStats}
-          exams={filteredExams}
-          onExamUpdate={handleExamUpdate}
-          onExamDelete={handleExamDelete}
-        />
+        <ExamClassGrid classStats={classStats} exams={filteredExams} />
       ) : (
-        <ExamList
-          exams={filteredExams}
-          onExamUpdate={handleExamUpdate}
-          onExamDelete={handleExamDelete}
-        />
+        <ExamList exams={filteredExams} onExamDelete={handleExamDelete} />
       )}
 
       {/* Create Exam Modal */}
