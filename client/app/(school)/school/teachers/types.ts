@@ -32,7 +32,7 @@ export interface TeacherInvitation {
   email: string;
   firstName: string;
   lastName: string;
-  role: "TEACHER" | "CLASS_ADMIN";
+  role: "TEACHER" | "CLASS_ADMIN" | "HEAD_OF_DEPARTMENT";
   classIds: string[];
   invitedBy: string;
   token: string;
@@ -46,7 +46,7 @@ export interface TeacherFormData {
   lastName: string;
   email: string;
   phoneNumber?: string;
-  role: "TEACHER" | "CLASS_ADMIN";
+  role: "TEACHER" | "CLASS_ADMIN" | "HEAD_OF_DEPARTMENT";
   classIds: string[];
   subjects: string[];
 }
