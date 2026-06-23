@@ -10,15 +10,15 @@ import {
   Gamepad2,
 } from "lucide-react";
 export const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", exact: true },
-  { icon: Target, label: "Practice CBT", href: "/dashboard/practice" },
-  { icon: BarChart3, label: "Performance Analysis", href: "/dashboard/performance" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/student", exact: true },
+  { icon: Target, label: "Practice CBT", href: "/student/practice" },
+  { icon: BarChart3, label: "Performance Analysis", href: "/student/performance" },
   { icon: Bot, label: "AI Tutor", href: "/ai-tutor" },
-  { icon: Library, label: "Library", href: "/dashboard/library" },
+  { icon: Library, label: "Library", href: "/student/library" },
   // { icon: Users, label: "Tutors", href: "/dashboard/tutors" },
   // { icon: Calendar, label: "Bookings", href: "/dashboard/bookings" },
-  { icon: Gamepad2, label: "Games", href: "/dashboard/games" },
-  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+  { icon: Gamepad2, label: "Games", href: "/student/games" },
+  { icon: Settings, label: "Settings", href: "/student/settings" },
 ];
 
 export type RecentSession = {

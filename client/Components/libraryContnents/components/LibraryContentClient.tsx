@@ -253,7 +253,7 @@ export default function LibraryPage() {
                   });
 
                   setPaywallItem(null);
-                  router.push(`/dashboard/billing?${checkoutParams.toString()}`);
+                  router.push(`billing?${checkoutParams.toString()}`);
                 }
               : undefined
           }

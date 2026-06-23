@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ContentDetailView } from "./components/ContentDetailView";
+import { ContentDetailView } from "@/Components/libraryContnents/detail/components/ContentDetailView";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   return { title: "Content · Gravitas Library" };

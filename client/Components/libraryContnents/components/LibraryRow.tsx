@@ -27,7 +27,7 @@ export default function LibraryRow({
   const colors = typeColor(item.type);
 
   const handleRowClick = () => {
-    router.push(`/dashboard/library/${item.id}?preview=${item.isPremium}`);
+    router.push(`library/${item.id}?preview=${item.isPremium}`);
   };
 
   return (
