@@ -1,14 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { X, Users, BookOpen, Plus, Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import type { Teacher } from "../types";
 
 interface AssignClassModalProps {
   isOpen: boolean;
   onClose: () => void;
   teacher: Teacher | null;
-  onAssign: (teacherId: string, classData: any) => void;
+  onAssign: (
+    teacherId: string,
+    classData: {
+      classId: string;
+      className: string;
+      classArm: string | null;
+      role: "CLASS_ADMIN" | "SUBJECT_TEACHER";
+      subjects: string[];
+    },
+  ) => void;
 }
 
 // Mock available classes
@@ -99,7 +108,7 @@ export function AssignClassModal({ isOpen, onClose, teacher, onAssign }: AssignC
                 title="role"
                 required
                 value={role}
-                onChange={(e) => setRole(e.target.value as any)}
+                onChange={(e) => setRole(e.target.value as "CLASS_ADMIN" | "SUBJECT_TEACHER")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-green-500">
                 <option value="CLASS_ADMIN">Class Admin (Full Access)</option>
                 <option value="SUBJECT_TEACHER">Subject Teacher (Limited Access)</option>
