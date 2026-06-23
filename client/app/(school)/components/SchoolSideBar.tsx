@@ -13,6 +13,7 @@ import {
   LogOut,
   BookOpen,
   School as SchoolIcon,
+  PenTool,
 } from "lucide-react";
 import GravitasLogoMark from "@/lib/components/gravitas-logo";
 
@@ -22,6 +23,11 @@ const SCHOOL_NAV_ITEMS = [
     label: "Overview",
     icon: LayoutDashboard,
     exact: true,
+  },
+  {
+    href: "/school/performance",
+    label: "School Performance",
+    icon: BarChart3,
   },
   {
     href: "/school/students",
@@ -39,12 +45,12 @@ const SCHOOL_NAV_ITEMS = [
     icon: HelpCircle,
   },
   {
-    href: "/school/performance",
-    label: "School Performance",
-    icon: BarChart3,
+    href: "/school/teachers",
+    label: "Teachers",
+    icon: PenTool,
   },
   {
-    href: "/school/ai",
+    href: "/ai-tutor",
     label: "Use AI",
     icon: Bot,
   },
